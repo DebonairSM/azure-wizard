@@ -1,0 +1,26 @@
+{
+  "name": "azure-wizard",
+  "version": "1.0.0",
+  "description": "Azure Recipe Wizard",
+  "type": "module",
+  "scripts": {
+    "prestart": "node scripts/load-env.js",
+    "start": "node server.js",
+    "preserve": "node scripts/load-env.js",
+    "serve": "node server.js",
+    "migrate": "node scripts/migrate-json-to-sqlite.js",
+    "populate-apim": "node scripts/populate-apim-offerings.js",
+    "migrate-apim-to-azure": "node scripts/migrate-apim-to-azure-offerings.js",
+    "query-azure-offerings": "node scripts/query-azure-offerings.js",
+    "ensure-azure-offerings": "node scripts/ensure-azure-offerings-table.js",
+    "kill-port": "node scripts/kill-port.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^12.4.1",
+    "ejs": "^3.1.9"
+  }
+}

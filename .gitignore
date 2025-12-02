@@ -1,0 +1,28 @@
+# Generated API key config (contains sensitive key from .env)
+js/api-key-config.js
+
+# Environment variables
+.env
+
+# Node modules
+node_modules/
+
+# Assets and images
+assets/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Assets and images
+assets/
+
+# Temporary files
+temp/
+
+# Database files (uncomment if you don't want to commit the database)
+# data/wizard.db
+# data/*.db
+
+
+
