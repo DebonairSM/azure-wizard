@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS apimOfferings (
     websocketSupport BOOLEAN DEFAULT 0,
     productionReady BOOLEAN DEFAULT 0,
     documentationLinks TEXT,
+    aiGatewayDetails TEXT, -- JSON object with comprehensive AI Gateway capabilities
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -198,4 +199,18 @@ CREATE INDEX IF NOT EXISTS idx_apimOfferings_skuTier ON apimOfferings(skuTier);
 CREATE INDEX IF NOT EXISTS idx_apimOfferings_category ON apimOfferings(category);
 CREATE INDEX IF NOT EXISTS idx_apimOfferings_version ON apimOfferings(version);
 CREATE INDEX IF NOT EXISTS idx_apimOfferings_productionReady ON apimOfferings(productionReady);
+
+-- Azure Resource Changelog - Track discovered changes in Azure offerings
+CREATE TABLE IF NOT EXISTS azureResourceChangelog (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    serviceName TEXT NOT NULL,
+    skuName TEXT,
+    changeType TEXT NOT NULL, -- 'added', 'removed', 'updated', 'deprecated'
+    changeDetails TEXT, -- JSON with before/after details
+    detectedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_changelog_serviceName ON azureResourceChangelog(serviceName);
+CREATE INDEX IF NOT EXISTS idx_changelog_changeType ON azureResourceChangelog(changeType);
+CREATE INDEX IF NOT EXISTS idx_changelog_detectedAt ON azureResourceChangelog(detectedAt);
 

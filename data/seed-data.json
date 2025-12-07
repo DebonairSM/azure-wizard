@@ -362,6 +362,87 @@
       "roleFocus": ["web-dev", "api-dev"]
     },
     {
+      "id": "appservice-tier-solution",
+      "question": "App Service pricing tier?",
+      "description": "Choose the App Service tier based on your workload requirements",
+      "nodeType": "question",
+      "tags": ["compute", "app-service", "web", "hosting"],
+      "azObjectives": ["AZ-204.1", "AZ-204.2"],
+      "roleFocus": ["web-dev", "api-dev"]
+    },
+    {
+      "id": "aks-tier-solution",
+      "question": "AKS tier selection?",
+      "description": "Choose the AKS tier based on SLA and feature requirements",
+      "nodeType": "question",
+      "tags": ["compute", "kubernetes", "aks", "containers"],
+      "azObjectives": ["AZ-204.4"],
+      "roleFocus": ["infrastructure", "devops"]
+    },
+    {
+      "id": "service-fabric-solution",
+      "question": "Service Fabric deployment type?",
+      "description": "Choose Service Fabric cluster configuration",
+      "nodeType": "question",
+      "tags": ["compute", "microservices", "service-fabric"],
+      "azObjectives": ["AZ-204.1"],
+      "roleFocus": ["web-dev", "api-dev"]
+    },
+    {
+      "id": "appservice-free-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "app-service", "free", "web"],
+      "azObjectives": ["AZ-204.1", "AZ-204.2"]
+    },
+    {
+      "id": "appservice-basic-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "app-service", "basic", "web"],
+      "azObjectives": ["AZ-204.1", "AZ-204.2"]
+    },
+    {
+      "id": "appservice-standard-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "app-service", "standard", "web"],
+      "azObjectives": ["AZ-204.1", "AZ-204.2"]
+    },
+    {
+      "id": "appservice-premium-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "app-service", "premium", "web"],
+      "azObjectives": ["AZ-204.1", "AZ-204.2"]
+    },
+    {
+      "id": "appservice-isolated-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "app-service", "isolated", "web"],
+      "azObjectives": ["AZ-204.1", "AZ-204.2"]
+    },
+    {
+      "id": "aks-free-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "kubernetes", "aks", "free"],
+      "azObjectives": ["AZ-204.4"]
+    },
+    {
+      "id": "aks-standard-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "kubernetes", "aks", "standard"],
+      "azObjectives": ["AZ-204.4"]
+    },
+    {
+      "id": "aks-premium-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "kubernetes", "aks", "premium"],
+      "azObjectives": ["AZ-204.4"]
+    },
+    {
+      "id": "service-fabric-recipe",
+      "nodeType": "terminal",
+      "tags": ["compute", "microservices", "service-fabric"],
+      "azObjectives": ["AZ-204.1"]
+    },
+    {
       "id": "container-apps-ai-recipe",
       "nodeType": "terminal",
       "tags": ["compute", "containers", "container-apps", "ai"],
@@ -774,28 +855,133 @@
       "nodeType": "terminal",
       "tags": ["media", "streaming"],
       "azObjectives": ["AZ-204.12"]
+    },
+    {
+      "id": "analytics-bi-solution",
+      "question": "What type of analytics and big data solution?",
+      "description": "Choose your data warehousing, ETL, streaming analytics, and business intelligence services",
+      "nodeType": "question",
+      "tags": ["analytics", "big-data", "bi", "data-warehouse"],
+      "azObjectives": ["AZ-204.13"],
+      "roleFocus": ["data-engineer", "analytics-dev", "bi-developer"]
+    },
+    {
+      "id": "analytics-bi-recipe",
+      "nodeType": "terminal",
+      "tags": ["analytics", "big-data", "synapse", "data-factory"],
+      "azObjectives": ["AZ-204.13"]
     }
   ],
   "options": [
     {
-      "id": "opt-msg",
+      "id": "opt-compute-runtime",
       "nodeId": "root",
-      "label": "Messaging/Queue",
-      "description": "Reliable message delivery and service decoupling",
-      "pros": ["Reliable delivery", "Service decoupling", "Scalability"],
-      "cons": ["Additional complexity", "Cost", "Latency"],
-      "whenToUse": "When you need reliable message delivery and service decoupling",
-      "whenNotToUse": "For simple request-response patterns or real-time communication"
+      "label": "Compute & Application Runtime",
+      "description": "Think: Where does my code live? App Services, Functions, Containers, AKS, VMs, Batch.",
+      "pros": ["First design decision", "Aligns with billing models", "Multiple deployment options", "Scalable compute"],
+      "cons": ["Service selection complexity", "Cost management", "Configuration overhead"],
+      "whenToUse": "When defining where application code will execute - the foundation of any cloud architecture",
+      "whenNotToUse": "This is almost always needed; skip only for pure data or networking scenarios"
     },
     {
-      "id": "opt-containers",
+      "id": "opt-data-persistence",
       "nodeId": "root",
-      "label": "Containers",
-      "description": "Containerized application deployment",
-      "pros": ["Portability", "Consistency", "Scalability"],
-      "cons": ["Orchestration complexity", "Learning curve"],
-      "whenToUse": "When you need portable, scalable application deployment",
-      "whenNotToUse": "For simple static websites or serverless functions"
+      "label": "Data Stores & Persistence",
+      "description": "Think: Where does my state live? SQL, NoSQL, Cache, Blob Storage, Data Lake, Synapse.",
+      "pros": ["Source of truth definition", "Multiple storage types", "Managed services", "High availability"],
+      "cons": ["Service selection complexity", "Data model decisions", "Cost at scale"],
+      "whenToUse": "When you need data persistence, databases, or storage - the foundation for stateful applications",
+      "whenNotToUse": "For purely stateless compute-only scenarios"
+    },
+    {
+      "id": "opt-integration-messaging",
+      "nodeId": "root",
+      "label": "Integration, Messaging & Workflow",
+      "description": "Think: How do these things talk to each other? Service Bus, Event Grid, Event Hub, API Management, Logic Apps.",
+      "pros": ["Service decoupling", "Event-driven patterns", "Workflow orchestration", "Reliable delivery"],
+      "cons": ["Integration complexity", "Message schema management", "Additional latency"],
+      "whenToUse": "When building distributed systems requiring service communication, events, or workflow orchestration",
+      "whenNotToUse": "For monolithic applications with direct function calls"
+    },
+    {
+      "id": "opt-networking-connectivity",
+      "nodeId": "root",
+      "label": "Networking & Connectivity",
+      "description": "Think: How does traffic flow? VNets, Private Endpoints, Application Gateway, Front Door, CDN, ExpressRoute.",
+      "pros": ["Network isolation", "Traffic management", "Global distribution", "Security controls"],
+      "cons": ["Configuration complexity", "Network planning required", "Cost"],
+      "whenToUse": "When you need network infrastructure, connectivity, traffic routing, or security boundaries",
+      "whenNotToUse": "For simple single-resource scenarios with default networking"
+    },
+    {
+      "id": "opt-identity-security",
+      "nodeId": "root",
+      "label": "Identity, Access, & Security Controls",
+      "description": "Think: Who can touch what? Entra ID (Azure AD), Managed Identities, Key Vault, RBAC, Defender, Conditional Access.",
+      "pros": ["Enterprise security", "Identity management", "Zero trust", "Compliance", "Secret management"],
+      "cons": ["Configuration complexity", "Learning curve", "Cost"],
+      "whenToUse": "When you need authentication, authorization, secrets management, or security compliance - critical for production",
+      "whenNotToUse": "Only for development-only scenarios or public anonymous access"
+    },
+    {
+      "id": "opt-observability-ops",
+      "nodeId": "root",
+      "label": "Observability & Operations",
+      "description": "Think: How do I know it's alive? Application Insights, Log Analytics, Monitor, Alerts, Workbooks, Cost Management.",
+      "pros": ["Full visibility", "Proactive monitoring", "Troubleshooting tools", "Cost tracking"],
+      "cons": ["Data volume costs", "Alert fatigue risk", "Setup investment"],
+      "whenToUse": "For any production system - observability should be built in from the start, not added after issues arise",
+      "whenNotToUse": "Only for throwaway prototypes or single-use scripts"
+    },
+    {
+      "id": "opt-devops-delivery",
+      "nodeId": "root",
+      "label": "DevOps & Delivery",
+      "description": "Think: How do I ship this? GitHub Actions, Azure DevOps Pipelines, Container Registry (ACR), IaC (Bicep/Terraform).",
+      "pros": ["Automated deployments", "CI/CD pipelines", "Infrastructure as code", "Version control"],
+      "cons": ["Setup complexity", "Pipeline maintenance", "Learning curve"],
+      "whenToUse": "When you need repeatable deployments, CI/CD pipelines, or infrastructure automation - shapes the entire architecture lifecycle",
+      "whenNotToUse": "For manual one-time deployments or pure exploration"
+    },
+    {
+      "id": "opt-ai-ml-cognitive",
+      "nodeId": "root",
+      "label": "AI, ML & Cognitive Services",
+      "description": "Think: How do I add brains? OpenAI, Cognitive Search, ML Studio, Speech Services, Vision APIs, Document Intelligence.",
+      "pros": ["Pre-built AI services", "ML platform", "Cognitive capabilities", "Rapid integration"],
+      "cons": ["Cost", "Learning curve", "Data quality requirements", "Token limits"],
+      "whenToUse": "When you need AI capabilities, machine learning models, natural language processing, or cognitive services",
+      "whenNotToUse": "For traditional applications without AI requirements"
+    },
+    {
+      "id": "opt-iot-edge",
+      "nodeId": "root",
+      "label": "IoT, Edge & Real-World Input",
+      "description": "Think: What happens at the edge? IoT Hub, Device Provisioning Service (DPS), Time Series Insights, Edge Runtime.",
+      "pros": ["Device connectivity", "Edge computing", "Device management", "Real-time processing"],
+      "cons": ["Specialized use case", "Hardware considerations", "Network reliability"],
+      "whenToUse": "When building IoT solutions requiring device connectivity, edge computing, or device management",
+      "whenNotToUse": "For traditional web or mobile applications without hardware integration"
+    },
+    {
+      "id": "opt-media-content",
+      "nodeId": "root",
+      "label": "Media & Content Delivery",
+      "description": "Think: How do I handle heavy media? Media Services, Live/On-demand Streaming, Encoding, DRM, Video Indexer.",
+      "pros": ["Media processing", "Streaming infrastructure", "Content delivery", "DRM support"],
+      "cons": ["Specialized use case", "High bandwidth costs", "Encoding complexity"],
+      "whenToUse": "When you need video processing, live streaming, encoding, content delivery, or media analytics",
+      "whenNotToUse": "For applications without media processing or streaming requirements"
+    },
+    {
+      "id": "opt-analytics-bi",
+      "nodeId": "root",
+      "label": "Analytics, BI & Big Data",
+      "description": "Think: How do I turn logs and events into intelligence? Synapse, Data Factory, Databricks, Stream Analytics, Power BI.",
+      "pros": ["Data warehousing", "ETL pipelines", "Real-time analytics", "Business intelligence"],
+      "cons": ["Complexity", "Cost at scale", "Data engineering skills required"],
+      "whenToUse": "When building enterprise data warehouses, analytics pipelines, or business intelligence solutions",
+      "whenNotToUse": "For simple operational reporting or small-scale data processing"
     },
     {
       "id": "opt-sb",
@@ -946,106 +1132,6 @@
       "cons": ["No orchestration", "Limited scaling"],
       "whenToUse": "Simple container workloads, batch jobs, dev/test",
       "whenNotToUse": "Production workloads requiring orchestration"
-    },
-    {
-      "id": "opt-web",
-      "nodeId": "root",
-      "label": "Web Application/API",
-      "description": "Web hosting, static sites, real-time communication, and API management",
-      "pros": ["Multiple hosting options", "Scalable", "Integrated services"],
-      "cons": ["Service selection complexity", "Cost management"],
-      "whenToUse": "When building web applications, APIs, or real-time communication features",
-      "whenNotToUse": "For pure data processing or infrastructure-only scenarios"
-    },
-    {
-      "id": "opt-compute",
-      "nodeId": "root",
-      "label": "Compute Services",
-      "description": "Virtual machines, serverless functions, batch processing, and containerized applications",
-      "pros": ["Flexible compute options", "Scalable", "Multiple deployment models"],
-      "cons": ["Service selection complexity", "Cost management"],
-      "whenToUse": "When you need compute resources for applications, batch jobs, or serverless workloads",
-      "whenNotToUse": "For pure data storage or networking-only scenarios"
-    },
-    {
-      "id": "opt-data-storage",
-      "nodeId": "root",
-      "label": "Data & Storage",
-      "description": "Databases, storage accounts, data lakes, and data management services",
-      "pros": ["Multiple storage types", "Scalable", "Managed services"],
-      "cons": ["Service selection complexity", "Cost management"],
-      "whenToUse": "When you need data persistence, databases, or file storage solutions",
-      "whenNotToUse": "For compute-only or networking-only scenarios"
-    },
-    {
-      "id": "opt-ai-ml",
-      "nodeId": "root",
-      "label": "AI & Machine Learning",
-      "description": "Artificial intelligence, machine learning, and cognitive services",
-      "pros": ["Pre-built AI services", "ML platform", "Cognitive capabilities"],
-      "cons": ["Cost", "Learning curve", "Data requirements"],
-      "whenToUse": "When you need AI capabilities, machine learning models, or cognitive services",
-      "whenNotToUse": "For traditional applications without AI requirements"
-    },
-    {
-      "id": "opt-security-identity",
-      "nodeId": "root",
-      "label": "Security & Identity",
-      "description": "Authentication, authorization, secrets management, and security services",
-      "pros": ["Enterprise security", "Identity management", "Compliance"],
-      "cons": ["Configuration complexity", "Cost"],
-      "whenToUse": "When you need authentication, authorization, secrets management, or security features",
-      "whenNotToUse": "For public-facing applications without authentication needs"
-    },
-    {
-      "id": "opt-networking",
-      "nodeId": "root",
-      "label": "Networking",
-      "description": "Virtual networks, load balancers, CDN, and connectivity services",
-      "pros": ["Network isolation", "Load balancing", "Global distribution"],
-      "cons": ["Configuration complexity", "Cost"],
-      "whenToUse": "When you need network infrastructure, connectivity, or traffic management",
-      "whenNotToUse": "For simple applications without networking requirements"
-    },
-    {
-      "id": "opt-devops",
-      "nodeId": "root",
-      "label": "DevOps & CI/CD",
-      "description": "Continuous integration, deployment pipelines, and development workflows",
-      "pros": ["Automated deployments", "Version control", "Pipeline management"],
-      "cons": ["Setup complexity", "Learning curve"],
-      "whenToUse": "When you need CI/CD pipelines, automated deployments, or development workflows",
-      "whenNotToUse": "For manual deployment scenarios or simple applications"
-    },
-    {
-      "id": "opt-monitoring-analytics",
-      "nodeId": "root",
-      "label": "Monitoring & Analytics",
-      "description": "Application insights, logging, metrics, and observability services",
-      "pros": ["Comprehensive monitoring", "Logging", "Analytics"],
-      "cons": ["Cost", "Data volume"],
-      "whenToUse": "When you need application monitoring, logging, metrics, or analytics",
-      "whenNotToUse": "For simple applications without monitoring requirements"
-    },
-    {
-      "id": "opt-iot",
-      "nodeId": "root",
-      "label": "IoT",
-      "description": "Internet of Things connectivity, device management, and edge computing",
-      "pros": ["Device connectivity", "Edge computing", "Device management"],
-      "cons": ["Specialized use case", "Complexity"],
-      "whenToUse": "When you need IoT device connectivity, edge computing, or device management",
-      "whenNotToUse": "For traditional web or mobile applications"
-    },
-    {
-      "id": "opt-media",
-      "nodeId": "root",
-      "label": "Media Services",
-      "description": "Media processing, video streaming, content delivery, and encoding services",
-      "pros": ["Media processing", "Streaming", "Content delivery"],
-      "cons": ["Specialized use case", "Cost"],
-      "whenToUse": "When you need video processing, streaming, encoding, or content delivery",
-      "whenNotToUse": "For applications without media processing requirements"
     },
     {
       "id": "opt-static-web",
@@ -1288,6 +1374,36 @@
       "whenNotToUse": "When you need full Kubernetes control or VM-level access"
     },
     {
+      "id": "opt-appservice-compute",
+      "nodeId": "compute-solution",
+      "label": "Azure App Service",
+      "description": "Platform as a Service (PaaS) for web apps, APIs, and mobile backends",
+      "pros": ["Managed platform", "Auto-scaling", "Multiple languages", "Built-in CI/CD"],
+      "cons": ["Platform constraints", "Cost at scale"],
+      "whenToUse": "Web applications, REST APIs, mobile backends requiring managed hosting",
+      "whenNotToUse": "When you need full VM control or container orchestration"
+    },
+    {
+      "id": "opt-aks-compute",
+      "nodeId": "compute-solution",
+      "label": "Azure Kubernetes Service (AKS)",
+      "description": "Managed Kubernetes for container orchestration",
+      "pros": ["Full Kubernetes", "Scalable", "Enterprise-ready", "Managed control plane"],
+      "cons": ["Complex", "Higher cost", "Learning curve"],
+      "whenToUse": "Complex container orchestration, microservices, enterprise workloads",
+      "whenNotToUse": "Simple single-container deployments or serverless containers"
+    },
+    {
+      "id": "opt-service-fabric",
+      "nodeId": "compute-solution",
+      "label": "Azure Service Fabric",
+      "description": "Microservices platform for stateful and stateless services",
+      "pros": ["Stateful services", "Actor model", "Microservices framework", "Distributed systems"],
+      "cons": ["Steep learning curve", "Platform-specific", "Migration complexity"],
+      "whenToUse": "Stateful microservices, actor-based applications, distributed systems",
+      "whenNotToUse": "Simple stateless applications or when preferring standard containers"
+    },
+    {
       "id": "opt-vm-general",
       "nodeId": "vm-solution",
       "label": "General Purpose",
@@ -1436,6 +1552,96 @@
       "cons": ["Platform constraints", "Container-based"],
       "whenToUse": "For containerized microservices, serverless containers, or scalable container workloads",
       "whenNotToUse": "When you need full Kubernetes control or VM-level access"
+    },
+    {
+      "id": "opt-appservice-free",
+      "nodeId": "appservice-tier-solution",
+      "label": "Free",
+      "description": "Free tier for development and testing with shared resources",
+      "pros": ["Free", "10 apps", "Custom domains", "Quick setup"],
+      "cons": ["No SLA", "60 CPU minutes/day", "Shared infrastructure", "No deployment slots", "No auto-scale"],
+      "whenToUse": "Learning, experimentation, personal projects, development and testing",
+      "whenNotToUse": "Production workloads or when SLA is required"
+    },
+    {
+      "id": "opt-appservice-basic",
+      "nodeId": "appservice-tier-solution",
+      "label": "Basic",
+      "description": "Dedicated compute for production workloads with manual scaling",
+      "pros": ["Dedicated compute", "99.95% SLA", "Up to 3 instances", "SSL certificates", "Custom domains"],
+      "cons": ["No auto-scale", "No deployment slots", "No VNET integration", "Manual scaling only"],
+      "whenToUse": "Small production apps, predictable traffic, cost-sensitive workloads",
+      "whenNotToUse": "When auto-scaling or deployment slots are needed"
+    },
+    {
+      "id": "opt-appservice-standard",
+      "nodeId": "appservice-tier-solution",
+      "label": "Standard",
+      "description": "Production-grade hosting with auto-scaling and deployment slots",
+      "pros": ["Auto-scale up to 10 instances", "5 deployment slots", "99.95% SLA", "Daily backups", "Production-ready"],
+      "cons": ["Limited to 10 instances", "No VNET integration", "No zone redundancy"],
+      "whenToUse": "Production web applications, APIs with variable load, apps requiring staging slots",
+      "whenNotToUse": "When VNET integration or zone redundancy is required"
+    },
+    {
+      "id": "opt-appservice-premium",
+      "nodeId": "appservice-tier-solution",
+      "label": "Premium v3",
+      "description": "High-performance hosting with enhanced compute, VNET integration, and advanced features",
+      "pros": ["Up to 30 instances", "20 deployment slots", "VNET integration", "Private endpoints", "Zone redundancy", "Dv3-series compute"],
+      "cons": ["Higher cost", "More complex setup for VNET integration"],
+      "whenToUse": "Enterprise web applications, high-traffic APIs, apps requiring VNET connectivity, mission-critical workloads",
+      "whenNotToUse": "Simple applications or when cost optimization is priority"
+    },
+    {
+      "id": "opt-appservice-isolated",
+      "nodeId": "appservice-tier-solution",
+      "label": "Isolated v2",
+      "description": "Maximum isolation and security with dedicated environment in your own VNET",
+      "pros": ["Complete network isolation", "Runs in dedicated App Service Environment", "Up to 100 instances", "Internal load balancer", "Zone redundancy"],
+      "cons": ["Highest cost", "Complex setup", "Requires App Service Environment"],
+      "whenToUse": "Highly regulated industries, complete network isolation requirements, large-scale enterprise applications, compliance-driven workloads",
+      "whenNotToUse": "When network isolation isn't required or budget is constrained"
+    },
+    {
+      "id": "opt-aks-free",
+      "nodeId": "aks-tier-solution",
+      "label": "Free",
+      "description": "Free tier with managed Kubernetes control plane",
+      "pros": ["Free control plane", "Standard Kubernetes features", "Community support"],
+      "cons": ["No SLA", "No support", "Limited to Uptime SLA regions"],
+      "whenToUse": "Development, testing, learning, non-production workloads",
+      "whenNotToUse": "Production workloads requiring SLA or support"
+    },
+    {
+      "id": "opt-aks-standard",
+      "nodeId": "aks-tier-solution",
+      "label": "Standard",
+      "description": "Standard tier with 99.95% SLA and support",
+      "pros": ["99.95% SLA", "Support included", "Production-ready", "All regions"],
+      "cons": ["Higher cost than Free", "Requires paid subscription"],
+      "whenToUse": "Production workloads requiring SLA guarantees and support",
+      "whenNotToUse": "Development/testing or when Free tier suffices"
+    },
+    {
+      "id": "opt-aks-premium",
+      "nodeId": "aks-tier-solution",
+      "label": "Premium",
+      "description": "Premium tier with advanced features and enhanced support",
+      "pros": ["99.95% SLA", "Enhanced support", "Advanced features", "Priority support"],
+      "cons": ["Highest cost", "May have features not needed"],
+      "whenToUse": "Enterprise production workloads requiring premium support and advanced features",
+      "whenNotToUse": "When Standard tier features are sufficient"
+    },
+    {
+      "id": "opt-service-fabric-cluster",
+      "nodeId": "service-fabric-solution",
+      "label": "Service Fabric Cluster",
+      "description": "Deploy Service Fabric cluster for microservices",
+      "pros": ["Stateful services", "Actor model", "Microservices framework", "Distributed systems"],
+      "cons": ["Steep learning curve", "Platform-specific", "Migration complexity"],
+      "whenToUse": "Stateful microservices, actor-based applications, distributed systems",
+      "whenNotToUse": "Simple stateless applications or when preferring standard containers"
     },
     {
       "id": "opt-azure-storage",
@@ -1811,21 +2017,30 @@
       "pros": ["Low-code/no-code approach simplifies workflow creation.", "Extensive connectors available for integrating with various services.", "Visual designer helps in understanding and managing workflows."],
       "cons": ["Can become complex for intricate workflows.", "Cost may grow with increased workflow complexity and usage.", "Less control over performance and execution compared to code-based solutions."],
       "whenToUse": "Use when you need to automate workflows that involve queues without extensive coding, particularly for business processes and integrations."
+    },
+    {
+      "id": "opt-analytics-bi-default",
+      "nodeId": "analytics-bi-solution",
+      "label": "Analytics & BI Solutions",
+      "description": "Explore data warehousing, ETL pipelines, and business intelligence services",
+      "pros": ["Comprehensive analytics", "Multiple tools", "Scalable"],
+      "cons": ["Selection complexity", "Cost at scale"],
+      "whenToUse": "When building data warehouse, analytics, or BI solutions"
     }
   ],
   "paths": [
-    { "fromNodeId": "root", "fromOptionId": "opt-msg", "toNodeId": "msg-service" },
-    { "fromNodeId": "root", "fromOptionId": "opt-containers", "toNodeId": "container-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-web", "toNodeId": "web-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-compute", "toNodeId": "compute-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-data-storage", "toNodeId": "data-storage-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-ai-ml", "toNodeId": "ai-ml-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-security-identity", "toNodeId": "security-identity-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-networking", "toNodeId": "networking-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-devops", "toNodeId": "devops-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-monitoring-analytics", "toNodeId": "monitoring-analytics-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-iot", "toNodeId": "iot-solution" },
-    { "fromNodeId": "root", "fromOptionId": "opt-media", "toNodeId": "media-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-compute-runtime", "toNodeId": "compute-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-data-persistence", "toNodeId": "data-storage-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-integration-messaging", "toNodeId": "msg-service" },
+    { "fromNodeId": "root", "fromOptionId": "opt-networking-connectivity", "toNodeId": "networking-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-identity-security", "toNodeId": "security-identity-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-observability-ops", "toNodeId": "monitoring-analytics-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-devops-delivery", "toNodeId": "devops-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-ai-ml-cognitive", "toNodeId": "ai-ml-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-iot-edge", "toNodeId": "iot-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-media-content", "toNodeId": "media-solution" },
+    { "fromNodeId": "root", "fromOptionId": "opt-analytics-bi", "toNodeId": "analytics-bi-solution" },
+    { "fromNodeId": "analytics-bi-solution", "fromOptionId": "opt-analytics-bi-default", "toNodeId": "analytics-bi-recipe" },
     { "fromNodeId": "data-storage-solution", "fromOptionId": "opt-data-storage-default", "toNodeId": "data-storage-recipe" },
     { "fromNodeId": "ai-ml-solution", "fromOptionId": "opt-ai-ml-default", "toNodeId": "ai-ml-recipe" },
     { "fromNodeId": "security-identity-solution", "fromOptionId": "opt-security-identity-default", "toNodeId": "security-identity-recipe" },
@@ -1865,6 +2080,9 @@
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-functions", "toNodeId": "functions-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-batch", "toNodeId": "batch-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-container-apps", "toNodeId": "container-apps-solution" },
+    { "fromNodeId": "compute-solution", "fromOptionId": "opt-appservice-compute", "toNodeId": "appservice-tier-solution" },
+    { "fromNodeId": "compute-solution", "fromOptionId": "opt-aks-compute", "toNodeId": "aks-tier-solution" },
+    { "fromNodeId": "compute-solution", "fromOptionId": "opt-service-fabric", "toNodeId": "service-fabric-solution" },
     { "fromNodeId": "vm-solution", "fromOptionId": "opt-vm-general", "toNodeId": "vm-general-recipe" },
     { "fromNodeId": "vm-solution", "fromOptionId": "opt-vm-ai", "toNodeId": "vm-ai-recipe" },
     { "fromNodeId": "vm-solution", "fromOptionId": "opt-vm-windows", "toNodeId": "vm-windows-recipe" },
@@ -1873,6 +2091,15 @@
     { "fromNodeId": "functions-solution", "fromOptionId": "opt-functions-consumption", "toNodeId": "functions-consumption-recipe" },
     { "fromNodeId": "functions-solution", "fromOptionId": "opt-functions-premium", "toNodeId": "functions-premium-recipe" },
     { "fromNodeId": "functions-solution", "fromOptionId": "opt-functions-dedicated", "toNodeId": "functions-dedicated-recipe" },
+    { "fromNodeId": "appservice-tier-solution", "fromOptionId": "opt-appservice-free", "toNodeId": "appservice-free-recipe" },
+    { "fromNodeId": "appservice-tier-solution", "fromOptionId": "opt-appservice-basic", "toNodeId": "appservice-basic-recipe" },
+    { "fromNodeId": "appservice-tier-solution", "fromOptionId": "opt-appservice-standard", "toNodeId": "appservice-standard-recipe" },
+    { "fromNodeId": "appservice-tier-solution", "fromOptionId": "opt-appservice-premium", "toNodeId": "appservice-premium-recipe" },
+    { "fromNodeId": "appservice-tier-solution", "fromOptionId": "opt-appservice-isolated", "toNodeId": "appservice-isolated-recipe" },
+    { "fromNodeId": "aks-tier-solution", "fromOptionId": "opt-aks-free", "toNodeId": "aks-free-recipe" },
+    { "fromNodeId": "aks-tier-solution", "fromOptionId": "opt-aks-standard", "toNodeId": "aks-standard-recipe" },
+    { "fromNodeId": "aks-tier-solution", "fromOptionId": "opt-aks-premium", "toNodeId": "aks-premium-recipe" },
+    { "fromNodeId": "service-fabric-solution", "fromOptionId": "opt-service-fabric-cluster", "toNodeId": "service-fabric-recipe" },
     { "fromNodeId": "batch-solution", "fromOptionId": "opt-batch-spot", "toNodeId": "batch-spot-recipe" },
     { "fromNodeId": "batch-solution", "fromOptionId": "opt-batch-dedicated", "toNodeId": "batch-dedicated-recipe" },
     { "fromNodeId": "batch-solution", "fromOptionId": "opt-batch-lro", "toNodeId": "batch-lro-recipe" },

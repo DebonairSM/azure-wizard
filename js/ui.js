@@ -269,237 +269,28 @@ export function hideError() {
 }
 
 /**
- * Render search results
- * @param {Array} nodes
- * @param {Function} onNodeSelect
+ * Show or hide the improve button and emit a request event when clicked.
+ * This lets other modules listen for improvement requests without UI needing their logic.
  */
-export function renderSearchResults(nodes, onNodeSelect) {
-    const resultsEl = document.getElementById('searchResults');
-    
-    if (nodes.length === 0) {
-        resultsEl.style.display = 'none';
+function renderImproveButton(node) {
+    const button = document.getElementById('improveButton');
+    if (!button) {
         return;
     }
 
-    resultsEl.innerHTML = '';
-    resultsEl.style.display = 'block';
+    const isQuestionNode = node && node.nodeType !== 'terminal';
+    const hasNodeId = !!node?.id;
 
-    nodes.forEach(node => {
-        const item = document.createElement('div');
-        item.className = 'search-result-item';
-        item.textContent = node.question || node.id;
-        item.onclick = () => {
-            onNodeSelect(node.id);
-            resultsEl.style.display = 'none';
+    if (isQuestionNode && hasNodeId) {
+        button.classList.remove('hidden');
+        button.onclick = () => {
+            const evt = new CustomEvent('improveNodeRequest', {
+                detail: { nodeId: node.id }
+            });
+            window.dispatchEvent(evt);
         };
-        resultsEl.appendChild(item);
-    });
-}
-
-/**
- * Hide search results
- */
-export function hideSearchResults() {
-    document.getElementById('searchResults').style.display = 'none';
-}
-
-/**
- * Show research prompt when search has no results
- * @param {string} query - Search query
- * @param {Function} onResearch - Callback when user confirms research
- */
-export function showResearchPrompt(query, onResearch) {
-    const resultsEl = document.getElementById('searchResults');
-    resultsEl.innerHTML = '';
-    resultsEl.style.display = 'block';
-    
-    const promptDiv = document.createElement('div');
-    promptDiv.style.padding = '15px';
-    promptDiv.style.textAlign = 'center';
-    
-    const message = document.createElement('div');
-    message.textContent = `No results found for "${query}". Would you like to research this topic?`;
-    message.style.marginBottom = '15px';
-    promptDiv.appendChild(message);
-    
-    const button = document.createElement('button');
-    button.textContent = 'Research Topic';
-    button.className = 'mode-btn';
-    button.style.marginRight = '10px';
-    button.onclick = () => {
-        resultsEl.style.display = 'none';
-        onResearch();
-    };
-    promptDiv.appendChild(button);
-    
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
-    cancelButton.className = 'mode-btn';
-    cancelButton.onclick = () => {
-        resultsEl.style.display = 'none';
-    };
-    promptDiv.appendChild(cancelButton);
-    
-    resultsEl.appendChild(promptDiv);
-}
-
-/**
- * Show API key configuration dialog
- */
-export function showApiKeyDialog() {
-    const currentKey = localStorage.getItem('OPENAI_API_KEY') || '';
-    
-    const dialog = document.createElement('div');
-    dialog.style.position = 'fixed';
-    dialog.style.top = '50%';
-    dialog.style.left = '50%';
-    dialog.style.transform = 'translate(-50%, -50%)';
-    dialog.style.background = 'white';
-    dialog.style.padding = '30px';
-    dialog.style.borderRadius = '8px';
-    dialog.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-    dialog.style.zIndex = '10000';
-    dialog.style.maxWidth = '500px';
-    dialog.style.width = '90%';
-    
-    const title = document.createElement('h2');
-    title.textContent = 'OpenAI API Key Configuration';
-    title.style.marginBottom = '20px';
-    dialog.appendChild(title);
-    
-    const info = document.createElement('p');
-    info.textContent = 'Enter your OpenAI API key to enable research features. The key is stored locally in your browser.';
-    info.style.marginBottom = '15px';
-    info.style.color = '#666';
-    info.style.fontSize = '14px';
-    dialog.appendChild(info);
-    
-    const input = document.createElement('input');
-    input.type = 'password';
-    input.placeholder = 'sk-...';
-    input.value = currentKey;
-    input.style.width = '100%';
-    input.style.padding = '10px';
-    input.style.border = '1px solid #ddd';
-    input.style.borderRadius = '4px';
-    input.style.marginBottom = '15px';
-    input.style.fontSize = '14px';
-    dialog.appendChild(input);
-    
-    const buttonContainer = document.createElement('div');
-    buttonContainer.style.display = 'flex';
-    buttonContainer.style.gap = '10px';
-    buttonContainer.style.justifyContent = 'flex-end';
-    
-    const saveButton = document.createElement('button');
-    saveButton.textContent = 'Save';
-    saveButton.className = 'mode-btn';
-    saveButton.onclick = () => {
-        const key = input.value.trim();
-        if (key) {
-            localStorage.setItem('OPENAI_API_KEY', key);
-            window.OPENAI_API_KEY = key;
-            document.body.removeChild(overlay);
-            document.body.removeChild(dialog);
-            showError('API key saved successfully!');
-            setTimeout(() => hideError(), 2000);
-        } else {
-            alert('Please enter a valid API key');
-        }
-    };
-    buttonContainer.appendChild(saveButton);
-    
-    const cancelButton = document.createElement('button');
-    cancelButton.textContent = 'Cancel';
-    cancelButton.className = 'mode-btn';
-    cancelButton.onclick = () => {
-        document.body.removeChild(overlay);
-        document.body.removeChild(dialog);
-    };
-    buttonContainer.appendChild(cancelButton);
-    
-    const clearButton = document.createElement('button');
-    clearButton.textContent = 'Clear';
-    clearButton.className = 'mode-btn';
-    clearButton.style.background = '#d13438';
-    clearButton.style.color = 'white';
-    clearButton.style.borderColor = '#d13438';
-    clearButton.onclick = () => {
-        localStorage.removeItem('OPENAI_API_KEY');
-        window.OPENAI_API_KEY = '';
-        input.value = '';
-    };
-    buttonContainer.appendChild(clearButton);
-    
-    dialog.appendChild(buttonContainer);
-    
-    // Add overlay
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.background = 'rgba(0,0,0,0.5)';
-    overlay.style.zIndex = '9999';
-    overlay.onclick = () => {
-        document.body.removeChild(overlay);
-        document.body.removeChild(dialog);
-    };
-    
-    document.body.appendChild(overlay);
-    document.body.appendChild(dialog);
-    
-    input.focus();
-}
-
-/**
- * Render improve button for question-type nodes
- * @param {Object} node - Node object
- */
-export function renderImproveButton(node) {
-    const improveButton = document.getElementById('improveButton');
-    
-    // Safety check
-    if (!improveButton) {
-        console.warn('Improve button element not found in DOM');
-        return;
-    }
-    
-    // Show button for question-type and root nodes (not terminal nodes)
-    if (node && (node.nodeType === 'question' || node.nodeType === 'root')) {
-        improveButton.classList.remove('hidden');
-        improveButton.dataset.nodeId = node.id;
-        console.log('Improve button shown for node:', node.id, 'nodeType:', node.nodeType);
     } else {
-        improveButton.classList.add('hidden');
-        improveButton.dataset.nodeId = '';
-        if (node) {
-            console.log('Improve button hidden for node:', node.id, 'nodeType:', node.nodeType);
-        }
-    }
-    
-    // Reset button state
-    improveButton.disabled = false;
-    improveButton.classList.remove('loading');
-    improveButton.textContent = 'Improve';
-}
-
-/**
- * Set improve button loading state
- * @param {boolean} isLoading
- */
-export function setImproveButtonLoading(isLoading) {
-    const improveButton = document.getElementById('improveButton');
-    if (isLoading) {
-        improveButton.disabled = true;
-        improveButton.classList.add('loading');
-        improveButton.textContent = 'Improving...';
-    } else {
-        improveButton.disabled = false;
-        improveButton.classList.remove('loading');
-        improveButton.textContent = 'Improve';
+        button.classList.add('hidden');
+        button.onclick = null;
     }
 }
-
-

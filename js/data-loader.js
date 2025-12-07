@@ -268,4 +268,33 @@ export function getCurrentDataVersion() {
     return getStoredDataVersion();
 }
 
+/**
+ * Clear all caches (localStorage, IndexedDB, and in-memory)
+ * @returns {Promise<void>}
+ */
+export async function clearAllCaches() {
+    try {
+        // Clear localStorage
+        localStorage.removeItem(DATA_VERSION_KEY);
+        localStorage.removeItem('azureWizardDataBackup');
+        
+        // Clear IndexedDB
+        await storage.clearAllData();
+        
+        // Invalidate in-memory cache (if knowledge-cache is imported)
+        try {
+            const { invalidateCache } = await import('./knowledge-cache.js');
+            invalidateCache();
+        } catch (e) {
+            // knowledge-cache might not be available, that's okay
+            console.debug('Could not invalidate knowledge cache:', e);
+        }
+        
+        console.log('All caches cleared successfully');
+    } catch (error) {
+        console.error('Error clearing caches:', error);
+        throw error;
+    }
+}
+
 

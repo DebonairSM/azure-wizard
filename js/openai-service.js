@@ -335,6 +335,110 @@ Your goal is to identify ALL relevant Azure services in a category and provide d
         tag.toLowerCase().includes('api-management')
     ) || nodeInfo.question?.toLowerCase().includes('api management');
     
+    // Check if this is an App Service-related node
+    const isAppServiceNode = nodeInfo.tags?.some(tag => 
+        tag.toLowerCase().includes('app-service') || 
+        tag.toLowerCase().includes('appservice') ||
+        tag.toLowerCase().includes('web')
+    ) || nodeInfo.question?.toLowerCase().includes('app service');
+    
+    const appServiceContext = isAppServiceNode ? `
+
+IMPORTANT FOR APP SERVICE:
+Azure App Service has these tiers (from azureOfferings database):
+- Free: Shared infrastructure for dev/test, no SLA, 60 min/day compute, limited features
+- Shared: Shared infrastructure with custom domains, no SLA, metered compute
+- Basic (B1, B2, B3): Entry-level dedicated compute, 99.95% SLA, manual scaling up to 3 instances
+- Standard (S1, S2, S3): Production workloads, 99.95% SLA, auto-scaling up to 10 instances, staging slots, daily backups
+- Premium v3 (P1v3, P2v3, P3v3): Enhanced performance, 99.95% SLA, auto-scaling up to 30 instances, more slots, VNET integration
+- Isolated v2 (I1v2, I2v2, I3v2, I4v2, I5v2, I6v2): App Service Environment, 99.95% SLA, complete network isolation, highest scale
+
+Key considerations:
+- Free/Shared: Development and testing only, no production SLA
+- Basic: Cost-effective for low-traffic production apps
+- Standard: Most common production choice with staging slots
+- Premium v3: High-performance workloads, VNET integration for secure backends
+- Isolated v2: Maximum security/compliance, dedicated hardware, ASE required
+
+When suggesting App Service options, consider the use case and recommend appropriate tiers.` : '';
+    
+    // Check if this is a Functions-related node
+    const isFunctionsNode = nodeInfo.tags?.some(tag => 
+        tag.toLowerCase().includes('function') || 
+        tag.toLowerCase().includes('serverless')
+    ) || nodeInfo.question?.toLowerCase().includes('function');
+    
+    const functionsContext = isFunctionsNode ? `
+
+IMPORTANT FOR AZURE FUNCTIONS:
+Azure Functions has these hosting plans (from azureOfferings database):
+- Consumption: True serverless, pay-per-execution, auto-scales to zero, 5 min timeout (configurable to 10)
+- Flex Consumption: New serverless with always-ready instances, VNet support, longer timeouts, private endpoints
+- Premium (EP1, EP2, EP3): Pre-warmed instances, no cold starts, VNET integration, unlimited execution time
+- Dedicated (App Service Plan): Runs on App Service, predictable costs, full App Service features
+
+Key considerations:
+- Consumption: Best for sporadic workloads, pay only for execution
+- Flex Consumption: Serverless with enterprise features (VNet, no cold starts)
+- Premium: Production workloads requiring no cold starts and VNET
+- Dedicated: When sharing App Service resources or need always-on
+
+When suggesting Functions options, consider cold start sensitivity and networking requirements.` : '';
+    
+    // Check if this is a Container Apps-related node
+    const isContainerAppsNode = nodeInfo.tags?.some(tag => 
+        tag.toLowerCase().includes('container') && tag.toLowerCase().includes('app')
+    ) || nodeInfo.question?.toLowerCase().includes('container app');
+    
+    const containerAppsContext = isContainerAppsNode ? `
+
+IMPORTANT FOR CONTAINER APPS:
+Azure Container Apps has these workload profiles (from azureOfferings database):
+- Consumption: Serverless containers, pay-per-use, auto-scales to zero, shared infrastructure
+- Dedicated: Dedicated workload profiles with specific compute (D4, D8, D16, etc.), predictable performance
+
+Key considerations:
+- Consumption: Best for variable workloads, cost-effective, fast scaling
+- Dedicated: Predictable performance, GPU support, larger compute options
+
+Container Apps features: Dapr integration, KEDA autoscaling, revision management, traffic splitting.` : '';
+    
+    // Check if this is a Logic Apps-related node
+    const isLogicAppsNode = nodeInfo.tags?.some(tag => 
+        tag.toLowerCase().includes('logic') || 
+        tag.toLowerCase().includes('workflow')
+    ) || nodeInfo.question?.toLowerCase().includes('logic app');
+    
+    const logicAppsContext = isLogicAppsNode ? `
+
+IMPORTANT FOR LOGIC APPS:
+Azure Logic Apps has these plans (from azureOfferings database):
+- Consumption (Multi-tenant): Pay-per-action, 200+ connectors, stateful workflows, quick to deploy
+- Standard (Single-tenant): App Service hosting, VNet integration, stateful AND stateless workflows, local dev
+
+Key considerations:
+- Consumption: Best for simple integrations, pay only for executions
+- Standard: Enterprise workflows requiring VNet, better performance, local development` : '';
+    
+    // Check if this is a Service Bus-related node
+    const isServiceBusNode = nodeInfo.tags?.some(tag => 
+        tag.toLowerCase().includes('service-bus') || 
+        tag.toLowerCase().includes('messaging')
+    ) || nodeInfo.question?.toLowerCase().includes('service bus');
+    
+    const serviceBusContext = isServiceBusNode ? `
+
+IMPORTANT FOR SERVICE BUS:
+Azure Service Bus has these tiers (from azureOfferings database):
+- Basic: Simple queues only, no topics, 256KB messages, good for simple scenarios
+- Standard: Queues and Topics, 256KB messages, variable throughput, production ready
+- Premium: Dedicated resources, 100MB messages, predictable performance, VNet, private endpoints
+
+Key considerations:
+- Basic: Development or simple queue-only scenarios
+- Standard: Most production pub-sub scenarios
+- Premium: High throughput, isolation, compliance requirements` : '';
+    
     const apimContext = isApimNode ? `
 
 IMPORTANT FOR API MANAGEMENT:
@@ -375,7 +479,7 @@ For example, if this is about messaging services, you should consider:
 - Event Hubs
 - Notification Hubs
 - Azure Relay
-- And any other relevant messaging/communication services${apimContext}
+- And any other relevant messaging/communication services${apimContext}${appServiceContext}${functionsContext}${containerAppsContext}${logicAppsContext}${serviceBusContext}
 
 Return a JSON object with this structure:
 ${jsonExample}

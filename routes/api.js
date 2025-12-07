@@ -1,6 +1,19 @@
 // API routes for data access
 import express from 'express';
 import { getDatabase } from '../db/database.js';
+import { 
+    fetchFunctionsSkus, 
+    fetchAppServiceSkus, 
+    fetchLogicAppsSkus, 
+    fetchServiceBusSkus,
+    fetchContainerAppsSkus,
+    fetchEventGridSkus,
+    fetchEventHubsSkus,
+    fetchRelaySkus,
+    fetchContainerInstancesSkus,
+    fetchAKSSkus,
+    fetchBatchSkus
+} from '../scripts/azure-sku-fetchers.js';
 
 const router = express.Router();
 
@@ -356,7 +369,7 @@ router.post('/nodes', (req, res) => {
         res.status(201).json({ id, message: 'Node created' });
     } catch (error) {
         console.error('Error creating node:', error);
-        if (error.code === 'SQLITE_CONSTRAINT') {
+        if (error.code === 'SQLITE_CONSTRAINT' || error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
             res.status(409).json({ error: 'Node already exists' });
         } else {
             res.status(500).json({ error: 'Internal server error' });
@@ -398,7 +411,7 @@ router.post('/options', (req, res) => {
         res.status(201).json({ id, message: 'Option created' });
     } catch (error) {
         console.error('Error creating option:', error);
-        if (error.code === 'SQLITE_CONSTRAINT') {
+        if (error.code === 'SQLITE_CONSTRAINT' || error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
             res.status(409).json({ error: 'Option already exists' });
         } else {
             res.status(500).json({ error: 'Internal server error' });
@@ -592,7 +605,7 @@ router.post('/paths', (req, res) => {
         res.status(201).json({ message: 'Path created' });
     } catch (error) {
         console.error('Error creating path:', error);
-        if (error.code === 'SQLITE_CONSTRAINT') {
+        if (error.code === 'SQLITE_CONSTRAINT' || error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
             res.status(409).json({ error: 'Path already exists' });
         } else {
             res.status(500).json({ error: 'Internal server error' });
@@ -726,6 +739,7 @@ router.get('/apim-offerings', (req, res) => {
             limitations: parseJsonArray(offering.limitations),
             useCases: parseJsonArray(offering.useCases),
             documentationLinks: parseJsonArray(offering.documentationLinks),
+            aiGatewayDetails: parseJsonObject(offering.aiGatewayDetails),
             vnetSupport: offering.vnetSupport === 1,
             multiRegion: offering.multiRegion === 1,
             selfHostedGateway: offering.selfHostedGateway === 1,
@@ -765,6 +779,7 @@ router.get('/apim-offerings/:id', (req, res) => {
             limitations: parseJsonArray(offering.limitations),
             useCases: parseJsonArray(offering.useCases),
             documentationLinks: parseJsonArray(offering.documentationLinks),
+            aiGatewayDetails: parseJsonObject(offering.aiGatewayDetails),
             vnetSupport: offering.vnetSupport === 1,
             multiRegion: offering.multiRegion === 1,
             selfHostedGateway: offering.selfHostedGateway === 1,
@@ -825,6 +840,265 @@ router.get('/apim-offerings/summary/versions', (req, res) => {
         res.json(summary);
     } catch (error) {
         console.error('Error getting APIM offerings summary:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * GET /api/apim-offerings/ai-gateway-features - Get AI Gateway feature matrix across all tiers
+ */
+router.get('/apim-offerings/ai-gateway-features', (req, res) => {
+    try {
+        const db = getDatabase();
+        const offerings = db.prepare(`
+            SELECT 
+                id, 
+                skuName, 
+                skuTier,
+                version,
+                aiGateway,
+                mcpSupport,
+                websocketSupport,
+                aiGatewayDetails
+            FROM apimOfferings
+            ORDER BY 
+                CASE version 
+                    WHEN 'v2' THEN 2 
+                    WHEN 'v1' THEN 1 
+                    ELSE 0 
+                END DESC,
+                CASE category
+                    WHEN 'premium' THEN 4
+                    WHEN 'v2' THEN 3
+                    WHEN 'standard' THEN 2
+                    WHEN 'consumption' THEN 1
+                    ELSE 0
+                END DESC
+        `).all();
+        
+        // Build feature matrix
+        const featureMatrix = offerings.map(offering => {
+            const details = parseJsonObject(offering.aiGatewayDetails);
+            
+            return {
+                id: offering.id,
+                skuName: offering.skuName,
+                skuTier: offering.skuTier,
+                version: offering.version,
+                aiGatewaySupported: offering.aiGateway === 1,
+                aiGatewaySupportLevel: details?.level || (offering.aiGateway === 1 ? 'basic' : 'none'),
+                features: {
+                    trafficMediation: {
+                        supported: details?.trafficMediation ? true : false,
+                        apiImportTypes: details?.trafficMediation?.apiImportTypes || [],
+                        modelDeployments: details?.trafficMediation?.modelDeployments || [],
+                        mcpCapabilities: details?.trafficMediation?.mcpCapabilities || {}
+                    },
+                    tokenRateLimiting: details?.scalabilityPolicies?.tokenRateLimiting?.supported || false,
+                    semanticCaching: details?.scalabilityPolicies?.semanticCaching?.supported || false,
+                    loadBalancing: details?.scalabilityPolicies?.loadBalancing?.supported || false,
+                    circuitBreaker: details?.scalabilityPolicies?.circuitBreaker?.supported || false,
+                    contentModeration: details?.securityPolicies?.contentModeration?.supported || false,
+                    tokenMetrics: details?.observability?.tokenMetrics?.supported || false,
+                    promptLogging: details?.observability?.logging?.promptLogging || false,
+                    mcpServer: offering.mcpSupport === 1,
+                    websocket: offering.websocketSupport === 1
+                }
+            };
+        });
+        
+        res.json(featureMatrix);
+    } catch (error) {
+        console.error('Error getting AI Gateway features:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * GET /api/apim-offerings/:id/ai-gateway - Get detailed AI Gateway info for specific tier
+ */
+router.get('/apim-offerings/:id/ai-gateway', (req, res) => {
+    try {
+        const db = getDatabase();
+        const offering = db.prepare(`
+            SELECT 
+                id,
+                skuName,
+                skuTier,
+                version,
+                aiGateway,
+                mcpSupport,
+                websocketSupport,
+                aiGatewayDetails
+            FROM apimOfferings 
+            WHERE id = ?
+        `).get(req.params.id);
+        
+        if (!offering) {
+            return res.status(404).json({ error: 'APIM offering not found' });
+        }
+        
+        const aiGatewayDetails = parseJsonObject(offering.aiGatewayDetails);
+        
+        if (!aiGatewayDetails || !aiGatewayDetails.supported) {
+            return res.json({
+                id: offering.id,
+                skuName: offering.skuName,
+                skuTier: offering.skuTier,
+                version: offering.version,
+                supported: false,
+                reason: aiGatewayDetails?.reason || 'AI Gateway features are not available in this tier'
+            });
+        }
+        
+        res.json({
+            id: offering.id,
+            skuName: offering.skuName,
+            skuTier: offering.skuTier,
+            version: offering.version,
+            supported: true,
+            ...aiGatewayDetails
+        });
+    } catch (error) {
+        console.error('Error getting AI Gateway details:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * GET /api/apim-offerings/ai-gateway/policies - Get all AI Gateway policies across tiers
+ * Query params: policyType (tokenRateLimiting, semanticCaching, loadBalancing, circuitBreaker, contentModeration, tokenMetrics)
+ */
+router.get('/apim-offerings/ai-gateway/policies', (req, res) => {
+    try {
+        const db = getDatabase();
+        const { policyType } = req.query;
+        
+        const offerings = db.prepare(`
+            SELECT 
+                id,
+                skuName,
+                skuTier,
+                version,
+                aiGateway,
+                aiGatewayDetails
+            FROM apimOfferings
+            WHERE aiGateway = 1
+            ORDER BY 
+                CASE version 
+                    WHEN 'v2' THEN 2 
+                    WHEN 'v1' THEN 1 
+                    ELSE 0 
+                END DESC,
+                skuTier DESC
+        `).all();
+        
+        const policies = offerings.map(offering => {
+            const details = parseJsonObject(offering.aiGatewayDetails);
+            
+            if (!details || !details.scalabilityPolicies) {
+                return null;
+            }
+            
+            let policyData = null;
+            
+            if (!policyType || policyType === 'all') {
+                policyData = details.scalabilityPolicies;
+            } else {
+                const policyMap = {
+                    tokenRateLimiting: details.scalabilityPolicies?.tokenRateLimiting,
+                    semanticCaching: details.scalabilityPolicies?.semanticCaching,
+                    loadBalancing: details.scalabilityPolicies?.loadBalancing,
+                    circuitBreaker: details.scalabilityPolicies?.circuitBreaker,
+                    contentModeration: details.securityPolicies?.contentModeration,
+                    tokenMetrics: details.observability?.tokenMetrics
+                };
+                policyData = policyMap[policyType];
+            }
+            
+            return {
+                tier: {
+                    id: offering.id,
+                    skuName: offering.skuName,
+                    skuTier: offering.skuTier,
+                    version: offering.version
+                },
+                policies: policyData
+            };
+        }).filter(p => p !== null);
+        
+        res.json(policies);
+    } catch (error) {
+        console.error('Error getting AI Gateway policies:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * GET /api/apim-offerings/ai-gateway/comparison - Compare AI Gateway capabilities between tiers
+ * Query params: tiers (comma-separated list of offering IDs)
+ */
+router.get('/apim-offerings/ai-gateway/comparison', (req, res) => {
+    try {
+        const db = getDatabase();
+        const { tiers } = req.query;
+        
+        if (!tiers) {
+            return res.status(400).json({ error: 'Missing required parameter: tiers (comma-separated offering IDs)' });
+        }
+        
+        const tierIds = tiers.split(',').map(t => t.trim());
+        const placeholders = tierIds.map(() => '?').join(',');
+        
+        const offerings = db.prepare(`
+            SELECT 
+                id,
+                skuName,
+                skuTier,
+                version,
+                aiGateway,
+                mcpSupport,
+                websocketSupport,
+                aiGatewayDetails
+            FROM apimOfferings
+            WHERE id IN (${placeholders})
+            ORDER BY 
+                CASE version 
+                    WHEN 'v2' THEN 2 
+                    WHEN 'v1' THEN 1 
+                    ELSE 0 
+                END DESC,
+                skuTier DESC
+        `).all(...tierIds);
+        
+        const comparison = offerings.map(offering => {
+            const details = parseJsonObject(offering.aiGatewayDetails);
+            
+            return {
+                tier: {
+                    id: offering.id,
+                    skuName: offering.skuName,
+                    skuTier: offering.skuTier,
+                    version: offering.version
+                },
+                supported: offering.aiGateway === 1,
+                supportLevel: details?.level || 'none',
+                capabilities: {
+                    trafficMediation: details?.trafficMediation || null,
+                    scalabilityPolicies: details?.scalabilityPolicies || null,
+                    securityPolicies: details?.securityPolicies || null,
+                    resiliency: details?.resiliency || null,
+                    observability: details?.observability || null,
+                    developerExperience: details?.developerExperience || null
+                },
+                limitations: details?.limitations || [],
+                documentation: details?.documentation || []
+            };
+        });
+        
+        res.json(comparison);
+    } catch (error) {
+        console.error('Error comparing AI Gateway capabilities:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -1188,6 +1462,124 @@ router.get('/apim-all-tiers', (req, res) => {
     } catch (error) {
         console.error('Error getting all APIM tiers:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * POST /api/azure-resources/load - Load Azure resources and SKUs
+ * Body: { service?: string } - Optional service name to load specific service
+ */
+router.post('/azure-resources/load', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { service } = req.body;
+        
+        // Define all services
+        const allServices = [
+            { name: 'Functions', fetcher: fetchFunctionsSkus },
+            { name: 'AppService', fetcher: fetchAppServiceSkus },
+            { name: 'ContainerApps', fetcher: fetchContainerAppsSkus },
+            { name: 'ContainerInstances', fetcher: fetchContainerInstancesSkus },
+            { name: 'AKS', fetcher: fetchAKSSkus },
+            { name: 'Batch', fetcher: fetchBatchSkus },
+            { name: 'LogicApps', fetcher: fetchLogicAppsSkus },
+            { name: 'ServiceBus', fetcher: fetchServiceBusSkus },
+            { name: 'EventGrid', fetcher: fetchEventGridSkus },
+            { name: 'EventHubs', fetcher: fetchEventHubsSkus },
+            { name: 'Relay', fetcher: fetchRelaySkus }
+        ];
+        
+        // Filter to specific service if requested
+        const servicesToLoad = service 
+            ? allServices.filter(s => s.name.toLowerCase() === service.toLowerCase())
+            : allServices;
+        
+        if (servicesToLoad.length === 0) {
+            return res.status(400).json({ error: `Service '${service}' not found` });
+        }
+        
+        let totalLoaded = 0;
+        const results = [];
+        
+        // Prepare insert statement
+        const insertStmt = db.prepare(`
+            INSERT OR REPLACE INTO azureOfferings (
+                id, serviceName, skuName, skuTier, version, category,
+                description, purpose, pricingModel, pricingInfo, sla,
+                features, capabilities, limitations, useCases,
+                deploymentOptions, attributes, networking, scaling,
+                regions, documentationLinks,
+                isPreview, isRecommended, isProductionReady,
+                createdAt, updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        
+        // Load each service
+        for (const serviceDef of servicesToLoad) {
+            try {
+                console.log(`Loading ${serviceDef.name}...`);
+                const offerings = await serviceDef.fetcher({});
+                
+                if (!offerings || offerings.length === 0) {
+                    results.push({ service: serviceDef.name, loaded: 0, error: 'No offerings found' });
+                    continue;
+                }
+                
+                let serviceLoaded = 0;
+                for (const offering of offerings) {
+                    const existing = db.prepare('SELECT id, createdAt FROM azureOfferings WHERE id = ?').get(offering.id);
+                    const isNew = !existing;
+                    const timestamp = new Date().toISOString();
+                    
+                    insertStmt.run(
+                        offering.id,
+                        serviceDef.name,
+                        offering.skuName,
+                        offering.skuTier || null,
+                        offering.version || null,
+                        offering.category || null,
+                        offering.description || null,
+                        offering.purpose || null,
+                        offering.pricingModel || null,
+                        offering.pricingInfo ? JSON.stringify(offering.pricingInfo) : null,
+                        offering.sla || null,
+                        offering.features ? JSON.stringify(offering.features) : null,
+                        offering.capabilities ? JSON.stringify(offering.capabilities) : null,
+                        offering.limitations ? JSON.stringify(offering.limitations) : null,
+                        offering.useCases ? JSON.stringify(offering.useCases) : null,
+                        offering.deploymentOptions ? JSON.stringify(offering.deploymentOptions) : null,
+                        offering.attributes ? JSON.stringify(offering.attributes) : null,
+                        offering.networking ? JSON.stringify(offering.networking) : null,
+                        offering.scaling ? JSON.stringify(offering.scaling) : null,
+                        offering.regions ? JSON.stringify(offering.regions) : null,
+                        offering.documentationLinks ? JSON.stringify(offering.documentationLinks) : null,
+                        offering.isPreview ? 1 : 0,
+                        offering.isRecommended ? 1 : 0,
+                        offering.isProductionReady ? 1 : 0,
+                        isNew ? timestamp : (existing ? existing.createdAt : timestamp),
+                        timestamp
+                    );
+                    
+                    serviceLoaded++;
+                    totalLoaded++;
+                }
+                
+                results.push({ service: serviceDef.name, loaded: serviceLoaded });
+                console.log(`Loaded ${serviceLoaded} offerings for ${serviceDef.name}`);
+            } catch (error) {
+                console.error(`Error loading ${serviceDef.name}:`, error);
+                results.push({ service: serviceDef.name, loaded: 0, error: error.message });
+            }
+        }
+        
+        res.json({ 
+            success: true, 
+            loaded: totalLoaded,
+            results 
+        });
+    } catch (error) {
+        console.error('Error loading Azure resources:', error);
+        res.status(500).json({ error: 'Internal server error', message: error.message });
     }
 });
 

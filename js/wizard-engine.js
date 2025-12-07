@@ -87,7 +87,14 @@ export class WizardEngine {
         const selectedOption = options.find(opt => opt.id === optionId);
 
         if (!selectedOption) {
-            throw new Error(`Option ${optionId} not found for current node`);
+            // Provide more helpful error message
+            const currentNode = await this.getCurrentNode();
+            const availableOptionIds = options.map(opt => opt.id).join(', ');
+            throw new Error(
+                `Option "${optionId}" not found for node "${currentNode?.id || this.currentNodeId}" (${currentNode?.question || 'unknown question'}). ` +
+                `Available options: ${availableOptionIds || 'none'}. ` +
+                `This may indicate a data inconsistency. Try clearing the cache.`
+            );
         }
 
         // Add to history

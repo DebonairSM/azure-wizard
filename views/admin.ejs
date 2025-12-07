@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #1a202c;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #1a202c;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .card h3 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .service-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .service-checkbox:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .service-checkbox input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .service-checkbox.checked {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .options {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option input {
+            cursor: pointer;
+        }
+
+        .option label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .progress {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress.active {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .progress-text {
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .results {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .service-list {
+            list-style: none;
+        }
+
+        .service-item {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-new {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-updated {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .status-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .status-card {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .changelog-item {
+            padding: 12px;
+            border-left: 3px solid #667eea;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .changelog-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .output-console {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .status-section {
+                grid-template-columns: 1fr;
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Azure Resource Discovery</h1>
+            <p>Automatically discover and maintain Azure service offerings</p>
+        </div>
+
+        <!-- Status Section -->
+        <div class="card">
+            <h2>Current Status</h2>
+            <div class="status-section">
+                <div class="status-card">
+                    <h3>Services in Database</h3>
+                    <div id="serviceStatus">Loading...</div>
+                </div>
+                <div class="status-card">
+                    <h3>Recent Changes</h3>
+                    <div id="recentChanges">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discovery Section -->
+        <div class="card">
+            <h2>Discover Resources</h2>
+            
+            <h3>Select Services</h3>
+            <div class="service-grid">
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="Functions">
+                    <span>Azure Functions</span>
+                </label>
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="AppService">
+                    <span>App Service</span>
+                </label>
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="LogicApps">
+                    <span>Logic Apps</span>
+                </label>
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="ServiceBus">
+                    <span>Service Bus</span>
+                </label>
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="ContainerApps">
+                    <span>Container Apps</span>
+                </label>
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="EventGrid">
+                    <span>Event Grid</span>
+                </label>
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="EventHubs">
+                    <span>Event Hubs</span>
+                </label>
+                <label class="service-checkbox">
+                    <input type="checkbox" name="service" value="Relay">
+                    <span>Azure Relay</span>
+                </label>
+            </div>
+
+            <h3>Options</h3>
+            <div class="options">
+                <div class="option">
+                    <input type="checkbox" id="dryRun" checked>
+                    <label for="dryRun">Dry Run (Preview Only)</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="force">
+                    <label for="force">Force Refresh</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="enrich">
+                    <label for="enrich">AI Enrichment</label>
+                </div>
+            </div>
+
+            <div>
+                <button class="btn btn-primary" id="discoverBtn" onclick="startDiscovery()">
+                    🚀 Discover Resources
+                </button>
+                <button class="btn btn-secondary" id="selectAllBtn" onclick="selectAllServices()">
+                    ✓ Select All
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress" id="progress">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Discovering resources...</div>
+            </div>
+
+            <!-- Results -->
+            <div class="results" id="results">
+                <h3>Discovery Results</h3>
+                <div class="summary" id="summary"></div>
+                <div id="serviceResults"></div>
+                <div id="outputConsole" class="output-console"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load status on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStatus();
+            setupCheckboxHandlers();
+        });
+
+        function setupCheckboxHandlers() {
+            document.querySelectorAll('.service-checkbox input').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const label = e.target.closest('.service-checkbox');
+                    if (e.target.checked) {
+                        label.classList.add('checked');
+                    } else {
+                        label.classList.remove('checked');
+                    }
+                });
+            });
+        }
+
+        async function loadStatus() {
+            try {
+                const response = await fetch('/api/admin/discovery-status');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update service status
+                    const serviceHtml = data.serviceCount.length > 0
+                        ? '<ul class="service-list">' + data.serviceCount.map(s => 
+                            `<li class="service-item">
+                                <span>${s.serviceName}</span>
+                                <span class="badge badge-new">${s.count} offerings</span>
+                            </li>`
+                          ).join('') + '</ul>'
+                        : '<p>No services discovered yet</p>';
+                    
+                    document.getElementById('serviceStatus').innerHTML = serviceHtml;
+
+                    // Update recent changes
+                    const changesHtml = data.recentChanges.length > 0
+                        ? data.recentChanges.map(c => 
+                            `<div class="changelog-item">
+                                <strong>${c.serviceName}</strong> - ${c.skuName}
+                                <div class="changelog-meta">
+                                    <span class="badge ${c.changeType === 'added' ? 'badge-new' : 'badge-updated'}">${c.changeType}</span>
+                                    <span>${new Date(c.detectedAt).toLocaleString()}</span>
+                                </div>
+                            </div>`
+                          ).join('')
+                        : '<p>No recent changes</p>';
+                    
+                    document.getElementById('recentChanges').innerHTML = changesHtml;
+                }
+            } catch (error) {
+                console.error('Error loading status:', error);
+                document.getElementById('serviceStatus').innerHTML = '<p>Error loading status</p>';
+                document.getElementById('recentChanges').innerHTML = '<p>Error loading changes</p>';
+            }
+        }
+
+        function selectAllServices() {
+            const checkboxes = document.querySelectorAll('.service-checkbox input');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+                const label = cb.closest('.service-checkbox');
+                if (cb.checked) {
+                    label.classList.add('checked');
+                } else {
+                    label.classList.remove('checked');
+                }
+            });
+
+            document.getElementById('selectAllBtn').textContent = allChecked ? '✓ Select All' : '✗ Clear All';
+        }
+
+        async function startDiscovery() {
+            const selectedServices = Array.from(document.querySelectorAll('.service-checkbox input:checked'))
+                .map(cb => cb.value);
+
+            if (selectedServices.length === 0) {
+                alert('Please select at least one service');
+                return;
+            }
+
+            const dryRun = document.getElementById('dryRun').checked;
+            const force = document.getElementById('force').checked;
+            const enrich = document.getElementById('enrich').checked;
+
+            // Show progress
+            document.getElementById('progress').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('discoverBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/admin/discover-resources', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ services: selectedServices, dryRun, force, enrich })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                    if (!dryRun) {
+                        await loadStatus(); // Reload status after successful discovery
+                    }
+                } else {
+                    alert('Discovery failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error during discovery:', error);
+                alert('Discovery failed: ' + error.message);
+            } finally {
+                document.getElementById('progress').classList.remove('active');
+                document.getElementById('discoverBtn').disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('results').classList.add('active');
+
+            const summary = data.summary;
+            
+            // Display summary stats
+            const summaryHtml = `
+                <div class="stat">
+                    <div class="stat-value">${summary.total || 0}</div>
+                    <div class="stat-label">Total Offerings</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${summary.new || 0}</div>
+                    <div class="stat-label">New</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${summary.updated || 0}</div>
+                    <div class="stat-label">Updated</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${summary.unchanged || 0}</div>
+                    <div class="stat-label">Unchanged</div>
+                </div>
+            `;
+            document.getElementById('summary').innerHTML = summaryHtml;
+
+            // Display service details
+            if (summary.services && summary.services.length > 0) {
+                const servicesHtml = '<ul class="service-list">' + summary.services.map(s => 
+                    `<li class="service-item">
+                        <span><strong>${s.name}</strong></span>
+                        <span>${s.count} offerings found</span>
+                    </li>`
+                ).join('') + '</ul>';
+                document.getElementById('serviceResults').innerHTML = servicesHtml;
+            }
+
+            // Display console output
+            if (data.output) {
+                document.getElementById('outputConsole').textContent = data.output;
+            }
+
+            // Show dry run warning
+            if (data.dryRun) {
+                document.getElementById('progressText').innerHTML = 
+                    '⚠️ DRY RUN MODE - No changes were written to the database. Uncheck "Dry Run" to save changes.';
+                document.getElementById('progressText').style.color = '#d69e2e';
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

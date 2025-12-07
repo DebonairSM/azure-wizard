@@ -6,6 +6,7 @@ import * as cache from './knowledge-cache.js';
 import * as jsonUpdater from './json-updater.js';
 import * as apiClient from './api-client.js';
 import { forceReloadData, loadJsonData } from './data-loader.js';
+import indexedDbDataProvider from './data-provider.js';
 
 /**
  * Research a topic when search returns no results
@@ -106,34 +107,153 @@ export async function researchRecipe(nodeId, nodeInfo, choiceHistory = []) {
  * @returns {Promise<string|null>} - New node ID or null
  */
 export async function researchMissingPath(fromNodeId, optionId, optionInfo) {
-    // Check if path exists
+    // Validate that the option actually exists before attempting research
+    // Use the data provider (which uses IndexedDB/API) instead of stale JSON file
+    // If optionInfo is provided and matches, trust it (it came from the UI which uses current data)
+    if (optionInfo && optionInfo.id === optionId && optionInfo.nodeId === fromNodeId) {
+        // Option info was provided from UI, so it exists - skip validation
+        console.debug('Option validated via optionInfo parameter');
+    } else {
+        // Validate by checking data sources
+        try {
+            let options = await indexedDbDataProvider.getOptionsForNode(fromNodeId);
+            let optionExists = options.some(opt => opt.id === optionId);
+            
+            if (!optionExists) {
+                // Try API as fallback (in case IndexedDB is stale)
+                try {
+                    const apiOptions = await apiClient.getOptionsForNode(fromNodeId);
+                    optionExists = apiOptions.some(opt => opt.id === optionId);
+                    if (optionExists) {
+                        // Option exists in API but not IndexedDB - cache might be stale
+                        console.warn('Option found in API but not IndexedDB - cache may be stale');
+                    } else {
+                        // Option doesn't exist in either source
+                        const fromNode = await indexedDbDataProvider.getNodeById(fromNodeId) || 
+                                         await apiClient.getNodeById(fromNodeId);
+                        const availableOptions = (options.length > 0 ? options : apiOptions)
+                            .map(opt => opt.id)
+                            .join(', ');
+                        throw new Error(
+                            `Cannot research path: Option "${optionId}" does not exist for node "${fromNodeId}" (${fromNode?.question || 'unknown'}). ` +
+                            `Available options: ${availableOptions || 'none'}. ` +
+                            `This indicates a data inconsistency. Please clear the cache and reload.`
+                        );
+                    }
+                } catch (apiError) {
+                    // API check failed - if we have optionInfo, trust it
+                    if (optionInfo && optionInfo.id === optionId) {
+                        console.warn('Option validation via API failed but optionInfo provided, continuing...');
+                    } else {
+                        const fromNode = await indexedDbDataProvider.getNodeById(fromNodeId) || 
+                                         await apiClient.getNodeById(fromNodeId).catch(() => null);
+                        throw new Error(
+                            `Cannot research path: Option "${optionId}" does not exist for node "${fromNodeId}" (${fromNode?.question || 'unknown'}). ` +
+                            `Please clear the cache and reload.`
+                        );
+                    }
+                }
+            }
+        } catch (validationError) {
+            // If validation fails but we have optionInfo, trust it and continue
+            if (optionInfo && optionInfo.id === optionId) {
+                console.warn('Option validation failed but optionInfo provided, continuing with research...', validationError);
+            } else {
+                throw validationError;
+            }
+        }
+    }
+    
+    // Check if path exists using API
+    try {
+        const nextNodeId = await apiClient.getNextNodeId(fromNodeId, optionId);
+        if (nextNodeId) {
+            console.log(`Path found via API: ${fromNodeId} -> ${nextNodeId} via ${optionId}`);
+            return nextNodeId;
+        }
+        // 404 is expected when path doesn't exist - continue to research
+        console.log(`Path not found via API (expected), will research new path for ${fromNodeId} -> ${optionId}`);
+    } catch (apiError) {
+        // API check failed (non-404 error), continue to research
+        console.warn('Path check via API failed, will research new path:', apiError);
+    }
+    
+    // Check cache as fallback
     const hasGap = await cache.isKnowledgeGap(`${fromNodeId}_${optionId}`, 'path');
     if (!hasGap) {
-        // Path exists
-        const data = await loadJsonData('data/seed-data.json');
-        const path = data.paths.find(
-            p => p.fromNodeId === fromNodeId && p.fromOptionId === optionId
-        );
-        return path ? path.toNodeId : null;
+        // Path might exist in JSON backup, check it
+        try {
+            const data = await loadJsonData('data/seed-data.json');
+            const path = data.paths.find(
+                p => p.fromNodeId === fromNodeId && p.fromOptionId === optionId
+            );
+            if (path) {
+                return path.toNodeId;
+            }
+        } catch (jsonError) {
+            // JSON check failed, continue to research
+            console.debug('Path check via JSON failed, will research new path:', jsonError);
+        }
     }
 
     // No path - research and create
+    console.log(`Starting research for missing path: ${fromNodeId} -> ${optionId} (${optionInfo?.label || 'unknown option'})`);
     try {
-        // Get context about the option
-        const data = await loadJsonData('data/seed-data.json');
-        const fromNode = data.nodes.find(n => n.id === fromNodeId);
+        // Get context about the option from data provider or API
+        let fromNode = await indexedDbDataProvider.getNodeById(fromNodeId);
+        if (!fromNode) {
+            fromNode = await apiClient.getNodeById(fromNodeId);
+        }
+        
+        if (!fromNode) {
+            throw new Error(`Source node ${fromNodeId} not found. Cannot research path.`);
+        }
+        
+        if (!optionInfo || !optionInfo.label) {
+            throw new Error(`Option info missing or incomplete. Cannot research path.`);
+        }
+        
+        console.log(`Generating new node for: ${fromNode.question} - ${optionInfo.label}`);
         
         // Generate a new node based on the option
         const newNode = await openai.generateNodeFromQuery(
-            `${fromNode?.question || 'Decision'} - ${optionInfo.label}`,
+            `${fromNode.question || 'Decision'} - ${optionInfo.label}`,
             { fromNode, option: optionInfo }
         );
+        
+        if (!newNode || !newNode.id) {
+            throw new Error('Failed to generate new node from OpenAI');
+        }
+        
+        console.log(`Generated new node: ${newNode.id} (${newNode.question})`);
 
         // Generate options for the new node
-        const options = await openai.generateNodeOptions(newNode.question, { 
-            parentNode: fromNode,
-            selectedOption: optionInfo
-        });
+        console.log(`Generating options for new node via OpenAI...`);
+        let options;
+        try {
+            const startTime = Date.now();
+            options = await openai.generateNodeOptions(newNode.question, { 
+                parentNode: fromNode,
+                selectedOption: optionInfo
+            });
+            const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+            console.log(`Generated ${options?.length || 0} options in ${duration}s`);
+            
+            if (!options || options.length === 0) {
+                throw new Error('OpenAI returned no options for the new node');
+            }
+        } catch (openaiError) {
+            console.error('Error generating options via OpenAI:', openaiError);
+            const errorMessage = openaiError.message || 'Unknown error';
+            if (errorMessage.includes('API key')) {
+                throw new Error('OpenAI API key not configured. Please set your API key using the "API Key" button.');
+            }
+            throw new Error(`Failed to generate options: ${errorMessage}`);
+        }
+
+        if (!options || options.length === 0) {
+            throw new Error('OpenAI returned no options for the new node');
+        }
 
         // Create option IDs
         const optionIds = options.map((opt, idx) => ({
@@ -141,6 +261,8 @@ export async function researchMissingPath(fromNodeId, optionId, optionInfo) {
             id: `${newNode.id}-opt-${idx + 1}`,
             nodeId: newNode.id
         }));
+        
+        console.log(`Created ${optionIds.length} option IDs:`, optionIds.map(o => o.id).join(', '));
 
         // Create path
         const path = {
@@ -149,37 +271,93 @@ export async function researchMissingPath(fromNodeId, optionId, optionInfo) {
             toNodeId: newNode.id
         };
 
-        // Save to JSON - validate nodes exist first
+        // Save to SQLite via API (source of truth)
         try {
-            const updatedData = await jsonUpdater.batchAdd({
-                nodes: [newNode],
-                options: optionIds,
-                paths: [path]
-            });
-
-            await jsonUpdater.saveJsonData(updatedData);
-            await forceReloadData();
+            console.log(`Creating node via API: ${newNode.id}`);
+            try {
+                await apiClient.createNode(newNode);
+                console.log(`Node ${newNode.id} created successfully`);
+            } catch (nodeError) {
+                // If node already exists (409), that's okay - continue
+                const errorMessage = nodeError.message || '';
+                if (errorMessage.includes('already exists') || errorMessage.includes('409')) {
+                    console.log(`Node ${newNode.id} already exists, continuing...`);
+                } else {
+                    console.error(`Failed to create node ${newNode.id}:`, nodeError);
+                    throw nodeError;
+                }
+            }
+            
+            console.log(`Creating ${optionIds.length} options via API`);
+            for (const option of optionIds) {
+                try {
+                    await apiClient.createOption(option);
+                } catch (optionError) {
+                    // If option already exists (409), that's okay - continue
+                    const errorMessage = optionError.message || '';
+                    if (errorMessage.includes('already exists') || errorMessage.includes('409')) {
+                        console.log(`Option ${option.id} already exists, skipping...`);
+                    } else {
+                        console.error(`Failed to create option ${option.id}:`, optionError);
+                        throw optionError;
+                    }
+                }
+            }
+            console.log(`All ${optionIds.length} options processed`);
+            
+            console.log(`Creating path via API: ${fromNodeId} -> ${newNode.id} via ${optionId}`);
+            try {
+                await apiClient.createPath(path);
+                console.log(`Path created successfully`);
+            } catch (pathError) {
+                // If path already exists (409), that's okay - we can use it
+                const errorMessage = pathError.message || '';
+                if (errorMessage.includes('already exists') || errorMessage.includes('409')) {
+                    console.log(`Path already exists, using existing path`);
+                } else {
+                    console.error(`Failed to create path:`, pathError);
+                    throw pathError;
+                }
+            }
+            
+            // Also update JSON for backup (optional)
+            try {
+                const updatedData = await jsonUpdater.batchAdd({
+                    nodes: [newNode],
+                    options: optionIds,
+                    paths: [path]
+                });
+                await jsonUpdater.saveJsonData(updatedData);
+            } catch (jsonError) {
+                // JSON update is optional - log but don't fail
+                console.warn('Failed to update JSON backup:', jsonError);
+            }
+            
+            // Invalidate cache and reload data
             cache.invalidateCache();
-
-            return newNode.id;
-        } catch (validationError) {
-            // If validation fails, the node/options might not have been added
-            // Try adding just the node and options first, then the path
-            console.warn('Batch add failed, trying sequential add:', validationError.message);
-            
-            const updatedData = await jsonUpdater.batchAdd({
-                nodes: [newNode],
-                options: optionIds
-            });
-            
-            // Now add the path after nodes/options are confirmed
-            const finalData = await jsonUpdater.addPath(path);
-            
-            await jsonUpdater.saveJsonData(finalData);
             await forceReloadData();
-            cache.invalidateCache();
-
+            
+            console.log(`Successfully created path: ${fromNodeId} -> ${newNode.id}`);
             return newNode.id;
+        } catch (apiError) {
+            console.error('Failed to create path via API:', apiError);
+            
+            // Fallback: try JSON (for backward compatibility)
+            try {
+                console.warn('Falling back to JSON update');
+                const updatedData = await jsonUpdater.batchAdd({
+                    nodes: [newNode],
+                    options: optionIds,
+                    paths: [path]
+                });
+                await jsonUpdater.saveJsonData(updatedData);
+                await forceReloadData();
+                cache.invalidateCache();
+                return newNode.id;
+            } catch (jsonError) {
+                console.error('Both API and JSON update failed:', jsonError);
+                throw new Error(`Failed to create path: ${apiError.message}. JSON fallback also failed: ${jsonError.message}`);
+            }
         }
     } catch (error) {
         console.error('Research missing path error:', error);

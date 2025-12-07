@@ -19,7 +19,6 @@ initDatabase();
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/data', express.static(path.join(__dirname, 'data')));
 app.use('/favicon.svg', express.static(path.join(__dirname, 'favicon.svg')));
@@ -31,10 +30,13 @@ app.set('views', path.join(__dirname, 'views'));
 // Import routes
 import wizardRoutes from './routes/wizard.js';
 import apiRoutes from './routes/api.js';
+import adminRoutes from './routes/admin.js';
 
 // Routes
 app.use('/', wizardRoutes);
 app.use('/api', apiRoutes);
+app.use('/admin', adminRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Start server with error handling
 const server = app.listen(PORT, () => {
