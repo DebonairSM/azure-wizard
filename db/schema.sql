@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     links TEXT, -- JSON array stored as text
     skillLevel TEXT,
     estimatedTime TEXT,
+    configSchema TEXT, -- JSON object stored as text - configuration options for this recipe
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (nodeId) REFERENCES nodes(id) ON DELETE CASCADE

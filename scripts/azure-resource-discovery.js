@@ -28,7 +28,8 @@ import {
     fetchRelaySkus,
     fetchContainerInstancesSkus,
     fetchAKSSkus,
-    fetchBatchSkus
+    fetchBatchSkus,
+    fetchAPIMSkus
 } from './azure-sku-fetchers.js';
 import { enrichOfferings, isAiEnrichmentAvailable } from './ai-enrichment.js';
 
@@ -50,7 +51,8 @@ const PRIORITY_SERVICES = {
         { name: 'ServiceBus', fetcher: fetchServiceBusSkus },
         { name: 'EventGrid', fetcher: fetchEventGridSkus },
         { name: 'EventHubs', fetcher: fetchEventHubsSkus },
-        { name: 'Relay', fetcher: fetchRelaySkus }
+        { name: 'Relay', fetcher: fetchRelaySkus },
+        { name: 'API Management', fetcher: fetchAPIMSkus }
     ]
 };
 
@@ -129,6 +131,7 @@ Available Services:
     - EventGrid
     - EventHubs
     - Relay
+    - API Management
 `);
 }
 
@@ -247,10 +250,10 @@ async function analyzeChanges(serviceName, offerings, db, options) {
                 description, purpose, pricingModel, pricingInfo, sla,
                 features, capabilities, limitations, useCases,
                 deploymentOptions, attributes, networking, scaling,
-                regions, documentationLinks,
+                regions, documentationLinks, metadata,
                 isPreview, isRecommended, isProductionReady,
                 createdAt, updatedAt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `);
 
         for (const offering of offerings) {
@@ -284,6 +287,7 @@ async function analyzeChanges(serviceName, offerings, db, options) {
                 offering.scaling ? JSON.stringify(offering.scaling) : null,
                 offering.regions ? JSON.stringify(offering.regions) : null,
                 offering.documentationLinks ? JSON.stringify(offering.documentationLinks) : null,
+                offering.metadata ? JSON.stringify(offering.metadata) : null,
                 offering.isPreview ? 1 : 0,
                 offering.isRecommended ? 1 : 0,
                 offering.isProductionReady ? 1 : 0,

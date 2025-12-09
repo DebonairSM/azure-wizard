@@ -8,11 +8,49 @@ import * as ui from './ui.js';
 let wizardEngine = null;
 let pendingMode = null;
 
+// Mode persistence key
+const MODE_STORAGE_KEY = 'azureWizardMode';
+
+/**
+ * Get saved mode from localStorage
+ * @returns {string} - 'study' or 'design' (default: 'design')
+ */
+function getSavedMode() {
+    try {
+        const saved = localStorage.getItem(MODE_STORAGE_KEY);
+        return saved === 'study' || saved === 'design' ? saved : 'design';
+    } catch (error) {
+        console.warn('[Wizard] Failed to get saved mode:', error);
+        return 'design';
+    }
+}
+
+/**
+ * Save mode to localStorage
+ * @param {string} mode - 'study' or 'design'
+ */
+function saveMode(mode) {
+    try {
+        if (mode === 'study' || mode === 'design') {
+            localStorage.setItem(MODE_STORAGE_KEY, mode);
+            console.log('[Wizard] Saved mode to localStorage:', mode);
+        }
+    } catch (error) {
+        console.warn('[Wizard] Failed to save mode:', error);
+    }
+}
+
 /**
  * Initialize the wizard
  */
 async function initialize() {
     try {
+        // Load saved mode from localStorage
+        const savedMode = getSavedMode();
+        if (!pendingMode) {
+            pendingMode = savedMode;
+        }
+        
         // Check if we have server-rendered data
         if (window.SERVER_DATA) {
             // Use server-rendered data directly - no need to show loading
@@ -31,9 +69,9 @@ async function initialize() {
             
             // Create wizard engine (will use IndexedDB as fallback)
             wizardEngine = new WizardEngine();
-            if (pendingMode) {
-                wizardEngine.setMode(pendingMode);
-            }
+            // Set mode from saved preference or pending mode
+            const modeToUse = pendingMode || savedMode;
+            wizardEngine.setMode(modeToUse);
             wizardEngine.currentNodeId = currentNode.id;
             
             // If no options from server, try loading from IndexedDB or API
@@ -50,6 +88,8 @@ async function initialize() {
                         console.log('[Wizard Init] No options in IndexedDB, loading from API...');
                         await loadData();
                         wizardEngine = new WizardEngine();
+                        // Restore mode after recreating engine
+                        wizardEngine.setMode(modeToUse);
                         wizardEngine.currentNodeId = currentNode.id;
                         options = await wizardEngine.getCurrentOptions();
                         console.log('[Wizard Init] Loaded', options.length, 'options from API');
@@ -66,6 +106,10 @@ async function initialize() {
             // Ensure content is visible (server already rendered it)
             document.getElementById('wizardContent').style.display = 'block';
             document.getElementById('loading').style.display = 'none';
+            
+            // Update mode buttons to reflect current mode
+            const currentMode = wizardEngine.getMode();
+            updateModeButtons(currentMode);
         } else {
             // Load data (will use cache if version matches)
             ui.showLoading();
@@ -75,14 +119,17 @@ async function initialize() {
             wizardEngine = new WizardEngine();
             await wizardEngine.initialize();
 
-            // Apply any mode chosen before initialization
-            if (pendingMode) {
-                wizardEngine.setMode(pendingMode);
-            }
+            // Apply any mode chosen before initialization, or use saved mode
+            const modeToUse = pendingMode || savedMode;
+            wizardEngine.setMode(modeToUse);
 
             // Render initial state
             await renderCurrentState();
             ui.hideLoading();
+            
+            // Update mode buttons to reflect current mode
+            const currentMode = wizardEngine.getMode();
+            updateModeButtons(currentMode);
         }
     } catch (error) {
         console.error('Initialization error:', error);
@@ -120,9 +167,11 @@ async function renderCurrentState() {
         const breadcrumbs = await wizardEngine.getBreadcrumbs();
         ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
 
-        // Show/hide back button
+        // Show back button only if not at root - check nodeType directly
         const backButton = document.getElementById('backButton');
-        backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
+        const isAtRoot = currentNode.nodeType === 'root';
+        backButton.style.display = isAtRoot ? 'none' : 'block';
+        backButton.disabled = false;
 
         // Check if terminal
         if (currentNode.nodeType === 'terminal') {
@@ -134,6 +183,13 @@ async function renderCurrentState() {
             } else {
                 ui.showError('Recipe not found for this node.');
             }
+        } else if (currentNode.nodeType === 'feature-selection') {
+            // Show feature selection form
+            ui.renderFeatureSelection(currentNode, handleFeatureSubmit);
+            
+            // Hide recipe display
+            document.getElementById('recipeDisplay').style.display = 'none';
+            document.getElementById('nodeDisplay').style.display = 'block';
         } else {
             // Show node with options
             const options = await wizardEngine.getCurrentOptions();
@@ -168,12 +224,20 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
     
     ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
     
+    // Show back button only if not at root - check nodeType directly
     const backButton = document.getElementById('backButton');
-    backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
+    const isAtRoot = currentNode.nodeType === 'root';
+    backButton.style.display = isAtRoot ? 'none' : 'block';
+    backButton.disabled = false;
     
     if (isTerminal && recipe) {
         const explanation = wizardEngine ? await wizardEngine.explainPath() : '';
         ui.renderRecipe(recipe, mode, explanation);
+    } else if (currentNode.nodeType === 'feature-selection') {
+        // Show feature selection form
+        ui.renderFeatureSelection(currentNode, handleFeatureSubmit);
+        document.getElementById('recipeDisplay').style.display = 'none';
+        document.getElementById('nodeDisplay').style.display = 'block';
     } else {
         // Ensure options is an array
         const optionsArray = Array.isArray(options) ? options : [];
@@ -181,6 +245,43 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
         ui.renderNode(currentNode, optionsArray, handleOptionSelect, mode);
         document.getElementById('recipeDisplay').style.display = 'none';
         document.getElementById('nodeDisplay').style.display = 'block';
+    }
+}
+
+/**
+ * Handle feature selection form submission
+ * @param {Array<string>} selectedFeatures
+ */
+async function handleFeatureSubmit(selectedFeatures) {
+    if (!wizardEngine) {
+        return;
+    }
+
+    // Store features in sessionStorage
+    sessionStorage.setItem('apim-ai-gateway-selected-features', JSON.stringify(selectedFeatures));
+
+    // If we have server-rendered data, navigate via server
+    if (window.SERVER_DATA) {
+        const currentNode = window.SERVER_DATA.currentNode;
+        // Navigate to recipe with features as query params
+        const featuresParam = encodeURIComponent(JSON.stringify(selectedFeatures));
+        window.location.href = `/wizard/navigate?fromNodeId=${currentNode.id}&optionId=feature-selection-submit&features=${featuresParam}`;
+        return;
+    }
+    
+    // Otherwise use client-side navigation
+    ui.showLoading();
+    ui.hideError();
+    
+    try {
+        // Navigate to recipe node using the special option ID
+        const result = await wizardEngine.selectOption('feature-selection-submit');
+        ui.hideLoading();
+        await renderCurrentState();
+    } catch (error) {
+        ui.hideLoading();
+        console.error('Feature selection error:', error);
+        ui.showError(`Error submitting features: ${error.message || 'Unknown error'}`);
     }
 }
 
@@ -220,6 +321,19 @@ async function handleOptionSelect(optionId) {
  * Handle back button click
  */
 async function handleBack() {
+    // If using server-side rendering, use server route to go back one step
+    if (window.SERVER_DATA) {
+        const currentNode = window.SERVER_DATA.currentNode;
+        if (currentNode && currentNode.nodeType === 'root') {
+            // Already at root, do nothing
+            return;
+        }
+        // Navigate back via server using prevNodeId from URL
+        const prevNodeId = window.SERVER_DATA.prevNodeId || '';
+        window.location.href = `/wizard/back?currentNodeId=${currentNode.id}&prevNodeId=${prevNodeId}`;
+        return;
+    }
+
     if (!wizardEngine) {
         return;
     }
@@ -355,9 +469,18 @@ async function handleExport() {
 function updateModeButtons(mode) {
     const designBtn = document.getElementById('designModeButton');
     const studyBtn = document.getElementById('studyModeButton');
+    console.log('[Wizard] updateModeButtons called with mode:', mode);
+    console.log('[Wizard] Buttons found:', { design: !!designBtn, study: !!studyBtn });
+    
     if (designBtn && studyBtn) {
         designBtn.classList.toggle('active', mode === 'design');
         studyBtn.classList.toggle('active', mode === 'study');
+        console.log('[Wizard] Updated button states:', {
+            design: designBtn.classList.contains('active'),
+            study: studyBtn.classList.contains('active')
+        });
+    } else {
+        console.warn('[Wizard] Could not update mode buttons - buttons not found');
     }
 }
 
@@ -365,20 +488,46 @@ function updateModeButtons(mode) {
  * Handle mode change
  * @param {string} mode
  */
-function handleModeChange(mode) {
+async function handleModeChange(mode) {
+    console.log('[Wizard] handleModeChange called with mode:', mode);
+    console.log('[Wizard] wizardEngine exists:', !!wizardEngine);
+    console.log('[Wizard] Has SERVER_DATA:', !!window.SERVER_DATA);
+    
     if (!wizardEngine) {
+        console.log('[Wizard] No wizardEngine yet, setting pendingMode to:', mode);
         pendingMode = mode;
+        saveMode(mode); // Persist mode even before engine is ready
         updateModeButtons(mode);
         return;
     }
 
+    console.log('[Wizard] Setting mode to:', mode);
     wizardEngine.setMode(mode);
+    saveMode(mode); // Persist mode to localStorage
     updateModeButtons(mode);
-    renderCurrentState();
+    
+    // If we have server-rendered data, re-render using that data with new mode
+    if (window.SERVER_DATA) {
+        console.log('[Wizard] Re-rendering with server data and new mode...');
+        const currentNode = window.SERVER_DATA.currentNode;
+        const options = window.SERVER_DATA.options || [];
+        const recipe = window.SERVER_DATA.recipe;
+        const isTerminal = window.SERVER_DATA.isTerminal;
+        
+        await renderNode(currentNode, options, recipe, isTerminal);
+    } else {
+        console.log('[Wizard] Rendering current state...');
+        await renderCurrentState();
+    }
+    console.log('[Wizard] Mode change complete');
 }
 
-// Set up event listeners
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Set up event listeners
+ */
+function setupEventListeners() {
+    console.log('[Wizard] Setting up event listeners');
+    
     // Back button
     const backButton = document.getElementById('backButton');
     if (backButton) {
@@ -388,11 +537,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mode buttons
     const designModeButton = document.getElementById('designModeButton');
     const studyModeButton = document.getElementById('studyModeButton');
+    
+    console.log('[Wizard] Mode buttons found:', {
+        design: !!designModeButton,
+        study: !!studyModeButton
+    });
+    
     if (designModeButton) {
-        designModeButton.addEventListener('click', () => handleModeChange('design'));
+        designModeButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('[Wizard] Design mode button clicked');
+            handleModeChange('design').catch(error => {
+                console.error('Error changing to design mode:', error);
+                ui.showError(`Error changing mode: ${error.message}`);
+            });
+        });
+        console.log('[Wizard] Design mode button event listener attached');
+    } else {
+        console.warn('[Wizard] Design mode button not found');
     }
+    
     if (studyModeButton) {
-        studyModeButton.addEventListener('click', () => handleModeChange('study'));
+        studyModeButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('[Wizard] Study mode button clicked');
+            handleModeChange('study').catch(error => {
+                console.error('Error changing to study mode:', error);
+                ui.showError(`Error changing mode: ${error.message}`);
+            });
+        });
+        console.log('[Wizard] Study mode button event listener attached');
+    } else {
+        console.warn('[Wizard] Study mode button not found');
     }
 
     // Export button
@@ -432,4 +610,13 @@ document.addEventListener('DOMContentLoaded', () => {
             loading.style.display = 'none';
         }
     });
-});
+}
+
+// Set up event listeners - handle both cases (DOM already ready or not)
+if (document.readyState === 'loading') {
+    // DOM is still loading, wait for DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', setupEventListeners);
+} else {
+    // DOM is already ready, run setup immediately
+    setupEventListeners();
+}

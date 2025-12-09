@@ -2267,3 +2267,1238 @@ export async function fetchBatchSkus(options) {
     console.log(`  ✓ Found ${offerings.length} Azure Batch SKUs`);
     return offerings;
 }
+
+// ============================================================================
+// API MANAGEMENT (APIM)
+// ============================================================================
+
+/**
+ * Fetch API Management SKUs/Tiers
+ * 
+ * Azure API Management SKU information sources:
+ * - Azure REST API: /subscriptions/{subscriptionId}/providers/Microsoft.ApiManagement/skus
+ * - Azure Pricing: https://azure.microsoft.com/pricing/details/api-management/
+ * - Documentation: https://learn.microsoft.com/azure/api-management/api-management-tiers
+ * - Azure CLI: az apim list-skus
+ */
+export async function fetchAPIMSkus(options) {
+    console.log('  Fetching API Management SKUs...');
+    
+    const offerings = [
+        {
+            id: 'apim-consumption',
+            skuName: 'Consumption',
+            skuTier: 'Consumption',
+            version: 'v1',
+            category: 'serverless',
+            description: 'Serverless, pay-as-you-go API Management tier ideal for prototyping, development, testing, and low-volume production scenarios',
+            purpose: 'Ideal for serverless and pay-as-you-go scenarios, suitable for prototyping, development, testing, and low-volume production',
+            pricingModel: 'pay-per-execution',
+            pricingInfo: {
+                model: 'Pay per API call execution',
+                freeTier: 'First 1 million executions free per month',
+                billing: 'Per-execution after free tier',
+                note: 'No infrastructure management required'
+            },
+            sla: null,
+            features: [
+                'Automatic scaling based on demand',
+                'Pay only for API calls executed',
+                'No infrastructure management',
+                'Basic security (authentication, authorization, rate limiting, IP filtering)',
+                'Integrated developer portal',
+                'Analytics and monitoring',
+                'API versioning support',
+                'Subscription and key management'
+            ],
+            capabilities: [
+                'Automatic scaling from zero to many instances',
+                'Up to 5 gateways per subscription',
+                '500 subscriptions per gateway',
+                '50 APIs per gateway',
+                '1,000 API operations per gateway',
+                'Maximum request duration of 30 seconds',
+                'Maximum policy length of 4 KB',
+                'Developer portal included',
+                'Basic analytics'
+            ],
+            limitations: [
+                'No SLA guarantee',
+                'Limited to 5 gateways per subscription',
+                '500 subscriptions per gateway limit',
+                '50 APIs per gateway limit',
+                '1,000 API operations per gateway limit',
+                'Maximum request duration of 30 seconds',
+                'Maximum policy length of 4 KB',
+                'No VNET integration',
+                'No private endpoints',
+                'No self-hosted gateway',
+                'No multi-region deployments'
+            ],
+            useCases: [
+                'Prototyping and development',
+                'Testing and evaluation',
+                'Low-volume production APIs',
+                'Serverless architectures',
+                'Pay-as-you-go scenarios',
+                'Event-driven API scenarios',
+                'Microservices API gateway'
+            ],
+            attributes: {
+                maxGateways: 5,
+                maxSubscriptionsPerGateway: 500,
+                maxApisPerGateway: 50,
+                maxOperationsPerGateway: 1000,
+                maxRequestDurationSeconds: 30,
+                maxPolicyLengthKB: 4,
+                vnetIntegration: false,
+                privateEndpoints: false,
+                selfHostedGateway: false,
+                multiRegion: false,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: false,
+                mcpSupport: false,
+                websocketSupport: false,
+                cacheSize: null,
+                maxScaleUnits: null,
+                scalingType: 'automatic'
+            },
+            networking: {
+                vnetIntegration: false,
+                privateEndpoints: false,
+                publicEndpoint: true,
+                hybridConnections: false
+            },
+            scaling: {
+                type: 'automatic',
+                minInstances: 0,
+                maxInstances: null,
+                scaleOutUnits: null,
+                autoScale: true
+            },
+            regions: ['All Azure regions'],
+            documentationLinks: [
+                { title: 'Consumption Tier Documentation', url: 'https://learn.microsoft.com/azure/api-management/api-management-consumption-tier' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' },
+                { title: 'API Management Overview', url: 'https://learn.microsoft.com/azure/api-management/api-management-key-concepts' }
+            ],
+            isPreview: false,
+            isRecommended: true,
+            isProductionReady: false
+        },
+        {
+            id: 'apim-developer',
+            skuName: 'Developer',
+            skuTier: 'Developer',
+            version: 'v1',
+            category: 'development',
+            description: 'Non-production tier designed for development, testing, and evaluation with all features for building and experimenting with APIs',
+            purpose: 'Designed for non-production use cases such as development, testing, and evaluation',
+            pricingModel: 'fixed-monthly',
+            pricingInfo: {
+                model: 'Fixed monthly rate',
+                note: 'Single scale-out unit only, no SLA',
+                billing: 'Monthly flat fee'
+            },
+            sla: null,
+            features: [
+                'All API Management features',
+                'Integrated developer portal',
+                'Full policy support',
+                'API versioning',
+                'Subscriptions and keys',
+                'Analytics',
+                'Single scale-out unit'
+            ],
+            capabilities: [
+                'Full feature set for development',
+                'Developer portal included',
+                'Policy configuration',
+                'API versioning support',
+                'Subscription management',
+                'All standard policies',
+                'Analytics and monitoring'
+            ],
+            limitations: [
+                'No SLA guarantee',
+                'Limited throughput (single unit)',
+                'Single scale-out unit only',
+                'Not suitable for live/production environments',
+                'No VNET integration',
+                'No private endpoints',
+                'No multi-region deployments'
+            ],
+            useCases: [
+                'Development and testing',
+                'Evaluation and proof of concept',
+                'Learning and experimentation',
+                'Non-production API management',
+                'Team development environments'
+            ],
+            attributes: {
+                maxGateways: 1,
+                maxSubscriptionsPerGateway: null,
+                maxApisPerGateway: null,
+                maxOperationsPerGateway: null,
+                maxRequestDurationSeconds: null,
+                maxPolicyLengthKB: null,
+                vnetIntegration: false,
+                privateEndpoints: false,
+                selfHostedGateway: false,
+                multiRegion: false,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: false,
+                mcpSupport: false,
+                websocketSupport: false,
+                cacheSize: null,
+                maxScaleUnits: 1,
+                scalingType: 'fixed'
+            },
+            networking: {
+                vnetIntegration: false,
+                privateEndpoints: false,
+                publicEndpoint: true,
+                hybridConnections: false
+            },
+            scaling: {
+                type: 'fixed',
+                minInstances: 1,
+                maxInstances: 1,
+                scaleOutUnits: 1,
+                autoScale: false
+            },
+            regions: ['All Azure regions'],
+            documentationLinks: [
+                { title: 'Developer Tier Documentation', url: 'https://learn.microsoft.com/azure/api-management/api-management-tiers' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' }
+            ],
+            isPreview: false,
+            isRecommended: false,
+            isProductionReady: false
+        },
+        {
+            id: 'apim-basic',
+            skuName: 'Basic',
+            skuTier: 'Basic',
+            version: 'v1',
+            category: 'standard',
+            description: 'Entry-level production tier with standard API gateway functionality, suitable for entry-level production use cases',
+            purpose: 'Suitable for entry-level production use cases with SLA guarantee',
+            pricingModel: 'per-unit',
+            pricingInfo: {
+                model: 'Fixed monthly rate per unit',
+                units: 'Up to 2 scale-out units',
+                billing: 'Monthly per unit',
+                note: '50 MB cache per unit'
+            },
+            sla: '99.9%',
+            features: [
+                'Standard API gateway functionality',
+                '50 MB cache per unit',
+                'Up to 2 scale-out units',
+                '99.9% SLA',
+                'Developer portal',
+                'Analytics and monitoring',
+                'Full policy support',
+                'API versioning'
+            ],
+            capabilities: [
+                'Production-ready with SLA',
+                'Basic scaling (up to 2 units)',
+                'Caching support (50 MB per unit)',
+                'Developer portal included',
+                'Analytics and monitoring',
+                'All standard policies',
+                'Subscription management'
+            ],
+            limitations: [
+                'No Virtual Network (VNET) support',
+                'Limited scalability (max 2 units)',
+                'Smaller cache size (50 MB per unit)',
+                'No multi-region deployments',
+                'No private endpoints',
+                'No self-hosted gateway'
+            ],
+            useCases: [
+                'Entry-level production APIs',
+                'Small to medium workloads',
+                'Cost-conscious production deployments',
+                'Single-region deployments',
+                'Standard API gateway needs'
+            ],
+            attributes: {
+                maxGateways: null,
+                maxSubscriptionsPerGateway: null,
+                maxApisPerGateway: null,
+                maxOperationsPerGateway: null,
+                maxRequestDurationSeconds: null,
+                maxPolicyLengthKB: null,
+                vnetIntegration: false,
+                privateEndpoints: false,
+                selfHostedGateway: false,
+                multiRegion: false,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: false,
+                mcpSupport: false,
+                websocketSupport: false,
+                cacheSize: '50 MB',
+                maxScaleUnits: 2,
+                scalingType: 'manual'
+            },
+            networking: {
+                vnetIntegration: false,
+                privateEndpoints: false,
+                publicEndpoint: true,
+                hybridConnections: false
+            },
+            scaling: {
+                type: 'manual',
+                minInstances: 1,
+                maxInstances: 2,
+                scaleOutUnits: [1, 2],
+                autoScale: false
+            },
+            regions: ['All Azure regions'],
+            documentationLinks: [
+                { title: 'Basic Tier Documentation', url: 'https://learn.microsoft.com/azure/api-management/api-management-tiers' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' }
+            ],
+            isPreview: false,
+            isRecommended: false,
+            isProductionReady: true
+        },
+        {
+            id: 'apim-standard',
+            skuName: 'Standard',
+            skuTier: 'Standard',
+            version: 'v1',
+            category: 'standard',
+            description: 'Balanced price and performance tier for growing teams and business-critical APIs with VNET integration',
+            purpose: 'Balances price and performance for growing teams and business-critical APIs',
+            pricingModel: 'per-unit',
+            pricingInfo: {
+                model: 'Fixed monthly rate per unit',
+                units: 'Up to 4 scale-out units',
+                billing: 'Monthly per unit',
+                note: '1 GB cache per unit'
+            },
+            sla: '99.9%',
+            features: [
+                '1 GB cache per unit',
+                'Up to 4 scale-out units',
+                '99.9% SLA',
+                'VNET integration for secure, private connectivity',
+                'Multi-region deployments',
+                'Developer portal',
+                'Analytics and monitoring',
+                'Full policy support',
+                'API versioning'
+            ],
+            capabilities: [
+                'VNET integration for secure backends',
+                'Multi-region support',
+                'Enhanced caching (1 GB per unit)',
+                'Better scalability (up to 4 units)',
+                'Developer portal included',
+                'Analytics and monitoring',
+                'All standard and advanced policies',
+                'Subscription management'
+            ],
+            limitations: [
+                'Limited scalability compared to Premium tier',
+                'No self-hosted gateway',
+                'Limited to 4 scale-out units',
+                'No private endpoints',
+                'Smaller cache than Premium tier'
+            ],
+            useCases: [
+                'Business-critical APIs',
+                'Growing teams and organizations',
+                'Multi-region deployments',
+                'VNET integration requirements',
+                'Medium to high-volume production',
+                'Enterprise API programs'
+            ],
+            attributes: {
+                maxGateways: null,
+                maxSubscriptionsPerGateway: null,
+                maxApisPerGateway: null,
+                maxOperationsPerGateway: null,
+                maxRequestDurationSeconds: null,
+                maxPolicyLengthKB: null,
+                vnetIntegration: true,
+                privateEndpoints: false,
+                selfHostedGateway: false,
+                multiRegion: true,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: false,
+                mcpSupport: false,
+                websocketSupport: false,
+                cacheSize: '1 GB',
+                maxScaleUnits: 4,
+                scalingType: 'manual'
+            },
+            networking: {
+                vnetIntegration: true,
+                privateEndpoints: false,
+                publicEndpoint: true,
+                hybridConnections: false
+            },
+            scaling: {
+                type: 'manual',
+                minInstances: 1,
+                maxInstances: 4,
+                scaleOutUnits: [1, 2, 3, 4],
+                autoScale: false
+            },
+            regions: ['All Azure regions'],
+            documentationLinks: [
+                { title: 'Standard Tier Documentation', url: 'https://learn.microsoft.com/azure/api-management/api-management-tiers' },
+                { title: 'VNET Integration', url: 'https://learn.microsoft.com/azure/api-management/api-management-using-with-vnet' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' }
+            ],
+            isPreview: false,
+            isRecommended: true,
+            isProductionReady: true
+        },
+        {
+            id: 'apim-premium',
+            skuName: 'Premium',
+            skuTier: 'Premium',
+            version: 'v1',
+            category: 'premium',
+            description: 'Enterprise-scale tier with stringent reliability and compliance needs, supporting multi-region active-active deployments',
+            purpose: 'Geared toward enterprise-scale deployments with stringent reliability and compliance needs',
+            pricingModel: 'per-unit',
+            pricingInfo: {
+                model: 'Fixed monthly rate per unit',
+                units: 'Up to 10 scale-out units per region (additional units available upon request)',
+                billing: 'Monthly per unit',
+                note: '5 GB cache per unit'
+            },
+            sla: '99.95%',
+            features: [
+                '5 GB cache per unit',
+                'Up to 10 scale-out units per region',
+                '99.95% SLA',
+                'Multi-region active-active deployments',
+                'Advanced VNET injection',
+                'Self-hosted gateway for hybrid/multi-cloud',
+                'Developer portal',
+                'Analytics and monitoring',
+                'Full policy support',
+                'API versioning',
+                'Private endpoints support'
+            ],
+            capabilities: [
+                'Highest scalability (up to 10 units per region)',
+                'Multi-region active-active deployments',
+                'Advanced VNET injection',
+                'Self-hosted gateway for hybrid scenarios',
+                'Largest cache size (5 GB per unit)',
+                'Developer portal included',
+                'Analytics and monitoring',
+                'All standard and advanced policies',
+                'Private endpoints support',
+                'Enterprise-grade features'
+            ],
+            limitations: [
+                'Higher cost than Standard tier',
+                'More complex setup and configuration',
+                'Requires capacity planning'
+            ],
+            useCases: [
+                'Enterprise-scale deployments',
+                'High availability requirements',
+                'Multi-region active-active scenarios',
+                'Hybrid and multi-cloud strategies',
+                'Compliance requirements',
+                'Mission-critical APIs',
+                'Large-scale API programs'
+            ],
+            attributes: {
+                maxGateways: null,
+                maxSubscriptionsPerGateway: null,
+                maxApisPerGateway: null,
+                maxOperationsPerGateway: null,
+                maxRequestDurationSeconds: null,
+                maxPolicyLengthKB: null,
+                vnetIntegration: true,
+                privateEndpoints: true,
+                selfHostedGateway: true,
+                multiRegion: true,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: false,
+                mcpSupport: false,
+                websocketSupport: false,
+                cacheSize: '5 GB',
+                maxScaleUnits: 10,
+                scalingType: 'manual'
+            },
+            networking: {
+                vnetIntegration: true,
+                privateEndpoints: true,
+                publicEndpoint: true,
+                hybridConnections: true,
+                vnetInjection: true
+            },
+            scaling: {
+                type: 'manual',
+                minInstances: 1,
+                maxInstances: 10,
+                scaleOutUnits: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                autoScale: false
+            },
+            regions: ['All Azure regions'],
+            documentationLinks: [
+                { title: 'Premium Tier Documentation', url: 'https://learn.microsoft.com/azure/api-management/api-management-tiers' },
+                { title: 'Self-hosted Gateway', url: 'https://learn.microsoft.com/azure/api-management/self-hosted-gateway-overview' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' }
+            ],
+            isPreview: false,
+            isRecommended: true,
+            isProductionReady: true
+        },
+        {
+            id: 'apim-basic-v2',
+            skuName: 'Basic v2',
+            skuTier: 'BasicV2',
+            version: 'v2',
+            category: 'v2',
+            description: 'v2 architecture tier for small teams and projects with faster deployment and scaling',
+            purpose: 'Intended for small teams and projects with improved architecture',
+            pricingModel: 'per-unit',
+            pricingInfo: {
+                model: 'Fixed monthly rate per unit',
+                note: 'Preview pricing may change upon general availability',
+                billing: 'Monthly per unit'
+            },
+            sla: '99.95%',
+            features: [
+                'Faster deployment times (minutes instead of hours)',
+                '99.95% SLA',
+                'Integrated developer portal',
+                'Improved architecture',
+                'Enhanced performance',
+                'All standard API Management features',
+                'Analytics and monitoring'
+            ],
+            capabilities: [
+                'Faster deployment (minutes vs hours)',
+                'Improved architecture',
+                'Better performance characteristics',
+                'Production SLA (99.95%)',
+                'Developer portal included',
+                'Analytics and monitoring',
+                'All standard policies'
+            ],
+            limitations: [
+                'Public IP address (Private Link required for secure inbound)',
+                'Currently in public preview',
+                'Not recommended for production use until GA',
+                'Features and pricing may change',
+                'No VNET integration',
+                'No private endpoints',
+                'No multi-region deployments'
+            ],
+            useCases: [
+                'Small teams and projects',
+                'Projects requiring fast deployment',
+                'Testing v2 architecture',
+                'Evaluation of new architecture',
+                'Non-production workloads'
+            ],
+            attributes: {
+                maxGateways: null,
+                maxSubscriptionsPerGateway: null,
+                maxApisPerGateway: null,
+                maxOperationsPerGateway: null,
+                maxRequestDurationSeconds: null,
+                maxPolicyLengthKB: null,
+                vnetIntegration: false,
+                privateEndpoints: false,
+                selfHostedGateway: false,
+                multiRegion: false,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: false,
+                mcpSupport: false,
+                websocketSupport: false,
+                cacheSize: null,
+                maxScaleUnits: null,
+                scalingType: 'manual',
+                deploymentTimeMinutes: true
+            },
+            networking: {
+                vnetIntegration: false,
+                privateEndpoints: false,
+                publicEndpoint: true,
+                hybridConnections: false,
+                privateLink: true
+            },
+            scaling: {
+                type: 'manual',
+                minInstances: 1,
+                maxInstances: null,
+                scaleOutUnits: null,
+                autoScale: false
+            },
+            regions: ['Selected Azure regions'],
+            documentationLinks: [
+                { title: 'API Management v2', url: 'https://learn.microsoft.com/azure/api-management/api-management-v2' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' }
+            ],
+            isPreview: true,
+            isRecommended: false,
+            isProductionReady: false
+        },
+        {
+            id: 'apim-standard-v2',
+            skuName: 'Standard v2',
+            skuTier: 'StandardV2',
+            version: 'v2',
+            category: 'v2',
+            description: 'v2 architecture tier with VNET integration for secure outbound traffic to backends in virtual networks or on-premises',
+            purpose: 'Supports VNET integration for secure outbound traffic',
+            pricingModel: 'per-unit',
+            pricingInfo: {
+                model: 'Fixed monthly rate per unit',
+                note: 'Preview pricing may change upon general availability',
+                billing: 'Monthly per unit'
+            },
+            sla: '99.95%',
+            features: [
+                'Faster deployment times',
+                'VNET integration for secure outbound traffic',
+                '99.95% SLA',
+                'Integrated developer portal',
+                'Connection to backends in VNETs or on-premises',
+                'Improved architecture',
+                'MCP (Model Context Protocol) support for AI agent integration',
+                'REST API exposure as MCP tools for AI agents',
+                'External MCP-compliant server integration',
+                'WebSocket support',
+                'All standard API Management features'
+            ],
+            capabilities: [
+                'VNET integration (outbound)',
+                'Faster deployment',
+                'Secure backend connectivity',
+                'Improved architecture',
+                'MCP (Model Context Protocol) support for AI agents',
+                'Tool discovery and invocation via MCP',
+                'REST API exposure as MCP tools',
+                'External MCP server integration',
+                'Context-aware tool invocations',
+                'WebSocket support for real-time APIs',
+                'Production SLA (99.95%)',
+                'Developer portal included',
+                'Analytics and monitoring'
+            ],
+            limitations: [
+                'Public IP address (Private Link required for secure inbound)',
+                'Currently in public preview',
+                'Not recommended for production use until GA',
+                'Features and pricing may change',
+                'No private endpoints',
+                'No multi-region deployments',
+                'No self-hosted gateway'
+            ],
+            useCases: [
+                'VNET integration requirements',
+                'Secure backend connectivity',
+                'Testing v2 architecture',
+                'MCP-compliant server integration',
+                'WebSocket applications',
+                'Real-time API requirements'
+            ],
+            attributes: {
+                maxGateways: null,
+                maxSubscriptionsPerGateway: null,
+                maxApisPerGateway: null,
+                maxOperationsPerGateway: null,
+                maxRequestDurationSeconds: null,
+                maxPolicyLengthKB: null,
+                vnetIntegration: true,
+                privateEndpoints: false,
+                selfHostedGateway: false,
+                multiRegion: false,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: false,
+                mcpSupport: true,
+                websocketSupport: true,
+                cacheSize: null,
+                maxScaleUnits: null,
+                scalingType: 'manual',
+                deploymentTimeMinutes: true
+            },
+            metadata: {
+                mcpSupport: {
+                    enabled: true,
+                    protocolVersion: '1.0',
+                    features: {
+                        toolDiscovery: {
+                            enabled: true,
+                            description: 'Expose REST APIs as tools discoverable by AI agents via MCP'
+                        },
+                        toolInvocation: {
+                            enabled: true,
+                            authentication: true,
+                            authorization: true,
+                            description: 'Allow AI agents to invoke APIs as tools with proper authentication'
+                        },
+                        contextAwareness: {
+                            enabled: true,
+                            sessionManagement: true,
+                            description: 'Maintain context across multiple tool invocations'
+                        },
+                        externalMcpServers: {
+                            enabled: true,
+                            integration: true,
+                            description: 'Integrate with external MCP-compliant servers'
+                        }
+                    },
+                    useCases: [
+                        'AI agent tool integration',
+                        'REST API exposure as MCP tools',
+                        'Multi-agent workflows',
+                        'Context-aware AI applications'
+                    ],
+                    limitations: [
+                        'MCP support is available but full AI Gateway features require Premium v2',
+                        'Token-based rate limiting and semantic caching not available in Standard v2',
+                        'Content safety policies are limited compared to Premium v2'
+                    ]
+                }
+            },
+            networking: {
+                vnetIntegration: true,
+                privateEndpoints: false,
+                publicEndpoint: true,
+                hybridConnections: false,
+                privateLink: true
+            },
+            scaling: {
+                type: 'manual',
+                minInstances: 1,
+                maxInstances: null,
+                scaleOutUnits: null,
+                autoScale: false
+            },
+            regions: ['Selected Azure regions'],
+            documentationLinks: [
+                { title: 'API Management v2', url: 'https://learn.microsoft.com/azure/api-management/api-management-v2' },
+                { title: 'MCP Support in v2', url: 'https://techcommunity.microsoft.com/blog/integrationsonazureblog/%F0%9F%9A%80-new-in-azure-api-management-mcp-in-v2-skus--external-mcp-compliant-server-sup/4440294' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' }
+            ],
+            isPreview: true,
+            isRecommended: false,
+            isProductionReady: false
+        },
+        {
+            id: 'apim-premium-v2',
+            skuName: 'Premium v2',
+            skuTier: 'PremiumV2',
+            version: 'v2',
+            category: 'v2',
+            description: 'Enterprise-wide API programs requiring high availability and performance with comprehensive feature set and unlimited included API calls',
+            purpose: 'Designed for enterprise-wide API programs requiring high availability and performance',
+            pricingModel: 'per-unit',
+            pricingInfo: {
+                model: 'Fixed monthly rate per unit',
+                note: 'Unlimited included API calls, preview pricing may change upon general availability',
+                billing: 'Monthly per unit with unlimited API calls'
+            },
+            sla: '99.95%',
+            features: [
+                'Superior capacity and highest entity limits',
+                'Unlimited included API calls',
+                'Comprehensive feature set',
+                'New architecture eliminating management traffic from customer VNET',
+                'Choice between VNET injection or VNET integration',
+                'Enhanced security and simplified setup',
+                'AI Gateway with comprehensive LLM management capabilities',
+                'Token-based rate limiting and cost control',
+                'Semantic caching for cost optimization (30-70% cost reduction)',
+                'Content safety and prompt injection protection',
+                'PII detection and sensitive data filtering',
+                'Prompt management with versioning and templates',
+                'Multi-model routing and load balancing',
+                'Token tracking and usage analytics',
+                'MCP (Model Context Protocol) support',
+                'AI agent tool discovery and invocation',
+                'Integration with Microsoft Foundry',
+                'Support for Azure OpenAI, OpenAI, and custom LLM providers',
+                'WebSocket support',
+                'Real-time API support',
+                'Faster deployment times',
+                '99.95% SLA',
+                'Multi-region deployments'
+            ],
+            capabilities: [
+                'Highest capacity and entity limits',
+                'Unlimited API calls included',
+                'VNET injection or integration',
+                'AI Gateway with enterprise-grade LLM governance',
+                'Token limits (request, response, total) with hard enforcement',
+                'Semantic caching with embedding-based similarity matching',
+                'Content safety: prompt injection protection, content moderation, PII detection',
+                'Token-based, request-based, and cost-based rate limiting',
+                'Prompt management: versioning, templates, decorators',
+                'Multi-model routing with load balancing and failover',
+                'Comprehensive observability: token tracking, latency monitoring, cost attribution',
+                'MCP support for AI agent tool discovery and invocation',
+                'External MCP-compliant server integration',
+                'Microsoft Foundry integration',
+                'Support for multiple LLM providers (Azure OpenAI, OpenAI, custom)',
+                'Self-hosted model support (Ollama, vLLM)',
+                'WebSocket support for real-time APIs',
+                'Multi-region active-active deployments',
+                'Enterprise security: OAuth 2.1, Entra ID, RBAC, audit logging',
+                'IP filtering and geographic restrictions',
+                'Improved architecture',
+                'Faster deployment',
+                'Production SLA (99.95%)',
+                'Developer portal included',
+                'Advanced analytics and monitoring'
+            ],
+            limitations: [
+                'Currently in public preview',
+                'Features and pricing may change upon general availability',
+                'Not recommended for production use until GA',
+                'Requires evaluation before production deployment'
+            ],
+            useCases: [
+                'Enterprise-wide API programs',
+                'High availability requirements',
+                'AI Gateway for LLM API management and governance',
+                'OpenAI and Azure OpenAI service management',
+                'AI agent orchestration and tool integration',
+                'Semantic caching for cost-optimized LLM deployments',
+                'Content safety and compliance for AI applications',
+                'Token-based cost control and budget management',
+                'Multi-model routing and load balancing',
+                'Prompt management and versioning',
+                'MCP-compliant server integration',
+                'AI application security and PII protection',
+                'Real-time API requirements',
+                'WebSocket applications',
+                'Multi-region deployments',
+                'High-volume AI API scenarios',
+                'Mission-critical AI APIs',
+                'Microsoft Foundry AI workloads',
+                'Compliance-sensitive AI deployments (GDPR, HIPAA)'
+            ],
+            attributes: {
+                maxGateways: null,
+                maxSubscriptionsPerGateway: null,
+                maxApisPerGateway: null,
+                maxOperationsPerGateway: null,
+                maxRequestDurationSeconds: null,
+                maxPolicyLengthKB: null,
+                vnetIntegration: true,
+                privateEndpoints: true,
+                selfHostedGateway: false,
+                multiRegion: true,
+                developerPortal: true,
+                analytics: true,
+                aiGateway: true,
+                mcpSupport: true,
+                websocketSupport: true,
+                cacheSize: null,
+                maxScaleUnits: null,
+                scalingType: 'manual',
+                deploymentTimeMinutes: true,
+                unlimitedApiCalls: true
+            },
+            metadata: {
+                aiGatewayDetails: {
+                    enabled: true,
+                    integration: {
+                        microsoftFoundry: true,
+                        azureOpenAI: true,
+                        openAI: true,
+                        anthropic: false,
+                        customLLMProviders: true,
+                        selfHostedModels: true,
+                        frameworks: ['Ollama', 'vLLM', 'Custom']
+                    },
+                    policies: {
+                        tokenLimits: {
+                            requestTokens: {
+                                enabled: true,
+                                configurable: true,
+                                defaultLimit: 'configurable',
+                                perProvider: true,
+                                enforcement: 'hard-limit',
+                                description: 'Enforce maximum input token limits per request to control costs and prevent abuse'
+                            },
+                            responseTokens: {
+                                enabled: true,
+                                configurable: true,
+                                defaultLimit: 'configurable',
+                                perProvider: true,
+                                enforcement: 'hard-limit',
+                                description: 'Limit maximum output tokens to control response sizes and costs'
+                            },
+                            totalTokens: {
+                                enabled: true,
+                                configurable: true,
+                                perRequest: true,
+                                perDay: true,
+                                perMonth: true,
+                                description: 'Total token limits per request, day, or month for cost control'
+                            }
+                        },
+                        contentSafety: {
+                            promptInjectionProtection: {
+                                enabled: true,
+                                detectionMethods: ['pattern-matching', 'behavioral-analysis', 'heuristic-detection'],
+                                blocking: true,
+                                logging: true,
+                                configurable: true,
+                                description: 'Detect and block prompt injection attacks, including jailbreak attempts'
+                            },
+                            contentModeration: {
+                                enabled: true,
+                                categories: ['violence', 'hate', 'self-harm', 'sexual', 'terrorism'],
+                                severity: 'configurable',
+                                action: ['block', 'log', 'flag'],
+                                description: 'Content moderation for both input prompts and AI-generated responses'
+                            },
+                            piiDetection: {
+                                enabled: true,
+                                types: ['SSN', 'Credit Card', 'Email', 'Phone', 'IP Address', 'Custom Regex'],
+                                masking: true,
+                                redaction: true,
+                                logging: true,
+                                description: 'Detect and protect personally identifiable information in requests and responses'
+                            },
+                            sensitiveDataFiltering: {
+                                enabled: true,
+                                customPatterns: true,
+                                compliance: ['GDPR', 'HIPAA', 'PCI-DSS', 'Custom'],
+                                description: 'Filter sensitive data to prevent exposure in AI model interactions'
+                            },
+                            digitalWatermarking: {
+                                enabled: false,
+                                supported: false,
+                                description: 'Watermark AI-generated content for traceability (future feature)'
+                            }
+                        },
+                        semanticCaching: {
+                            enabled: true,
+                            cacheType: 'embedding-based',
+                            similarityThreshold: {
+                                configurable: true,
+                                default: 0.85,
+                                range: [0.0, 1.0],
+                                description: 'Semantic similarity threshold for cache hits'
+                            },
+                            embeddingModel: {
+                                supported: ['text-embedding-ada-002', 'text-embedding-3-small', 'text-embedding-3-large', 'Custom'],
+                                default: 'text-embedding-ada-002',
+                                customModels: true
+                            },
+                            ttl: {
+                                configurable: true,
+                                default: 3600,
+                                unit: 'seconds',
+                                maxTtl: 86400,
+                                description: 'Time-to-live for cached responses'
+                            },
+                            cacheKeyGeneration: {
+                                method: 'semantic-similarity',
+                                includeContext: true,
+                                includeParameters: true,
+                                customKeyLogic: true
+                            },
+                            costOptimization: {
+                                enabled: true,
+                                reductionEstimate: '30-70%',
+                                description: 'Reduce LLM API costs by serving semantically similar cached responses'
+                            },
+                            performanceImprovement: {
+                                latencyReduction: 'significant',
+                                throughputIncrease: true,
+                                description: 'Improve response times for similar queries'
+                            }
+                        },
+                        rateLimiting: {
+                            tokenBased: {
+                                enabled: true,
+                                perUser: true,
+                                perSubscription: true,
+                                perAPI: true,
+                                perProvider: true,
+                                timeWindows: ['per-minute', 'per-hour', 'per-day', 'per-month'],
+                                description: 'Rate limiting based on token consumption rather than request count'
+                            },
+                            requestBased: {
+                                enabled: true,
+                                traditionalRateLimiting: true,
+                                perEndpoint: true,
+                                description: 'Traditional request-based rate limiting for AI endpoints'
+                            },
+                            costBased: {
+                                enabled: true,
+                                budgetEnforcement: true,
+                                alertThresholds: true,
+                                automaticThrottling: true,
+                                description: 'Rate limiting based on cost budgets to prevent overspending'
+                            },
+                            adaptiveRateLimiting: {
+                                enabled: true,
+                                basedOnModelPerformance: true,
+                                basedOnBackendHealth: true,
+                                description: 'Dynamically adjust rate limits based on model performance and availability'
+                            }
+                        },
+                        promptManagement: {
+                            promptVersioning: {
+                                enabled: true,
+                                versionControl: true,
+                                rollback: true,
+                                a_bTesting: true,
+                                description: 'Version control for prompts with rollback and A/B testing capabilities'
+                            },
+                            promptTemplates: {
+                                enabled: true,
+                                templateLibrary: true,
+                                variables: true,
+                                inheritance: true,
+                                description: 'Create, store, and reuse prompt templates with variable substitution'
+                            },
+                            promptDecorators: {
+                                enabled: true,
+                                standardization: true,
+                                compliance: true,
+                                description: 'Apply decorators to standardize prompts and ensure compliance'
+                            },
+                            promptInjection: {
+                                enabled: true,
+                                prevention: true,
+                                detection: true,
+                                description: 'Prevent unauthorized prompt modifications and injection attacks'
+                            }
+                        },
+                        modelRouting: {
+                            multiModelRouting: {
+                                enabled: true,
+                                loadBalancing: true,
+                                failover: true,
+                                modelSelection: ['round-robin', 'least-cost', 'performance-based', 'custom'],
+                                description: 'Route requests across multiple models for load balancing and failover'
+                            },
+                            modelVersioning: {
+                                enabled: true,
+                                canaryDeployments: true,
+                                gradualRollout: true,
+                                description: 'Manage model versions with canary deployments and gradual rollouts'
+                            },
+                            costOptimization: {
+                                enabled: true,
+                                routeToLeastCost: true,
+                                fallbackToExpensive: true,
+                                description: 'Automatically route to cost-optimized models with fallback options'
+                            }
+                        },
+                        observability: {
+                            tokenTracking: {
+                                enabled: true,
+                                perRequest: true,
+                                perUser: true,
+                                perModel: true,
+                                costAttribution: true,
+                                description: 'Track token consumption and costs per request, user, and model'
+                            },
+                            latencyMonitoring: {
+                                enabled: true,
+                                p50: true,
+                                p95: true,
+                                p99: true,
+                                modelComparison: true,
+                                description: 'Monitor and compare latency metrics across different models'
+                            },
+                            errorTracking: {
+                                enabled: true,
+                                categorization: true,
+                                alerting: true,
+                                description: 'Track and categorize errors from AI model interactions'
+                            },
+                            usageAnalytics: {
+                                enabled: true,
+                                dashboards: true,
+                                exports: true,
+                                customReports: true,
+                                description: 'Comprehensive analytics and reporting for AI API usage'
+                            }
+                        }
+                    },
+                    mcpSupport: {
+                        enabled: true,
+                        protocolVersion: '1.0',
+                        features: {
+                            toolDiscovery: {
+                                enabled: true,
+                                description: 'Expose REST APIs as tools discoverable by AI agents via MCP'
+                            },
+                            toolInvocation: {
+                                enabled: true,
+                                authentication: true,
+                                authorization: true,
+                                description: 'Allow AI agents to invoke APIs as tools with proper authentication'
+                            },
+                            contextAwareness: {
+                                enabled: true,
+                                sessionManagement: true,
+                                description: 'Maintain context across multiple tool invocations'
+                            },
+                            externalMcpServers: {
+                                enabled: true,
+                                integration: true,
+                                description: 'Integrate with external MCP-compliant servers'
+                            }
+                        },
+                        useCases: [
+                            'AI agent tool integration',
+                            'REST API exposure as MCP tools',
+                            'Multi-agent workflows',
+                            'Context-aware AI applications'
+                        ]
+                    },
+                    security: {
+                        authentication: {
+                            methods: ['OAuth 2.1', 'Microsoft Entra ID', 'API Keys', 'JWT', 'Certificate'],
+                            default: 'OAuth 2.1',
+                            multiMethod: true
+                        },
+                        authorization: {
+                            rbac: true,
+                            abac: false,
+                            customPolicies: true,
+                            description: 'Role-based and attribute-based access control for AI endpoints'
+                        },
+                        encryption: {
+                            inTransit: 'TLS 1.2+',
+                            atRest: true,
+                            keyManagement: 'Azure Key Vault',
+                            description: 'End-to-end encryption for AI API communications'
+                        },
+                        auditLogging: {
+                            enabled: true,
+                            compliance: ['GDPR', 'HIPAA', 'SOC 2', 'ISO 27001'],
+                            retention: 'configurable',
+                            description: 'Comprehensive audit logging for compliance and security monitoring'
+                        },
+                        ipFiltering: {
+                            enabled: true,
+                            whitelist: true,
+                            blacklist: true,
+                            geoFiltering: true,
+                            description: 'IP-based access control and geographic filtering'
+                        }
+                    },
+                    deploymentOptions: {
+                        regions: {
+                            supported: ['All Premium v2 regions'],
+                            multiRegion: true,
+                            activeActive: true,
+                            description: 'Deploy AI Gateway across multiple regions for high availability'
+                        },
+                        networking: {
+                            vnetIntegration: true,
+                            vnetInjection: true,
+                            privateEndpoints: true,
+                            publicEndpoint: true,
+                            description: 'Flexible networking options for secure AI API deployment'
+                        },
+                        isolation: {
+                            dedicatedInstances: false,
+                            sharedInfrastructure: true,
+                            dataResidency: true,
+                            description: 'Deployment isolation and data residency options'
+                        }
+                    },
+                    costOptimization: {
+                        semanticCaching: {
+                            costReduction: '30-70%',
+                            enabled: true,
+                            description: 'Reduce LLM API costs through intelligent caching'
+                        },
+                        tokenOptimization: {
+                            requestOptimization: true,
+                            responseTruncation: true,
+                            description: 'Optimize token usage to reduce costs'
+                        },
+                        modelSelection: {
+                            automatic: true,
+                            basedOnCost: true,
+                            basedOnPerformance: true,
+                            description: 'Automatically select cost-optimized models'
+                        },
+                        usageTracking: {
+                            perUser: true,
+                            perDepartment: true,
+                            budgetAlerts: true,
+                            description: 'Track and control AI API spending'
+                        }
+                    },
+                    bestPractices: [
+                        'Enable semantic caching for frequently asked questions',
+                        'Set token limits to prevent cost overruns',
+                        'Configure content safety policies for production workloads',
+                        'Use token-based rate limiting for cost control',
+                        'Implement PII detection for compliance',
+                        'Monitor token consumption and costs regularly',
+                        'Use prompt templates for consistency',
+                        'Enable audit logging for security and compliance',
+                        'Configure multi-model routing for high availability',
+                        'Set up budget alerts and automatic throttling'
+                    ],
+                    limitations: [
+                        'AI Gateway features are only available in Premium v2 tier',
+                        'Semantic caching requires embedding model configuration',
+                        'Some features may be in preview',
+                        'Cost optimization depends on cache hit rates',
+                        'MCP support requires MCP-compliant clients'
+                    ]
+                }
+            },
+            networking: {
+                vnetIntegration: true,
+                privateEndpoints: true,
+                publicEndpoint: true,
+                hybridConnections: true,
+                vnetInjection: true,
+                privateLink: true
+            },
+            scaling: {
+                type: 'manual',
+                minInstances: 1,
+                maxInstances: null,
+                scaleOutUnits: null,
+                autoScale: false
+            },
+            regions: ['Selected Azure regions'],
+            documentationLinks: [
+                { title: 'API Management v2', url: 'https://learn.microsoft.com/azure/api-management/api-management-v2' },
+                { title: 'AI Gateway', url: 'https://learn.microsoft.com/azure/api-management/api-management-ai-gateway' },
+                { title: 'MCP Support in v2', url: 'https://techcommunity.microsoft.com/blog/integrationsonazureblog/%F0%9F%9A%80-new-in-azure-api-management-mcp-in-v2-skus--external-mcp-compliant-server-sup/4440294' },
+                { title: 'API Management Pricing', url: 'https://azure.microsoft.com/pricing/details/api-management/' }
+            ],
+            isPreview: true,
+            isRecommended: true,
+            isProductionReady: false
+        }
+    ];
+
+    console.log(`  ✓ Found ${offerings.length} API Management SKUs`);
+    return offerings;
+}

@@ -181,10 +181,16 @@
             cursor: pointer;
             font-size: 14px;
             margin-bottom: 20px;
+            transition: opacity 0.2s, background 0.2s;
         }
 
-        .back-button:hover {
+        .back-button:hover:not(:disabled) {
             background: #106ebe;
+        }
+
+        .back-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .export-button {
@@ -232,8 +238,8 @@
             <h1>Azure Recipe Wizard</h1>
             <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
                 <div class="mode-toggle" aria-label="Mode selector">
-                    <button class="mode-btn active" id="designModeButton">Design</button>
-                    <button class="mode-btn" id="studyModeButton">Study</button>
+                    <button type="button" class="mode-btn active" id="designModeButton">Design</button>
+                    <button type="button" class="mode-btn" id="studyModeButton">Study</button>
                 </div>
                 <button class="mode-btn" id="loadResourcesButton">Load Azure Resources</button>
             </div>
@@ -278,6 +284,136 @@
                     <% if (recipe) { %>
                         <div class="explain-path" id="explainPath"></div>
                         <div class="recipe-title" id="recipeTitle"><%= recipe.title || 'Recipe' %></div>
+                        
+                        <!-- AI Gateway Details Section -->
+                        <% if (recipe.aiGatewayDetails) { %>
+                            <div style="background: #f0f7ff; border-left: 4px solid #0078d4; padding: 20px; margin: 20px 0; border-radius: 4px;">
+                                <h2 style="margin-top: 0; color: #0078d4;">AI Gateway Features & Capabilities</h2>
+                                
+                                <!-- Policies Section -->
+                                <% if (recipe.aiGatewayDetails.policies) { %>
+                                    <div style="margin-bottom: 20px;">
+                                        <h3 style="color: #333; margin-bottom: 10px;">Policies</h3>
+                                        
+                                        <!-- Token Limits -->
+                                        <% if (recipe.aiGatewayDetails.policies.tokenLimits) { %>
+                                            <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px;">
+                                                <strong>Token Limits:</strong>
+                                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                                    <% if (recipe.aiGatewayDetails.policies.tokenLimits.requestTokens) { %>
+                                                        <li>Request tokens: Configurable limits with hard enforcement</li>
+                                                    <% } %>
+                                                    <% if (recipe.aiGatewayDetails.policies.tokenLimits.responseTokens) { %>
+                                                        <li>Response tokens: Configurable limits to control output sizes</li>
+                                                    <% } %>
+                                                    <% if (recipe.aiGatewayDetails.policies.tokenLimits.totalTokens) { %>
+                                                        <li>Total tokens: Per-request, daily, and monthly limits</li>
+                                                    <% } %>
+                                                </ul>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <!-- Content Safety -->
+                                        <% if (recipe.aiGatewayDetails.policies.contentSafety) { %>
+                                            <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px;">
+                                                <strong>Content Safety:</strong>
+                                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                                    <% if (recipe.aiGatewayDetails.policies.contentSafety.promptInjectionProtection) { %>
+                                                        <li>Prompt injection protection: Pattern matching and behavioral analysis</li>
+                                                    <% } %>
+                                                    <% if (recipe.aiGatewayDetails.policies.contentSafety.contentModeration) { %>
+                                                        <li>Content moderation: Categories include violence, hate, self-harm, sexual content</li>
+                                                    <% } %>
+                                                    <% if (recipe.aiGatewayDetails.policies.contentSafety.piiDetection) { %>
+                                                        <li>PII detection: SSN, credit cards, emails, phone numbers with masking/redaction</li>
+                                                    <% } %>
+                                                </ul>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <!-- Semantic Caching -->
+                                        <% if (recipe.aiGatewayDetails.policies.semanticCaching) { %>
+                                            <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px;">
+                                                <strong>Semantic Caching:</strong>
+                                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                                    <li>Type: Embedding-based similarity matching</li>
+                                                    <% if (recipe.aiGatewayDetails.policies.semanticCaching.similarityThreshold) { %>
+                                                        <li>Similarity threshold: <%= recipe.aiGatewayDetails.policies.semanticCaching.similarityThreshold.default || 'Configurable' %> (configurable 0.0-1.0)</li>
+                                                    <% } %>
+                                                    <% if (recipe.aiGatewayDetails.policies.semanticCaching.costOptimization) { %>
+                                                        <li>Cost reduction: <%= recipe.aiGatewayDetails.policies.semanticCaching.costOptimization.reductionEstimate || '30-70%' %></li>
+                                                    <% } %>
+                                                </ul>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <!-- Rate Limiting -->
+                                        <% if (recipe.aiGatewayDetails.policies.rateLimiting) { %>
+                                            <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px;">
+                                                <strong>Rate Limiting:</strong>
+                                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                                    <% if (recipe.aiGatewayDetails.policies.rateLimiting.tokenBased) { %>
+                                                        <li>Token-based: Per-user, per-subscription, per-API, per-provider limits</li>
+                                                    <% } %>
+                                                    <% if (recipe.aiGatewayDetails.policies.rateLimiting.requestBased) { %>
+                                                        <li>Request-based: Traditional request rate limiting</li>
+                                                    <% } %>
+                                                    <% if (recipe.aiGatewayDetails.policies.rateLimiting.costBased) { %>
+                                                        <li>Cost-based: Budget enforcement with automatic throttling</li>
+                                                    <% } %>
+                                                </ul>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                                
+                                <!-- Integration Support -->
+                                <% if (recipe.aiGatewayDetails.integration) { %>
+                                    <div style="margin-bottom: 20px;">
+                                        <h3 style="color: #333; margin-bottom: 10px;">LLM Provider Support</h3>
+                                        <div style="padding: 10px; background: white; border-radius: 4px;">
+                                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                                <% if (recipe.aiGatewayDetails.integration.microsoftFoundry) { %><li>Microsoft Foundry</li><% } %>
+                                                <% if (recipe.aiGatewayDetails.integration.azureOpenAI) { %><li>Azure OpenAI</li><% } %>
+                                                <% if (recipe.aiGatewayDetails.integration.openAI) { %><li>OpenAI</li><% } %>
+                                                <% if (recipe.aiGatewayDetails.integration.customLLMProviders) { %><li>Custom LLM Providers</li><% } %>
+                                                <% if (recipe.aiGatewayDetails.integration.selfHostedModels) { %><li>Self-hosted Models (Ollama, vLLM)</li><% } %>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                <% } %>
+                                
+                                <!-- MCP Support -->
+                                <% if (recipe.aiGatewayDetails.mcpSupport && recipe.aiGatewayDetails.mcpSupport.enabled) { %>
+                                    <div style="margin-bottom: 20px;">
+                                        <h3 style="color: #333; margin-bottom: 10px;">Model Context Protocol (MCP) Support</h3>
+                                        <div style="padding: 10px; background: white; border-radius: 4px;">
+                                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                                <li>Tool discovery: Expose REST APIs as tools for AI agents</li>
+                                                <li>Tool invocation: Allow AI agents to invoke APIs with authentication</li>
+                                                <li>Context awareness: Maintain context across tool invocations</li>
+                                                <li>External MCP servers: Integrate with external MCP-compliant servers</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                <% } %>
+                                
+                                <!-- Best Practices -->
+                                <% if (recipe.aiGatewayDetails.bestPractices && recipe.aiGatewayDetails.bestPractices.length > 0) { %>
+                                    <div style="margin-bottom: 20px;">
+                                        <h3 style="color: #333; margin-bottom: 10px;">Best Practices</h3>
+                                        <div style="padding: 10px; background: white; border-radius: 4px;">
+                                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                                <% recipe.aiGatewayDetails.bestPractices.forEach(practice => { %>
+                                                    <li><%= practice %></li>
+                                                <% }); %>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            </div>
+                        <% } %>
+                        
                         <div class="recipe-steps" id="recipeSteps">
                             <% if (recipe.steps && Array.isArray(recipe.steps)) { %>
                                 <% recipe.steps.forEach(step => { %>
@@ -305,7 +441,8 @@
             recipe: <%- JSON.stringify(recipe) %>,
             isTerminal: <%- JSON.stringify(isTerminal) %>,
             version: '<%= version %>',
-            nodeId: '<%= nodeId %>'
+            nodeId: '<%= nodeId %>',
+            prevNodeId: '<%= prevNodeId || "" %>'
         };
         
         // Handle option click for server-rendered options

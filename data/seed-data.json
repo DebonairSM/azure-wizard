@@ -227,6 +227,15 @@
       "roleFocus": ["api-dev"]
     },
     {
+      "id": "apim-ai-gateway-features",
+      "question": "Select AI Gateway Features",
+      "description": "Choose the AI Gateway features you want to configure. Selected features will customize your deployment recipe.",
+      "nodeType": "feature-selection",
+      "tags": ["web", "api", "gateway", "ai"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
       "id": "apim-ai-gateway-recipe",
       "nodeType": "terminal",
       "tags": ["web", "api", "gateway", "ai"],
@@ -246,6 +255,36 @@
     },
     {
       "id": "apim-v2-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "v2"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-consumption-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "consumption"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-developer-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "developer"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-basic-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "basic"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-standard-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "standard"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-premium-recipe",
       "nodeType": "terminal",
       "tags": ["web", "api", "gateway", "v2"],
       "azObjectives": ["AZ-204.2"]
@@ -1004,6 +1043,16 @@
       "whenNotToUse": "When you need guaranteed message delivery or command patterns"
     },
     {
+      "id": "opt-api-management-msg",
+      "nodeId": "msg-service",
+      "label": "API Management",
+      "description": "API gateway with management, security, analytics, and AI Gateway features",
+      "pros": ["API gateway", "Rate limiting", "AI Gateway features", "Analytics", "MCP support"],
+      "cons": ["Additional cost", "Complexity"],
+      "whenToUse": "For managing, securing, and monitoring APIs, especially with AI/LLM integration",
+      "whenNotToUse": "For simple internal APIs without gateway requirements"
+    },
+    {
       "id": "opt-healthcare-integration",
       "nodeId": "msg-service",
       "label": "Healthcare Integration (HL7/FHIR)",
@@ -1304,6 +1353,12 @@
       "whenNotToUse": "For standard REST APIs without AI/LLM requirements"
     },
     {
+      "id": "feature-selection-submit",
+      "nodeId": "apim-ai-gateway-features",
+      "label": "Continue to Recipe",
+      "description": "Submit selected features and proceed to recipe"
+    },
+    {
       "id": "opt-apim-mcp",
       "nodeId": "api-management-type",
       "label": "Model Context Protocol",
@@ -1332,6 +1387,56 @@
       "cons": ["Newer service", "Migration needed"],
       "whenToUse": "For new API Management deployments requiring latest features and performance",
       "whenNotToUse": "For existing classic deployments or when v2 features aren't needed"
+    },
+    {
+      "id": "opt-apim-consumption",
+      "nodeId": "api-management-type",
+      "label": "Consumption Tier",
+      "description": "Serverless, pay-per-execution API Management - ideal for prototyping and low-volume production",
+      "pros": ["Pay-per-use", "Automatic scaling", "No infrastructure", "Free tier (1M calls/month)"],
+      "cons": ["No SLA", "Limited to 5 gateways", "30s request limit", "4KB policy limit"],
+      "whenToUse": "For prototyping, development, testing, or low-volume production with variable traffic",
+      "whenNotToUse": "For high-volume production requiring SLA or VNET integration"
+    },
+    {
+      "id": "opt-apim-developer",
+      "nodeId": "api-management-type",
+      "label": "Developer Tier",
+      "description": "Non-production tier for development and evaluation with all features",
+      "pros": ["All features", "Low cost", "Full policy support", "Developer portal"],
+      "cons": ["No SLA", "Single unit only", "Not for production"],
+      "whenToUse": "For development, testing, evaluation, or learning API Management",
+      "whenNotToUse": "For production workloads or when SLA is required"
+    },
+    {
+      "id": "opt-apim-basic",
+      "nodeId": "api-management-type",
+      "label": "Basic Tier",
+      "description": "Entry-level production tier with 99.9% SLA and basic scaling",
+      "pros": ["Production SLA", "50MB cache per unit", "Up to 2 units", "Cost-effective"],
+      "cons": ["No VNET support", "Limited to 2 units", "No multi-region"],
+      "whenToUse": "For entry-level production APIs with predictable traffic and no VNET needs",
+      "whenNotToUse": "For high-volume APIs, VNET integration, or multi-region deployments"
+    },
+    {
+      "id": "opt-apim-standard",
+      "nodeId": "api-management-type",
+      "label": "Standard Tier",
+      "description": "Production tier with VNET integration and multi-region support",
+      "pros": ["VNET integration", "Multi-region", "1GB cache per unit", "Up to 4 units", "99.9% SLA"],
+      "cons": ["No self-hosted gateway", "Limited to 4 units"],
+      "whenToUse": "For business-critical APIs requiring VNET connectivity or multi-region deployments",
+      "whenNotToUse": "For enterprise-scale deployments requiring self-hosted gateway or 10+ units"
+    },
+    {
+      "id": "opt-apim-premium",
+      "nodeId": "api-management-type",
+      "label": "Premium Tier",
+      "description": "Enterprise tier with highest scalability, multi-region active-active, and self-hosted gateway",
+      "pros": ["Up to 10 units per region", "Multi-region active-active", "Self-hosted gateway", "5GB cache", "99.95% SLA", "VNET injection"],
+      "cons": ["Higher cost", "More complex setup"],
+      "whenToUse": "For enterprise-scale deployments, high availability, hybrid/multi-cloud, or compliance requirements",
+      "whenNotToUse": "For small to medium workloads where Standard tier is sufficient"
     },
     {
       "id": "opt-vm",
@@ -1402,6 +1507,16 @@
       "cons": ["Steep learning curve", "Platform-specific", "Migration complexity"],
       "whenToUse": "Stateful microservices, actor-based applications, distributed systems",
       "whenNotToUse": "Simple stateless applications or when preferring standard containers"
+    },
+    {
+      "id": "opt-web-solution",
+      "nodeId": "compute-solution",
+      "label": "Web Solution",
+      "description": "Web applications, APIs, and API management services",
+      "pros": ["Multiple hosting options", "API Management", "Static sites", "Real-time features"],
+      "cons": ["Service selection", "Configuration"],
+      "whenToUse": "For web applications, APIs, API gateways, or static websites",
+      "whenNotToUse": "For batch processing, HPC, or non-web workloads"
     },
     {
       "id": "opt-vm-general",
@@ -2051,6 +2166,7 @@
     { "fromNodeId": "media-solution", "fromOptionId": "opt-media-default", "toNodeId": "media-recipe" },
     { "fromNodeId": "msg-service", "fromOptionId": "opt-sb", "toNodeId": "sb-type" },
     { "fromNodeId": "msg-service", "fromOptionId": "opt-event-grid", "toNodeId": "event-grid-recipe" },
+    { "fromNodeId": "msg-service", "fromOptionId": "opt-api-management-msg", "toNodeId": "api-management-type" },
     { "fromNodeId": "sb-type", "fromOptionId": "opt-queue", "toNodeId": "sb-queue-recipe" },
     { "fromNodeId": "sb-type", "fromOptionId": "opt-topic", "toNodeId": "sb-topic-recipe" },
     { "fromNodeId": "container-solution", "fromOptionId": "opt-aks", "toNodeId": "aks-recipe" },
@@ -2072,10 +2188,16 @@
     { "fromNodeId": "signalr-solution", "fromOptionId": "opt-signalr-serverless", "toNodeId": "signalr-serverless-recipe" },
     { "fromNodeId": "signalr-solution", "fromOptionId": "opt-signalr-premium", "toNodeId": "signalr-premium-recipe" },
     { "fromNodeId": "signalr-solution", "fromOptionId": "opt-signalr-basic", "toNodeId": "signalr-basic-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-ai-gateway", "toNodeId": "apim-ai-gateway-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-ai-gateway", "toNodeId": "apim-ai-gateway-features" },
+    { "fromNodeId": "apim-ai-gateway-features", "fromOptionId": "feature-selection-submit", "toNodeId": "apim-ai-gateway-recipe" },
     { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-mcp", "toNodeId": "apim-mcp-recipe" },
     { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-classic", "toNodeId": "apim-classic-recipe" },
     { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-v2", "toNodeId": "apim-v2-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-consumption", "toNodeId": "apim-consumption-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-developer", "toNodeId": "apim-developer-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-basic", "toNodeId": "apim-basic-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-standard", "toNodeId": "apim-standard-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-premium", "toNodeId": "apim-premium-recipe" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-vm", "toNodeId": "vm-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-functions", "toNodeId": "functions-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-batch", "toNodeId": "batch-solution" },
@@ -2083,6 +2205,7 @@
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-appservice-compute", "toNodeId": "appservice-tier-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-aks-compute", "toNodeId": "aks-tier-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-service-fabric", "toNodeId": "service-fabric-solution" },
+    { "fromNodeId": "compute-solution", "fromOptionId": "opt-web-solution", "toNodeId": "web-solution" },
     { "fromNodeId": "vm-solution", "fromOptionId": "opt-vm-general", "toNodeId": "vm-general-recipe" },
     { "fromNodeId": "vm-solution", "fromOptionId": "opt-vm-ai", "toNodeId": "vm-ai-recipe" },
     { "fromNodeId": "vm-solution", "fromOptionId": "opt-vm-windows", "toNodeId": "vm-windows-recipe" },
@@ -2667,7 +2790,118 @@
       ],
       "skillLevel": "intermediate",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "appservice-webapp-premiumv4"
+      "deploymentTemplateId": "appservice-webapp-premiumv4",
+      "configSchema": {
+        "appName": { "type": "string", "required": true, "label": "App Name" },
+        "runtime": { "type": "string", "default": "dotnet:8.0", "label": "Runtime Stack" },
+        "planTier": { "type": "string", "default": "Free", "label": "App Service Plan Tier" },
+        "appSettings": { "type": "object", "default": {}, "label": "Application Settings", "description": "Key-value pairs injected as environment variables" },
+        "connectionStrings": { "type": "array", "default": [], "label": "Connection Strings", "description": "Database and service connection strings" },
+        "alwaysOn": { "type": "boolean", "default": true, "label": "Always On", "description": "Keep app loaded to avoid cold starts" },
+        "httpsOnly": { "type": "boolean", "default": true, "label": "HTTPS Only", "description": "Redirect HTTP to HTTPS" },
+        "minTlsVersion": { "type": "string", "default": "1.2", "label": "Minimum TLS Version", "description": "Minimum TLS version (1.0, 1.1, 1.2, 1.3)" },
+        "http20Enabled": { "type": "boolean", "default": true, "label": "HTTP/2 Enabled", "description": "Enable HTTP/2 protocol" },
+        "ftpsState": { "type": "string", "default": "Disabled", "label": "FTP/FTPS State", "description": "FTP/FTPS access (Disabled, FtpsOnly, AllAllowed)" },
+        "webSocketsEnabled": { "type": "boolean", "default": false, "label": "Web Sockets Enabled", "description": "Enable WebSocket support" },
+        "managedPipelineMode": { "type": "string", "default": "Integrated", "label": "Managed Pipeline Mode", "description": "IIS pipeline mode (Integrated, Classic)" },
+        "platformArchitecture": { "type": "string", "default": "x64", "label": "Platform Architecture", "description": "32-bit (x86) or 64-bit (x64)" },
+        "remoteDebuggingEnabled": { "type": "boolean", "default": false, "label": "Remote Debugging Enabled", "description": "Enable remote debugging" },
+        "remoteDebuggingVersion": { "type": "string", "default": "VS2022", "label": "Remote Debugging Version", "description": "Visual Studio version (VS2017, VS2019, VS2022)" },
+        "use32BitWorkerProcess": { "type": "boolean", "default": false, "label": "Use 32-bit Worker Process", "description": "Use 32-bit worker process (x86)" },
+        "arrAffinityEnabled": { "type": "boolean", "default": true, "label": "ARR Affinity Enabled", "description": "Enable session affinity (sticky sessions)" },
+        "loadBalancing": { "type": "string", "default": "LeastRequests", "label": "Load Balancing", "description": "Load balancing method (LeastRequests, WeightedRoundRobin, LeastResponseTime, WeightedTotalTraffic)" },
+        "instanceCount": { "type": "number", "default": 1, "label": "Instance Count", "description": "Number of instances (manual scaling)" },
+        "minInstances": { "type": "number", "default": 0, "label": "Minimum Instances", "description": "Minimum instances for auto-scaling" },
+        "maxInstances": { "type": "number", "default": 10, "label": "Maximum Instances", "description": "Maximum instances for auto-scaling" },
+        "autoScaleEnabled": { "type": "boolean", "default": false, "label": "Auto-scale Enabled", "description": "Enable automatic scaling" },
+        "customDomainNames": { "type": "array", "default": [], "label": "Custom Domain Names", "description": "List of custom domain names" },
+        "sslCertificates": { "type": "array", "default": [], "label": "SSL Certificates", "description": "SSL certificate thumbprints or managed certificate references" },
+        "healthCheckPath": { "type": "string", "default": "", "label": "Health Check Path", "description": "Path for health check endpoint (e.g., /health)" },
+        "deploymentSlotCount": { "type": "number", "default": 0, "label": "Deployment Slots", "description": "Number of deployment slots (staging, production, etc.)" },
+        "deploymentSlotName": { "type": "string", "default": "production", "label": "Deployment Slot Name", "description": "Name of the deployment slot" },
+        "continuousDeploymentEnabled": { "type": "boolean", "default": false, "label": "Continuous Deployment", "description": "Enable continuous deployment from source control" },
+        "deploymentSource": { "type": "string", "default": "None", "label": "Deployment Source", "description": "Source for deployments (None, LocalGit, GitHub, AzureDevOps, ExternalGit, OneDrive, Dropbox, Bitbucket, VSO, External)" },
+        "deploymentSourceUrl": { "type": "string", "default": "", "label": "Deployment Source URL", "description": "URL for deployment source repository" },
+        "deploymentSourceBranch": { "type": "string", "default": "main", "label": "Deployment Source Branch", "description": "Branch to deploy from" },
+        "startupCommand": { "type": "string", "default": "", "label": "Startup Command", "description": "Custom startup command or script" },
+        "appCommandLine": { "type": "string", "default": "", "label": "App Command Line", "description": "Command to run the app (for containers or custom runtimes)" },
+        "managedIdentityEnabled": { "type": "boolean", "default": false, "label": "Managed Identity Enabled", "description": "Enable system-assigned managed identity" },
+        "managedIdentityType": { "type": "string", "default": "SystemAssigned", "label": "Managed Identity Type", "description": "SystemAssigned, UserAssigned, or None" },
+        "userAssignedIdentities": { "type": "array", "default": [], "label": "User-Assigned Identities", "description": "List of user-assigned managed identity resource IDs" },
+        "authenticationEnabled": { "type": "boolean", "default": false, "label": "Authentication Enabled", "description": "Enable Easy Auth (App Service Authentication)" },
+        "authenticationProvider": { "type": "string", "default": "AzureActiveDirectory", "label": "Authentication Provider", "description": "Identity provider (AzureActiveDirectory, Facebook, Google, Twitter, MicrosoftAccount, GitHub)" },
+        "vnetIntegrationEnabled": { "type": "boolean", "default": false, "label": "VNet Integration Enabled", "description": "Enable virtual network integration" },
+        "vnetResourceGroup": { "type": "string", "default": "", "label": "VNet Resource Group", "description": "Resource group containing the virtual network" },
+        "vnetName": { "type": "string", "default": "", "label": "VNet Name", "description": "Name of the virtual network" },
+        "vnetSubnetName": { "type": "string", "default": "", "label": "VNet Subnet Name", "description": "Name of the subnet" },
+        "hybridConnections": { "type": "array", "default": [], "label": "Hybrid Connections", "description": "Hybrid connection resource IDs for on-premises access" },
+        "privateEndpointEnabled": { "type": "boolean", "default": false, "label": "Private Endpoint Enabled", "description": "Enable private endpoint for secure access" },
+        "ipRestrictions": { "type": "array", "default": [], "label": "IP Restrictions", "description": "IP access restrictions (allow/deny rules)" },
+        "scmIpRestrictions": { "type": "array", "default": [], "label": "SCM IP Restrictions", "description": "IP restrictions for SCM/Kudu site" },
+        "applicationInsightsEnabled": { "type": "boolean", "default": false, "label": "Application Insights Enabled", "description": "Enable Application Insights monitoring" },
+        "applicationInsightsKey": { "type": "string", "default": "", "label": "Application Insights Key", "description": "Application Insights instrumentation key or connection string" },
+        "diagnosticLogsEnabled": { "type": "boolean", "default": false, "label": "Diagnostic Logs Enabled", "description": "Enable application logging" },
+        "detailedErrorLoggingEnabled": { "type": "boolean", "default": false, "label": "Detailed Error Logging", "description": "Enable detailed error logging" },
+        "failedRequestTracingEnabled": { "type": "boolean", "default": false, "label": "Failed Request Tracing", "description": "Enable failed request tracing" },
+        "httpLoggingEnabled": { "type": "boolean", "default": false, "label": "HTTP Logging Enabled", "description": "Enable HTTP logging" },
+        "logsDirectorySizeLimit": { "type": "number", "default": 35, "label": "Logs Directory Size Limit (MB)", "description": "Maximum size for logs directory" },
+        "requestTracingEnabled": { "type": "boolean", "default": false, "label": "Request Tracing Enabled", "description": "Enable request tracing" },
+        "backupEnabled": { "type": "boolean", "default": false, "label": "Backup Enabled", "description": "Enable automated backups" },
+        "backupScheduleFrequency": { "type": "number", "default": 7, "label": "Backup Schedule Frequency (days)", "description": "Days between backups" },
+        "backupRetentionDays": { "type": "number", "default": 30, "label": "Backup Retention (days)", "description": "Number of days to retain backups" },
+        "backupStorageAccount": { "type": "string", "default": "", "label": "Backup Storage Account", "description": "Storage account resource ID for backups" },
+        "appServicePlanName": { "type": "string", "default": "", "label": "App Service Plan Name", "description": "Name of the App Service Plan (if creating new)" },
+        "appServicePlanSku": { "type": "string", "default": "Free", "label": "App Service Plan SKU", "description": "Plan SKU (Free, Basic, Standard, Premium, PremiumV2, PremiumV3, PremiumV4)" },
+        "appServicePlanWorkerSize": { "type": "string", "default": "Small", "label": "App Service Plan Worker Size", "description": "Worker size (Small, Medium, Large, ExtraLarge)" },
+        "location": { "type": "string", "default": "eastus", "label": "Location", "description": "Azure region for deployment" },
+        "resourceGroup": { "type": "string", "default": "", "label": "Resource Group", "description": "Resource group name" },
+        "tags": { "type": "object", "default": {}, "label": "Tags", "description": "Resource tags as key-value pairs" },
+        "javaVersion": { "type": "string", "default": "", "label": "Java Version", "description": "Java version (1.8, 11, 17, 21) if using Java runtime" },
+        "javaContainer": { "type": "string", "default": "", "label": "Java Container", "description": "Java container (Tomcat, Jetty) if applicable" },
+        "javaContainerVersion": { "type": "string", "default": "", "label": "Java Container Version", "description": "Java container version" },
+        "phpVersion": { "type": "string", "default": "", "label": "PHP Version", "description": "PHP version (8.1, 8.2, 8.3) if using PHP runtime" },
+        "pythonVersion": { "type": "string", "default": "", "label": "Python Version", "description": "Python version (3.9, 3.10, 3.11, 3.12) if using Python runtime" },
+        "nodeVersion": { "type": "string", "default": "", "label": "Node.js Version", "description": "Node.js version (18-lts, 20-lts) if using Node.js runtime" },
+        "dotnetVersion": { "type": "string", "default": "8.0", "label": ".NET Version", "description": ".NET version (8.0, 7.0, 6.0) if using .NET runtime" },
+        "linuxFxVersion": { "type": "string", "default": "", "label": "Linux FX Version", "description": "Linux framework version (e.g., DOTNETCORE|8.0, NODE|18-lts, PYTHON|3.11)" },
+        "windowsFxVersion": { "type": "string", "default": "", "label": "Windows FX Version", "description": "Windows framework version" },
+        "dockerImage": { "type": "string", "default": "", "label": "Docker Image", "description": "Docker image name if using custom container" },
+        "dockerRegistryUrl": { "type": "string", "default": "", "label": "Docker Registry URL", "description": "Docker registry URL (Docker Hub, ACR, etc.)" },
+        "dockerRegistryUsername": { "type": "string", "default": "", "label": "Docker Registry Username", "description": "Docker registry username" },
+        "dockerRegistryPassword": { "type": "string", "default": "", "label": "Docker Registry Password", "description": "Docker registry password or managed identity" },
+        "acrUseManagedIdentityCreds": { "type": "boolean", "default": false, "label": "ACR Use Managed Identity", "description": "Use managed identity for Azure Container Registry authentication" },
+        "siteAuthEnabled": { "type": "boolean", "default": false, "label": "Site Authentication Enabled", "description": "Enable site-level authentication" },
+        "siteAuthSettings": { "type": "object", "default": {}, "label": "Site Authentication Settings", "description": "Authentication configuration object" },
+        "ipv6Supported": { "type": "boolean", "default": false, "label": "IPv6 Supported", "description": "Enable IPv6 support for inbound traffic" },
+        "availabilityZones": { "type": "array", "default": [], "label": "Availability Zones", "description": "Availability zones for zone redundancy (requires 2+ instances)" },
+        "zoneRedundant": { "type": "boolean", "default": false, "label": "Zone Redundant", "description": "Enable zone redundancy (requires Premium plans)" },
+        "clientAffinityEnabled": { "type": "boolean", "default": true, "label": "Client Affinity Enabled", "description": "Enable client affinity (ARR affinity)" },
+        "clientCertEnabled": { "type": "boolean", "default": false, "label": "Client Certificate Enabled", "description": "Require client certificates for incoming requests" },
+        "clientCertMode": { "type": "string", "default": "Optional", "label": "Client Certificate Mode", "description": "Client certificate mode (Optional, Required, OptionalInteractiveUser)" },
+        "clientCertExclusionPaths": { "type": "string", "default": "", "label": "Client Certificate Exclusion Paths", "description": "Comma-separated paths excluded from client certificate requirement" },
+        "xManagedServiceIdentityId": { "type": "number", "default": 0, "label": "Managed Service Identity ID", "description": "Managed service identity ID" },
+        "scmType": { "type": "string", "default": "None", "label": "SCM Type", "description": "Source control type (None, LocalGit, GitHub, AzureDevOps, Bitbucket, ExternalGit, OneDrive, Dropbox, VSO)" },
+        "localMySqlEnabled": { "type": "boolean", "default": false, "label": "Local MySQL Enabled", "description": "Enable local MySQL database (deprecated)" },
+        "preWarmedInstanceCount": { "type": "number", "default": 0, "label": "Pre-warmed Instance Count", "description": "Number of pre-warmed instances (Premium plans only)" },
+        "apiDefinitionUrl": { "type": "string", "default": "", "label": "API Definition URL", "description": "URL to OpenAPI/Swagger definition" },
+        "apiManagementConfigId": { "type": "string", "default": "", "label": "API Management Config ID", "description": "API Management configuration ID" },
+        "corsAllowedOrigins": { "type": "array", "default": [], "label": "CORS Allowed Origins", "description": "Allowed origins for CORS (use * for all)" },
+        "corsSupportCredentials": { "type": "boolean", "default": false, "label": "CORS Support Credentials", "description": "Support credentials in CORS requests" },
+        "defaultDocuments": { "type": "array", "default": ["Default.htm", "Default.html", "default.aspx", "index.html", "index.htm", "hostingstart.html"], "label": "Default Documents", "description": "List of default documents" },
+        "handlerMappings": { "type": "array", "default": [], "label": "Handler Mappings", "description": "Custom handler mappings" },
+        "virtualApplications": { "type": "array", "default": [], "label": "Virtual Applications", "description": "Virtual applications configuration" },
+        "experiments": { "type": "object", "default": {}, "label": "Experiments", "description": "Ramp-up rules for gradual deployment" },
+        "limits": { "type": "object", "default": {}, "label": "Limits", "description": "Site limits configuration (maxPercentageCpu, maxMemoryInMb, maxDiskSizeInMb)" },
+        "autoHealEnabled": { "type": "boolean", "default": false, "label": "Auto Heal Enabled", "description": "Enable auto-heal to restart unhealthy instances" },
+        "autoHealRules": { "type": "object", "default": {}, "label": "Auto Heal Rules", "description": "Auto-heal rules configuration" },
+        "push": { "type": "object", "default": {}, "label": "Push Settings", "description": "Push notification settings" },
+        "ipSecurityRestrictions": { "type": "array", "default": [], "label": "IP Security Restrictions", "description": "IP security restrictions with priority" },
+        "scmIpSecurityRestrictions": { "type": "array", "default": [], "label": "SCM IP Security Restrictions", "description": "IP security restrictions for SCM site" },
+        "scmIpSecurityRestrictionsUseMain": { "type": "boolean", "default": false, "label": "SCM Use Main IP Restrictions", "description": "Use main site IP restrictions for SCM" },
+        "http20ProxyFlag": { "type": "boolean", "default": true, "label": "HTTP/2 Proxy Flag", "description": "Enable HTTP/2 proxy" },
+        "useManagedIdentityCreds": { "type": "boolean", "default": false, "label": "Use Managed Identity Credentials", "description": "Use managed identity for credentials" },
+        "functionAppScaleLimit": { "type": "number", "default": 200, "label": "Function App Scale Limit", "description": "Maximum scale limit for Function Apps" }
+      }
     },
     {
       "id": "recipe-appservice-api",
@@ -2722,7 +2956,95 @@
       ],
       "skillLevel": "intermediate",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "appservice-api"
+      "deploymentTemplateId": "appservice-api",
+      "configSchema": {
+        "appName": { "type": "string", "required": true, "label": "API App Name" },
+        "runtime": { "type": "string", "default": "dotnet:8.0", "label": "Runtime Stack" },
+        "corsOrigins": { "type": "array", "default": [], "label": "CORS Origins" },
+        "appSettings": { "type": "object", "default": {}, "label": "Application Settings", "description": "Key-value pairs injected as environment variables" },
+        "connectionStrings": { "type": "array", "default": [], "label": "Connection Strings", "description": "Database and service connection strings" },
+        "alwaysOn": { "type": "boolean", "default": true, "label": "Always On", "description": "Keep app loaded to avoid cold starts" },
+        "httpsOnly": { "type": "boolean", "default": true, "label": "HTTPS Only", "description": "Redirect HTTP to HTTPS" },
+        "minTlsVersion": { "type": "string", "default": "1.2", "label": "Minimum TLS Version", "description": "Minimum TLS version (1.0, 1.1, 1.2, 1.3)" },
+        "http20Enabled": { "type": "boolean", "default": true, "label": "HTTP/2 Enabled", "description": "Enable HTTP/2 protocol" },
+        "webSocketsEnabled": { "type": "boolean", "default": false, "label": "Web Sockets Enabled", "description": "Enable WebSocket support" },
+        "platformArchitecture": { "type": "string", "default": "x64", "label": "Platform Architecture", "description": "32-bit (x86) or 64-bit (x64)" },
+        "instanceCount": { "type": "number", "default": 1, "label": "Instance Count", "description": "Number of instances (manual scaling)" },
+        "minInstances": { "type": "number", "default": 0, "label": "Minimum Instances", "description": "Minimum instances for auto-scaling" },
+        "maxInstances": { "type": "number", "default": 10, "label": "Maximum Instances", "description": "Maximum instances for auto-scaling" },
+        "autoScaleEnabled": { "type": "boolean", "default": false, "label": "Auto-scale Enabled", "description": "Enable automatic scaling" },
+        "customDomainNames": { "type": "array", "default": [], "label": "Custom Domain Names", "description": "List of custom domain names" },
+        "sslCertificates": { "type": "array", "default": [], "label": "SSL Certificates", "description": "SSL certificate thumbprints or managed certificate references" },
+        "healthCheckPath": { "type": "string", "default": "/api/health", "label": "Health Check Path", "description": "Path for health check endpoint" },
+        "deploymentSlotCount": { "type": "number", "default": 0, "label": "Deployment Slots", "description": "Number of deployment slots (staging, production, etc.)" },
+        "deploymentSlotName": { "type": "string", "default": "production", "label": "Deployment Slot Name", "description": "Name of the deployment slot" },
+        "continuousDeploymentEnabled": { "type": "boolean", "default": false, "label": "Continuous Deployment", "description": "Enable continuous deployment from source control" },
+        "deploymentSource": { "type": "string", "default": "None", "label": "Deployment Source", "description": "Source for deployments (None, LocalGit, GitHub, AzureDevOps, ExternalGit, OneDrive, Dropbox, Bitbucket, VSO, External)" },
+        "deploymentSourceUrl": { "type": "string", "default": "", "label": "Deployment Source URL", "description": "URL for deployment source repository" },
+        "deploymentSourceBranch": { "type": "string", "default": "main", "label": "Deployment Source Branch", "description": "Branch to deploy from" },
+        "managedIdentityEnabled": { "type": "boolean", "default": false, "label": "Managed Identity Enabled", "description": "Enable system-assigned managed identity" },
+        "managedIdentityType": { "type": "string", "default": "SystemAssigned", "label": "Managed Identity Type", "description": "SystemAssigned, UserAssigned, or None" },
+        "userAssignedIdentities": { "type": "array", "default": [], "label": "User-Assigned Identities", "description": "List of user-assigned managed identity resource IDs" },
+        "authenticationEnabled": { "type": "boolean", "default": false, "label": "Authentication Enabled", "description": "Enable Easy Auth (App Service Authentication)" },
+        "authenticationProvider": { "type": "string", "default": "AzureActiveDirectory", "label": "Authentication Provider", "description": "Identity provider (AzureActiveDirectory, Facebook, Google, Twitter, MicrosoftAccount, GitHub)" },
+        "vnetIntegrationEnabled": { "type": "boolean", "default": false, "label": "VNet Integration Enabled", "description": "Enable virtual network integration" },
+        "vnetResourceGroup": { "type": "string", "default": "", "label": "VNet Resource Group", "description": "Resource group containing the virtual network" },
+        "vnetName": { "type": "string", "default": "", "label": "VNet Name", "description": "Name of the virtual network" },
+        "vnetSubnetName": { "type": "string", "default": "", "label": "VNet Subnet Name", "description": "Name of the subnet" },
+        "privateEndpointEnabled": { "type": "boolean", "default": false, "label": "Private Endpoint Enabled", "description": "Enable private endpoint for secure access" },
+        "ipRestrictions": { "type": "array", "default": [], "label": "IP Restrictions", "description": "IP access restrictions (allow/deny rules)" },
+        "scmIpRestrictions": { "type": "array", "default": [], "label": "SCM IP Restrictions", "description": "IP restrictions for SCM/Kudu site" },
+        "applicationInsightsEnabled": { "type": "boolean", "default": false, "label": "Application Insights Enabled", "description": "Enable Application Insights monitoring" },
+        "applicationInsightsKey": { "type": "string", "default": "", "label": "Application Insights Key", "description": "Application Insights instrumentation key or connection string" },
+        "diagnosticLogsEnabled": { "type": "boolean", "default": false, "label": "Diagnostic Logs Enabled", "description": "Enable application logging" },
+        "detailedErrorLoggingEnabled": { "type": "boolean", "default": false, "label": "Detailed Error Logging", "description": "Enable detailed error logging" },
+        "httpLoggingEnabled": { "type": "boolean", "default": false, "label": "HTTP Logging Enabled", "description": "Enable HTTP logging" },
+        "logsDirectorySizeLimit": { "type": "number", "default": 35, "label": "Logs Directory Size Limit (MB)", "description": "Maximum size for logs directory" },
+        "appServicePlanName": { "type": "string", "default": "", "label": "App Service Plan Name", "description": "Name of the App Service Plan (if creating new)" },
+        "appServicePlanSku": { "type": "string", "default": "Standard", "label": "App Service Plan SKU", "description": "Plan SKU (Free, Basic, Standard, Premium, PremiumV2, PremiumV3, PremiumV4)" },
+        "appServicePlanWorkerSize": { "type": "string", "default": "Small", "label": "App Service Plan Worker Size", "description": "Worker size (Small, Medium, Large, ExtraLarge)" },
+        "location": { "type": "string", "default": "eastus", "label": "Location", "description": "Azure region for deployment" },
+        "resourceGroup": { "type": "string", "default": "", "label": "Resource Group", "description": "Resource group name" },
+        "tags": { "type": "object", "default": {}, "label": "Tags", "description": "Resource tags as key-value pairs" },
+        "javaVersion": { "type": "string", "default": "", "label": "Java Version", "description": "Java version (1.8, 11, 17, 21) if using Java runtime" },
+        "javaContainer": { "type": "string", "default": "", "label": "Java Container", "description": "Java container (Tomcat, Jetty) if applicable" },
+        "javaContainerVersion": { "type": "string", "default": "", "label": "Java Container Version", "description": "Java container version" },
+        "phpVersion": { "type": "string", "default": "", "label": "PHP Version", "description": "PHP version (8.1, 8.2, 8.3) if using PHP runtime" },
+        "pythonVersion": { "type": "string", "default": "", "label": "Python Version", "description": "Python version (3.9, 3.10, 3.11, 3.12) if using Python runtime" },
+        "nodeVersion": { "type": "string", "default": "", "label": "Node.js Version", "description": "Node.js version (18-lts, 20-lts) if using Node.js runtime" },
+        "dotnetVersion": { "type": "string", "default": "8.0", "label": ".NET Version", "description": ".NET version (8.0, 7.0, 6.0) if using .NET runtime" },
+        "linuxFxVersion": { "type": "string", "default": "", "label": "Linux FX Version", "description": "Linux framework version (e.g., DOTNETCORE|8.0, NODE|18-lts, PYTHON|3.11)" },
+        "windowsFxVersion": { "type": "string", "default": "", "label": "Windows FX Version", "description": "Windows framework version" },
+        "dockerImage": { "type": "string", "default": "", "label": "Docker Image", "description": "Docker image name if using custom container" },
+        "dockerRegistryUrl": { "type": "string", "default": "", "label": "Docker Registry URL", "description": "Docker registry URL (Docker Hub, ACR, etc.)" },
+        "dockerRegistryUsername": { "type": "string", "default": "", "label": "Docker Registry Username", "description": "Docker registry username" },
+        "dockerRegistryPassword": { "type": "string", "default": "", "label": "Docker Registry Password", "description": "Docker registry password or managed identity" },
+        "acrUseManagedIdentityCreds": { "type": "boolean", "default": false, "label": "ACR Use Managed Identity", "description": "Use managed identity for Azure Container Registry authentication" },
+        "siteAuthEnabled": { "type": "boolean", "default": false, "label": "Site Authentication Enabled", "description": "Enable site-level authentication" },
+        "siteAuthSettings": { "type": "object", "default": {}, "label": "Site Authentication Settings", "description": "Authentication configuration object" },
+        "ipv6Supported": { "type": "boolean", "default": false, "label": "IPv6 Supported", "description": "Enable IPv6 support for inbound traffic" },
+        "availabilityZones": { "type": "array", "default": [], "label": "Availability Zones", "description": "Availability zones for zone redundancy (requires 2+ instances)" },
+        "zoneRedundant": { "type": "boolean", "default": false, "label": "Zone Redundant", "description": "Enable zone redundancy (requires Premium plans)" },
+        "corsAllowedOrigins": { "type": "array", "default": [], "label": "CORS Allowed Origins", "description": "Allowed origins for CORS (use * for all)" },
+        "corsSupportCredentials": { "type": "boolean", "default": true, "label": "CORS Support Credentials", "description": "Support credentials in CORS requests" },
+        "apiDefinitionUrl": { "type": "string", "default": "", "label": "API Definition URL", "description": "URL to OpenAPI/Swagger definition" },
+        "apiManagementConfigId": { "type": "string", "default": "", "label": "API Management Config ID", "description": "API Management configuration ID" },
+        "swaggerEnabled": { "type": "boolean", "default": true, "label": "Swagger Enabled", "description": "Enable Swagger/OpenAPI UI" },
+        "defaultDocuments": { "type": "array", "default": [], "label": "Default Documents", "description": "List of default documents (usually empty for APIs)" },
+        "handlerMappings": { "type": "array", "default": [], "label": "Handler Mappings", "description": "Custom handler mappings" },
+        "limits": { "type": "object", "default": {}, "label": "Limits", "description": "Site limits configuration (maxPercentageCpu, maxMemoryInMb, maxDiskSizeInMb)" },
+        "autoHealEnabled": { "type": "boolean", "default": false, "label": "Auto Heal Enabled", "description": "Enable auto-heal to restart unhealthy instances" },
+        "autoHealRules": { "type": "object", "default": {}, "label": "Auto Heal Rules", "description": "Auto-heal rules configuration" },
+        "ipSecurityRestrictions": { "type": "array", "default": [], "label": "IP Security Restrictions", "description": "IP security restrictions with priority" },
+        "scmIpSecurityRestrictions": { "type": "array", "default": [], "label": "SCM IP Security Restrictions", "description": "IP security restrictions for SCM site" },
+        "scmIpSecurityRestrictionsUseMain": { "type": "boolean", "default": false, "label": "SCM Use Main IP Restrictions", "description": "Use main site IP restrictions for SCM" },
+        "http20ProxyFlag": { "type": "boolean", "default": true, "label": "HTTP/2 Proxy Flag", "description": "Enable HTTP/2 proxy" },
+        "useManagedIdentityCreds": { "type": "boolean", "default": false, "label": "Use Managed Identity Credentials", "description": "Use managed identity for credentials" },
+        "healthCheckPath": { "type": "string", "default": "/api/health", "label": "Health Check Path", "description": "Path for health check endpoint" },
+        "healthCheckExpiration": { "type": "string", "default": "", "label": "Health Check Expiration", "description": "Health check expiration time" },
+        "rateLimitEnabled": { "type": "boolean", "default": false, "label": "Rate Limiting Enabled", "description": "Enable rate limiting for API endpoints" },
+        "rateLimitRules": { "type": "array", "default": [], "label": "Rate Limit Rules", "description": "Rate limiting rules configuration" }
+      }
     },
     {
       "id": "recipe-appservice-mobile",
@@ -2823,6 +3145,332 @@
       "skillLevel": "intermediate",
       "deploymentTemplateType": "bicep",
       "deploymentTemplateId": "appservice-function"
+    },
+    {
+      "id": "recipe-appservice-free",
+      "nodeId": "appservice-free-recipe",
+      "title": "App Service Free Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create App Service Plan (Free)",
+          "description": "Create an App Service Plan with Free tier. Note: Free tier uses shared infrastructure with resource limits"
+        },
+        {
+          "number": 2,
+          "title": "Create Web App",
+          "description": "Create a Web App resource on the Free plan. Choose Windows or Linux runtime stack"
+        },
+        {
+          "number": 3,
+          "title": "Configure Custom Domain",
+          "description": "Add custom domain name (Free tier supports custom domains but no SSL certificates)"
+        },
+        {
+          "number": 4,
+          "title": "Set Application Settings",
+          "description": "Configure environment variables and connection strings. Note: Free tier has 60 CPU minutes per day limit"
+        },
+        {
+          "number": 5,
+          "title": "Deploy Application",
+          "description": "Deploy your application using ZIP deploy, local Git, or continuous deployment from GitHub/Azure DevOps"
+        },
+        {
+          "number": 6,
+          "title": "Monitor Usage",
+          "description": "Monitor CPU minutes usage and app performance. Free tier apps may experience cold starts and resource throttling"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.Web/serverfarms",
+          "Microsoft.Web/sites"
+        ]
+      },
+      "links": [
+        { "label": "App Service Free Tier", "url": "https://docs.microsoft.com/azure/app-service/overview-hosting-plans" },
+        { "label": "App Service Documentation", "url": "https://docs.microsoft.com/azure/app-service/" }
+      ],
+      "skillLevel": "beginner",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "appservice-free"
+    },
+    {
+      "id": "recipe-appservice-basic",
+      "nodeId": "appservice-basic-recipe",
+      "title": "App Service Basic Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create App Service Plan (Basic)",
+          "description": "Create an App Service Plan with Basic tier. Basic tier provides dedicated compute with 99.95% SLA"
+        },
+        {
+          "number": 2,
+          "title": "Create Web App",
+          "description": "Create a Web App resource on the Basic plan. Choose Windows or Linux runtime stack (.NET, Node.js, Python, Java, PHP)"
+        },
+        {
+          "number": 3,
+          "title": "Configure Manual Scaling",
+          "description": "Set instance count manually (up to 3 instances). Basic tier does not support auto-scaling"
+        },
+        {
+          "number": 4,
+          "title": "Configure SSL Certificate",
+          "description": "Upload or use App Service Managed Certificate for HTTPS. Basic tier supports SSL certificates"
+        },
+        {
+          "number": 5,
+          "title": "Set Up Custom Domain",
+          "description": "Add custom domain names and configure DNS. Basic tier supports custom domains with SSL"
+        },
+        {
+          "number": 6,
+          "title": "Configure Application Settings",
+          "description": "Set environment variables, connection strings, and app settings. Basic tier provides dedicated resources"
+        },
+        {
+          "number": 7,
+          "title": "Deploy Application",
+          "description": "Deploy your application using ZIP deploy, local Git, or continuous deployment. Note: No deployment slots available on Basic tier"
+        },
+        {
+          "number": 8,
+          "title": "Monitor and Scale",
+          "description": "Monitor application performance. Manually scale instances as needed (Basic tier requires manual scaling)"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.Web/serverfarms",
+          "Microsoft.Web/sites"
+        ]
+      },
+      "links": [
+        { "label": "App Service Basic Tier", "url": "https://docs.microsoft.com/azure/app-service/overview-hosting-plans" },
+        { "label": "App Service Scaling", "url": "https://docs.microsoft.com/azure/app-service/manage-scale-up" },
+        { "label": "App Service Documentation", "url": "https://docs.microsoft.com/azure/app-service/" }
+      ],
+      "skillLevel": "intermediate",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "appservice-basic"
+    },
+    {
+      "id": "recipe-appservice-standard",
+      "nodeId": "appservice-standard-recipe",
+      "title": "App Service Standard Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create App Service Plan (Standard)",
+          "description": "Create an App Service Plan with Standard tier. Standard tier provides production-grade hosting with auto-scaling"
+        },
+        {
+          "number": 2,
+          "title": "Create Web App",
+          "description": "Create a Web App resource on the Standard plan. Choose Windows or Linux runtime stack"
+        },
+        {
+          "number": 3,
+          "title": "Configure Auto-Scaling",
+          "description": "Set up auto-scaling rules to scale between 1-10 instances based on CPU, memory, or HTTP queue length metrics"
+        },
+        {
+          "number": 4,
+          "title": "Set Up Deployment Slots",
+          "description": "Create deployment slots (up to 5 slots) for staging, testing, and blue-green deployments"
+        },
+        {
+          "number": 5,
+          "title": "Configure SSL and Custom Domains",
+          "description": "Set up SSL certificates and custom domains. Standard tier supports App Service Managed Certificates"
+        },
+        {
+          "number": 6,
+          "title": "Enable Daily Backups",
+          "description": "Configure automated daily backups with retention policies. Standard tier includes backup functionality"
+        },
+        {
+          "number": 7,
+          "title": "Configure Application Settings",
+          "description": "Set environment variables, connection strings, and slot-specific settings for deployment slots"
+        },
+        {
+          "number": 8,
+          "title": "Deploy to Staging Slot",
+          "description": "Deploy application to staging slot, test, and swap to production when ready"
+        },
+        {
+          "number": 9,
+          "title": "Monitor and Optimize",
+          "description": "Monitor application performance, auto-scaling behavior, and optimize based on metrics"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.Web/serverfarms",
+          "Microsoft.Web/sites",
+          "Microsoft.Web/sites/slots"
+        ]
+      },
+      "links": [
+        { "label": "App Service Standard Tier", "url": "https://docs.microsoft.com/azure/app-service/overview-hosting-plans" },
+        { "label": "Auto-scaling", "url": "https://docs.microsoft.com/azure/app-service/manage-scale-up" },
+        { "label": "Deployment Slots", "url": "https://docs.microsoft.com/azure/app-service/deploy-staging-slots" },
+        { "label": "App Service Backups", "url": "https://docs.microsoft.com/azure/app-service/manage-backup" }
+      ],
+      "skillLevel": "intermediate",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "appservice-standard"
+    },
+    {
+      "id": "recipe-appservice-premium",
+      "nodeId": "appservice-premium-recipe",
+      "title": "App Service Premium v3 Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create App Service Plan (Premium v3)",
+          "description": "Create an App Service Plan with Premium v3 tier. Premium tier provides high-performance hosting with Dv3-series compute"
+        },
+        {
+          "number": 2,
+          "title": "Create Web App",
+          "description": "Create a Web App resource on the Premium plan. Choose Windows or Linux runtime stack"
+        },
+        {
+          "number": 3,
+          "title": "Configure Advanced Auto-Scaling",
+          "description": "Set up auto-scaling rules to scale between 1-30 instances. Premium tier supports more instances and advanced scaling metrics"
+        },
+        {
+          "number": 4,
+          "title": "Set Up Multiple Deployment Slots",
+          "description": "Create deployment slots (up to 20 slots) for complex deployment strategies and testing environments"
+        },
+        {
+          "number": 5,
+          "title": "Configure VNET Integration",
+          "description": "Set up virtual network integration to access resources in your VNET securely"
+        },
+        {
+          "number": 6,
+          "title": "Configure Private Endpoints",
+          "description": "Set up private endpoints for secure access to your App Service from within your VNET"
+        },
+        {
+          "number": 7,
+          "title": "Enable Zone Redundancy",
+          "description": "Configure zone redundancy with minimum 2 instances for 99.99% SLA across availability zones"
+        },
+        {
+          "number": 8,
+          "title": "Configure SSL and Custom Domains",
+          "description": "Set up SSL certificates (including private certificates) and custom domains with advanced certificate management"
+        },
+        {
+          "number": 9,
+          "title": "Set Up Advanced Monitoring",
+          "description": "Configure Application Insights, diagnostic logs, and performance monitoring for enterprise-grade observability"
+        },
+        {
+          "number": 10,
+          "title": "Deploy and Optimize",
+          "description": "Deploy application using advanced deployment strategies and optimize for high-performance workloads"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.Web/serverfarms",
+          "Microsoft.Web/sites",
+          "Microsoft.Web/sites/slots",
+          "Microsoft.Network/privateEndpoints"
+        ]
+      },
+      "links": [
+        { "label": "App Service Premium Tier", "url": "https://docs.microsoft.com/azure/app-service/overview-hosting-plans" },
+        { "label": "VNET Integration", "url": "https://docs.microsoft.com/azure/app-service/web-sites-integrate-with-vnet" },
+        { "label": "Private Endpoints", "url": "https://docs.microsoft.com/azure/app-service/networking/private-endpoint" },
+        { "label": "Zone Redundancy", "url": "https://docs.microsoft.com/azure/app-service/manage-scale-up" }
+      ],
+      "skillLevel": "advanced",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "appservice-premium"
+    },
+    {
+      "id": "recipe-appservice-isolated",
+      "nodeId": "appservice-isolated-recipe",
+      "title": "App Service Isolated v2 Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create App Service Environment v3",
+          "description": "Create an App Service Environment (ASE) v3 in your VNET. Isolated tier requires an ASE for complete network isolation"
+        },
+        {
+          "number": 2,
+          "title": "Create App Service Plan (Isolated v2)",
+          "description": "Create an App Service Plan with Isolated v2 tier within the ASE. Isolated tier provides maximum isolation and security"
+        },
+        {
+          "number": 3,
+          "title": "Create Web App",
+          "description": "Create a Web App resource on the Isolated plan. Choose Windows or Linux runtime stack"
+        },
+        {
+          "number": 4,
+          "title": "Configure Network Isolation",
+          "description": "Configure internal load balancer and network security groups for complete network isolation"
+        },
+        {
+          "number": 5,
+          "title": "Set Up Advanced Scaling",
+          "description": "Configure scaling up to 100 instances. Isolated tier supports the highest instance counts for large-scale applications"
+        },
+        {
+          "number": 6,
+          "title": "Configure Zone Redundancy",
+          "description": "Enable zone redundancy across availability zones for maximum availability and 99.99% SLA"
+        },
+        {
+          "number": 7,
+          "title": "Set Up Private Endpoints",
+          "description": "Configure private endpoints for secure access from within your VNET without internet exposure"
+        },
+        {
+          "number": 8,
+          "title": "Configure Deployment Slots",
+          "description": "Set up deployment slots (up to 20) for staging and production environments within the isolated environment"
+        },
+        {
+          "number": 9,
+          "title": "Configure Compliance and Security",
+          "description": "Set up security policies, compliance configurations, and audit logging for regulated industries"
+        },
+        {
+          "number": 10,
+          "title": "Deploy and Monitor",
+          "description": "Deploy application in the isolated environment and monitor with enterprise-grade observability tools"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.Web/hostingEnvironments",
+          "Microsoft.Web/serverfarms",
+          "Microsoft.Web/sites",
+          "Microsoft.Network/privateEndpoints"
+        ]
+      },
+      "links": [
+        { "label": "App Service Isolated Tier", "url": "https://docs.microsoft.com/azure/app-service/environment/overview" },
+        { "label": "App Service Environment", "url": "https://docs.microsoft.com/azure/app-service/environment/intro" },
+        { "label": "ASE Network Architecture", "url": "https://docs.microsoft.com/azure/app-service/environment/network-info" }
+      ],
+      "skillLevel": "advanced",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "appservice-isolated"
     },
     {
       "id": "recipe-signalr-ai-streaming",
@@ -3282,6 +3930,269 @@
       "skillLevel": "advanced",
       "deploymentTemplateType": "bicep",
       "deploymentTemplateId": "apim-v2"
+    },
+    {
+      "id": "recipe-apim-consumption",
+      "nodeId": "apim-consumption-recipe",
+      "title": "API Management Consumption Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create API Management Consumption Instance",
+          "description": "Create an Azure API Management instance with Consumption tier - serverless, pay-per-execution model"
+        },
+        {
+          "number": 2,
+          "title": "Import or Create APIs",
+          "description": "Import APIs from OpenAPI/Swagger or create APIs manually (up to 50 APIs per gateway)"
+        },
+        {
+          "number": 3,
+          "title": "Configure Basic Policies",
+          "description": "Set up policies for rate limiting, authentication, and transformation (max 4KB policy size)"
+        },
+        {
+          "number": 4,
+          "title": "Set Up Subscriptions",
+          "description": "Create API subscriptions and keys for access control (up to 500 subscriptions per gateway)"
+        },
+        {
+          "number": 5,
+          "title": "Configure Developer Portal",
+          "description": "Customize and publish developer portal for API discovery"
+        },
+        {
+          "number": 6,
+          "title": "Monitor Usage",
+          "description": "Monitor API calls and usage - first 1 million executions free per month"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.ApiManagement/service"
+        ]
+      },
+      "links": [
+        { "label": "Consumption Tier Documentation", "url": "https://learn.microsoft.com/azure/api-management/api-management-consumption-tier" },
+        { "label": "API Management Pricing", "url": "https://azure.microsoft.com/pricing/details/api-management/" }
+      ],
+      "skillLevel": "beginner",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "apim-consumption"
+    },
+    {
+      "id": "recipe-apim-developer",
+      "nodeId": "apim-developer-recipe",
+      "title": "API Management Developer Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create API Management Developer Instance",
+          "description": "Create an Azure API Management instance with Developer tier for non-production use"
+        },
+        {
+          "number": 2,
+          "title": "Import or Create APIs",
+          "description": "Import APIs or create new APIs with full feature set for development"
+        },
+        {
+          "number": 3,
+          "title": "Configure Policies",
+          "description": "Set up all API Management policies for testing and development"
+        },
+        {
+          "number": 4,
+          "title": "Set Up Developer Portal",
+          "description": "Configure developer portal for API documentation and testing"
+        },
+        {
+          "number": 5,
+          "title": "Test APIs",
+          "description": "Test APIs through developer portal or direct API calls"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.ApiManagement/service"
+        ]
+      },
+      "links": [
+        { "label": "Developer Tier Documentation", "url": "https://learn.microsoft.com/azure/api-management/api-management-tiers" }
+      ],
+      "skillLevel": "beginner",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "apim-developer"
+    },
+    {
+      "id": "recipe-apim-basic",
+      "nodeId": "apim-basic-recipe",
+      "title": "API Management Basic Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create API Management Basic Instance",
+          "description": "Create an Azure API Management instance with Basic tier - entry-level production with 99.9% SLA"
+        },
+        {
+          "number": 2,
+          "title": "Scale to 2 Units",
+          "description": "Scale up to 2 scale-out units for increased capacity (50MB cache per unit)"
+        },
+        {
+          "number": 3,
+          "title": "Import or Create APIs",
+          "description": "Import APIs or create new APIs for production use"
+        },
+        {
+          "number": 4,
+          "title": "Configure Policies",
+          "description": "Set up production policies for rate limiting, authentication, and caching"
+        },
+        {
+          "number": 5,
+          "title": "Set Up Monitoring",
+          "description": "Configure Application Insights for API analytics and monitoring"
+        },
+        {
+          "number": 6,
+          "title": "Deploy to Production",
+          "description": "Deploy APIs to production with 99.9% SLA guarantee"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.ApiManagement/service",
+          "Microsoft.Insights/components"
+        ]
+      },
+      "links": [
+        { "label": "Basic Tier Documentation", "url": "https://learn.microsoft.com/azure/api-management/api-management-tiers" }
+      ],
+      "skillLevel": "intermediate",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "apim-basic"
+    },
+    {
+      "id": "recipe-apim-standard",
+      "nodeId": "apim-standard-recipe",
+      "title": "API Management Standard Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create API Management Standard Instance",
+          "description": "Create an Azure API Management instance with Standard tier - production with VNET integration"
+        },
+        {
+          "number": 2,
+          "title": "Configure VNET Integration",
+          "description": "Set up VNET integration for secure, private connectivity to backends"
+        },
+        {
+          "number": 3,
+          "title": "Scale to 4 Units",
+          "description": "Scale up to 4 scale-out units for increased capacity (1GB cache per unit)"
+        },
+        {
+          "number": 4,
+          "title": "Configure Multi-Region",
+          "description": "Set up multi-region deployments for improved availability"
+        },
+        {
+          "number": 5,
+          "title": "Import or Create APIs",
+          "description": "Import APIs or create new APIs for business-critical use"
+        },
+        {
+          "number": 6,
+          "title": "Configure Advanced Policies",
+          "description": "Set up advanced policies leveraging VNET connectivity and enhanced caching"
+        },
+        {
+          "number": 7,
+          "title": "Set Up Monitoring",
+          "description": "Configure comprehensive monitoring and analytics"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.ApiManagement/service",
+          "Microsoft.Network/virtualNetworks",
+          "Microsoft.Insights/components"
+        ]
+      },
+      "links": [
+        { "label": "Standard Tier Documentation", "url": "https://learn.microsoft.com/azure/api-management/api-management-tiers" },
+        { "label": "VNET Integration", "url": "https://learn.microsoft.com/azure/api-management/api-management-using-with-vnet" }
+      ],
+      "skillLevel": "intermediate",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "apim-standard"
+    },
+    {
+      "id": "recipe-apim-premium",
+      "nodeId": "apim-premium-recipe",
+      "title": "API Management Premium Tier Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Create API Management Premium Instance",
+          "description": "Create an Azure API Management instance with Premium tier - enterprise-scale with 99.95% SLA"
+        },
+        {
+          "number": 2,
+          "title": "Configure Multi-Region Active-Active",
+          "description": "Set up multi-region active-active deployments for high availability"
+        },
+        {
+          "number": 3,
+          "title": "Scale to 10 Units Per Region",
+          "description": "Scale up to 10 scale-out units per region (5GB cache per unit)"
+        },
+        {
+          "number": 4,
+          "title": "Configure Advanced VNET Injection",
+          "description": "Set up advanced VNET injection for complete network isolation"
+        },
+        {
+          "number": 5,
+          "title": "Deploy Self-Hosted Gateway",
+          "description": "Deploy self-hosted gateway for hybrid and multi-cloud scenarios"
+        },
+        {
+          "number": 6,
+          "title": "Configure Workspaces",
+          "description": "Set up workspaces (up to 30 in Premium) for API organization"
+        },
+        {
+          "number": 7,
+          "title": "Import or Create APIs",
+          "description": "Import APIs or create new APIs for enterprise-scale deployment"
+        },
+        {
+          "number": 8,
+          "title": "Configure Enterprise Policies",
+          "description": "Set up enterprise-grade policies for compliance and governance"
+        },
+        {
+          "number": 9,
+          "title": "Set Up Comprehensive Monitoring",
+          "description": "Configure enterprise monitoring, analytics, and alerting"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.ApiManagement/service",
+          "Microsoft.Network/virtualNetworks",
+          "Microsoft.Insights/components"
+        ]
+      },
+      "links": [
+        { "label": "Premium Tier Documentation", "url": "https://learn.microsoft.com/azure/api-management/api-management-tiers" },
+        { "label": "Self-hosted Gateway", "url": "https://learn.microsoft.com/azure/api-management/self-hosted-gateway-overview" }
+      ],
+      "skillLevel": "advanced",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "apim-premium"
     },
     {
       "id": "recipe-vm-general",
@@ -4778,7 +5689,113 @@
       "configSchema": {
         "appName": { "type": "string", "required": true, "label": "App Name" },
         "runtime": { "type": "string", "default": "dotnet:8.0", "label": "Runtime Stack" },
-        "planTier": { "type": "string", "default": "Free", "label": "App Service Plan Tier" }
+        "planTier": { "type": "string", "default": "Free", "label": "App Service Plan Tier" },
+        "appSettings": { "type": "object", "default": {}, "label": "Application Settings", "description": "Key-value pairs injected as environment variables" },
+        "connectionStrings": { "type": "array", "default": [], "label": "Connection Strings", "description": "Database and service connection strings" },
+        "alwaysOn": { "type": "boolean", "default": true, "label": "Always On", "description": "Keep app loaded to avoid cold starts" },
+        "httpsOnly": { "type": "boolean", "default": true, "label": "HTTPS Only", "description": "Redirect HTTP to HTTPS" },
+        "minTlsVersion": { "type": "string", "default": "1.2", "label": "Minimum TLS Version", "description": "Minimum TLS version (1.0, 1.1, 1.2, 1.3)" },
+        "http20Enabled": { "type": "boolean", "default": true, "label": "HTTP/2 Enabled", "description": "Enable HTTP/2 protocol" },
+        "ftpsState": { "type": "string", "default": "Disabled", "label": "FTP/FTPS State", "description": "FTP/FTPS access (Disabled, FtpsOnly, AllAllowed)" },
+        "webSocketsEnabled": { "type": "boolean", "default": false, "label": "Web Sockets Enabled", "description": "Enable WebSocket support" },
+        "managedPipelineMode": { "type": "string", "default": "Integrated", "label": "Managed Pipeline Mode", "description": "IIS pipeline mode (Integrated, Classic)" },
+        "platformArchitecture": { "type": "string", "default": "x64", "label": "Platform Architecture", "description": "32-bit (x86) or 64-bit (x64)" },
+        "remoteDebuggingEnabled": { "type": "boolean", "default": false, "label": "Remote Debugging Enabled", "description": "Enable remote debugging" },
+        "remoteDebuggingVersion": { "type": "string", "default": "VS2022", "label": "Remote Debugging Version", "description": "Visual Studio version (VS2017, VS2019, VS2022)" },
+        "use32BitWorkerProcess": { "type": "boolean", "default": false, "label": "Use 32-bit Worker Process", "description": "Use 32-bit worker process (x86)" },
+        "arrAffinityEnabled": { "type": "boolean", "default": true, "label": "ARR Affinity Enabled", "description": "Enable session affinity (sticky sessions)" },
+        "loadBalancing": { "type": "string", "default": "LeastRequests", "label": "Load Balancing", "description": "Load balancing method (LeastRequests, WeightedRoundRobin, LeastResponseTime, WeightedTotalTraffic)" },
+        "instanceCount": { "type": "number", "default": 1, "label": "Instance Count", "description": "Number of instances (manual scaling)" },
+        "minInstances": { "type": "number", "default": 0, "label": "Minimum Instances", "description": "Minimum instances for auto-scaling" },
+        "maxInstances": { "type": "number", "default": 10, "label": "Maximum Instances", "description": "Maximum instances for auto-scaling" },
+        "autoScaleEnabled": { "type": "boolean", "default": false, "label": "Auto-scale Enabled", "description": "Enable automatic scaling" },
+        "customDomainNames": { "type": "array", "default": [], "label": "Custom Domain Names", "description": "List of custom domain names" },
+        "sslCertificates": { "type": "array", "default": [], "label": "SSL Certificates", "description": "SSL certificate thumbprints or managed certificate references" },
+        "healthCheckPath": { "type": "string", "default": "", "label": "Health Check Path", "description": "Path for health check endpoint (e.g., /health)" },
+        "deploymentSlotCount": { "type": "number", "default": 0, "label": "Deployment Slots", "description": "Number of deployment slots (staging, production, etc.)" },
+        "deploymentSlotName": { "type": "string", "default": "production", "label": "Deployment Slot Name", "description": "Name of the deployment slot" },
+        "continuousDeploymentEnabled": { "type": "boolean", "default": false, "label": "Continuous Deployment", "description": "Enable continuous deployment from source control" },
+        "deploymentSource": { "type": "string", "default": "None", "label": "Deployment Source", "description": "Source for deployments (None, LocalGit, GitHub, AzureDevOps, ExternalGit, OneDrive, Dropbox, Bitbucket, VSO, External)" },
+        "deploymentSourceUrl": { "type": "string", "default": "", "label": "Deployment Source URL", "description": "URL for deployment source repository" },
+        "deploymentSourceBranch": { "type": "string", "default": "main", "label": "Deployment Source Branch", "description": "Branch to deploy from" },
+        "startupCommand": { "type": "string", "default": "", "label": "Startup Command", "description": "Custom startup command or script" },
+        "appCommandLine": { "type": "string", "default": "", "label": "App Command Line", "description": "Command to run the app (for containers or custom runtimes)" },
+        "managedIdentityEnabled": { "type": "boolean", "default": false, "label": "Managed Identity Enabled", "description": "Enable system-assigned managed identity" },
+        "managedIdentityType": { "type": "string", "default": "SystemAssigned", "label": "Managed Identity Type", "description": "SystemAssigned, UserAssigned, or None" },
+        "userAssignedIdentities": { "type": "array", "default": [], "label": "User-Assigned Identities", "description": "List of user-assigned managed identity resource IDs" },
+        "authenticationEnabled": { "type": "boolean", "default": false, "label": "Authentication Enabled", "description": "Enable Easy Auth (App Service Authentication)" },
+        "authenticationProvider": { "type": "string", "default": "AzureActiveDirectory", "label": "Authentication Provider", "description": "Identity provider (AzureActiveDirectory, Facebook, Google, Twitter, MicrosoftAccount, GitHub)" },
+        "vnetIntegrationEnabled": { "type": "boolean", "default": false, "label": "VNet Integration Enabled", "description": "Enable virtual network integration" },
+        "vnetResourceGroup": { "type": "string", "default": "", "label": "VNet Resource Group", "description": "Resource group containing the virtual network" },
+        "vnetName": { "type": "string", "default": "", "label": "VNet Name", "description": "Name of the virtual network" },
+        "vnetSubnetName": { "type": "string", "default": "", "label": "VNet Subnet Name", "description": "Name of the subnet" },
+        "hybridConnections": { "type": "array", "default": [], "label": "Hybrid Connections", "description": "Hybrid connection resource IDs for on-premises access" },
+        "privateEndpointEnabled": { "type": "boolean", "default": false, "label": "Private Endpoint Enabled", "description": "Enable private endpoint for secure access" },
+        "ipRestrictions": { "type": "array", "default": [], "label": "IP Restrictions", "description": "IP access restrictions (allow/deny rules)" },
+        "scmIpRestrictions": { "type": "array", "default": [], "label": "SCM IP Restrictions", "description": "IP restrictions for SCM/Kudu site" },
+        "applicationInsightsEnabled": { "type": "boolean", "default": false, "label": "Application Insights Enabled", "description": "Enable Application Insights monitoring" },
+        "applicationInsightsKey": { "type": "string", "default": "", "label": "Application Insights Key", "description": "Application Insights instrumentation key or connection string" },
+        "diagnosticLogsEnabled": { "type": "boolean", "default": false, "label": "Diagnostic Logs Enabled", "description": "Enable application logging" },
+        "detailedErrorLoggingEnabled": { "type": "boolean", "default": false, "label": "Detailed Error Logging", "description": "Enable detailed error logging" },
+        "failedRequestTracingEnabled": { "type": "boolean", "default": false, "label": "Failed Request Tracing", "description": "Enable failed request tracing" },
+        "httpLoggingEnabled": { "type": "boolean", "default": false, "label": "HTTP Logging Enabled", "description": "Enable HTTP logging" },
+        "logsDirectorySizeLimit": { "type": "number", "default": 35, "label": "Logs Directory Size Limit (MB)", "description": "Maximum size for logs directory" },
+        "requestTracingEnabled": { "type": "boolean", "default": false, "label": "Request Tracing Enabled", "description": "Enable request tracing" },
+        "backupEnabled": { "type": "boolean", "default": false, "label": "Backup Enabled", "description": "Enable automated backups" },
+        "backupScheduleFrequency": { "type": "number", "default": 7, "label": "Backup Schedule Frequency (days)", "description": "Days between backups" },
+        "backupRetentionDays": { "type": "number", "default": 30, "label": "Backup Retention (days)", "description": "Number of days to retain backups" },
+        "backupStorageAccount": { "type": "string", "default": "", "label": "Backup Storage Account", "description": "Storage account resource ID for backups" },
+        "appServicePlanName": { "type": "string", "default": "", "label": "App Service Plan Name", "description": "Name of the App Service Plan (if creating new)" },
+        "appServicePlanSku": { "type": "string", "default": "Free", "label": "App Service Plan SKU", "description": "Plan SKU (Free, Basic, Standard, Premium, PremiumV2, PremiumV3, PremiumV4)" },
+        "appServicePlanWorkerSize": { "type": "string", "default": "Small", "label": "App Service Plan Worker Size", "description": "Worker size (Small, Medium, Large, ExtraLarge)" },
+        "location": { "type": "string", "default": "eastus", "label": "Location", "description": "Azure region for deployment" },
+        "resourceGroup": { "type": "string", "default": "", "label": "Resource Group", "description": "Resource group name" },
+        "tags": { "type": "object", "default": {}, "label": "Tags", "description": "Resource tags as key-value pairs" },
+        "javaVersion": { "type": "string", "default": "", "label": "Java Version", "description": "Java version (1.8, 11, 17, 21) if using Java runtime" },
+        "javaContainer": { "type": "string", "default": "", "label": "Java Container", "description": "Java container (Tomcat, Jetty) if applicable" },
+        "javaContainerVersion": { "type": "string", "default": "", "label": "Java Container Version", "description": "Java container version" },
+        "phpVersion": { "type": "string", "default": "", "label": "PHP Version", "description": "PHP version (8.1, 8.2, 8.3) if using PHP runtime" },
+        "pythonVersion": { "type": "string", "default": "", "label": "Python Version", "description": "Python version (3.9, 3.10, 3.11, 3.12) if using Python runtime" },
+        "nodeVersion": { "type": "string", "default": "", "label": "Node.js Version", "description": "Node.js version (18-lts, 20-lts) if using Node.js runtime" },
+        "dotnetVersion": { "type": "string", "default": "8.0", "label": ".NET Version", "description": ".NET version (8.0, 7.0, 6.0) if using .NET runtime" },
+        "linuxFxVersion": { "type": "string", "default": "", "label": "Linux FX Version", "description": "Linux framework version (e.g., DOTNETCORE|8.0, NODE|18-lts, PYTHON|3.11)" },
+        "windowsFxVersion": { "type": "string", "default": "", "label": "Windows FX Version", "description": "Windows framework version" },
+        "dockerImage": { "type": "string", "default": "", "label": "Docker Image", "description": "Docker image name if using custom container" },
+        "dockerRegistryUrl": { "type": "string", "default": "", "label": "Docker Registry URL", "description": "Docker registry URL (Docker Hub, ACR, etc.)" },
+        "dockerRegistryUsername": { "type": "string", "default": "", "label": "Docker Registry Username", "description": "Docker registry username" },
+        "dockerRegistryPassword": { "type": "string", "default": "", "label": "Docker Registry Password", "description": "Docker registry password or managed identity" },
+        "acrUseManagedIdentityCreds": { "type": "boolean", "default": false, "label": "ACR Use Managed Identity", "description": "Use managed identity for Azure Container Registry authentication" },
+        "siteAuthEnabled": { "type": "boolean", "default": false, "label": "Site Authentication Enabled", "description": "Enable site-level authentication" },
+        "siteAuthSettings": { "type": "object", "default": {}, "label": "Site Authentication Settings", "description": "Authentication configuration object" },
+        "ipv6Supported": { "type": "boolean", "default": false, "label": "IPv6 Supported", "description": "Enable IPv6 support for inbound traffic" },
+        "availabilityZones": { "type": "array", "default": [], "label": "Availability Zones", "description": "Availability zones for zone redundancy (requires 2+ instances)" },
+        "zoneRedundant": { "type": "boolean", "default": false, "label": "Zone Redundant", "description": "Enable zone redundancy (requires Premium plans)" },
+        "clientAffinityEnabled": { "type": "boolean", "default": true, "label": "Client Affinity Enabled", "description": "Enable client affinity (ARR affinity)" },
+        "clientCertEnabled": { "type": "boolean", "default": false, "label": "Client Certificate Enabled", "description": "Require client certificates for incoming requests" },
+        "clientCertMode": { "type": "string", "default": "Optional", "label": "Client Certificate Mode", "description": "Client certificate mode (Optional, Required, OptionalInteractiveUser)" },
+        "clientCertExclusionPaths": { "type": "string", "default": "", "label": "Client Certificate Exclusion Paths", "description": "Comma-separated paths excluded from client certificate requirement" },
+        "xManagedServiceIdentityId": { "type": "number", "default": 0, "label": "Managed Service Identity ID", "description": "Managed service identity ID" },
+        "scmType": { "type": "string", "default": "None", "label": "SCM Type", "description": "Source control type (None, LocalGit, GitHub, AzureDevOps, Bitbucket, ExternalGit, OneDrive, Dropbox, VSO)" },
+        "localMySqlEnabled": { "type": "boolean", "default": false, "label": "Local MySQL Enabled", "description": "Enable local MySQL database (deprecated)" },
+        "preWarmedInstanceCount": { "type": "number", "default": 0, "label": "Pre-warmed Instance Count", "description": "Number of pre-warmed instances (Premium plans only)" },
+        "apiDefinitionUrl": { "type": "string", "default": "", "label": "API Definition URL", "description": "URL to OpenAPI/Swagger definition" },
+        "apiManagementConfigId": { "type": "string", "default": "", "label": "API Management Config ID", "description": "API Management configuration ID" },
+        "corsAllowedOrigins": { "type": "array", "default": [], "label": "CORS Allowed Origins", "description": "Allowed origins for CORS (use * for all)" },
+        "corsSupportCredentials": { "type": "boolean", "default": false, "label": "CORS Support Credentials", "description": "Support credentials in CORS requests" },
+        "defaultDocuments": { "type": "array", "default": ["Default.htm", "Default.html", "default.aspx", "index.html", "index.htm", "hostingstart.html"], "label": "Default Documents", "description": "List of default documents" },
+        "handlerMappings": { "type": "array", "default": [], "label": "Handler Mappings", "description": "Custom handler mappings" },
+        "virtualApplications": { "type": "array", "default": [], "label": "Virtual Applications", "description": "Virtual applications configuration" },
+        "experiments": { "type": "object", "default": {}, "label": "Experiments", "description": "Ramp-up rules for gradual deployment" },
+        "limits": { "type": "object", "default": {}, "label": "Limits", "description": "Site limits configuration (maxPercentageCpu, maxMemoryInMb, maxDiskSizeInMb)" },
+        "autoHealEnabled": { "type": "boolean", "default": false, "label": "Auto Heal Enabled", "description": "Enable auto-heal to restart unhealthy instances" },
+        "autoHealRules": { "type": "object", "default": {}, "label": "Auto Heal Rules", "description": "Auto-heal rules configuration" },
+        "push": { "type": "object", "default": {}, "label": "Push Settings", "description": "Push notification settings" },
+        "ipSecurityRestrictions": { "type": "array", "default": [], "label": "IP Security Restrictions", "description": "IP security restrictions with priority" },
+        "scmIpSecurityRestrictions": { "type": "array", "default": [], "label": "SCM IP Security Restrictions", "description": "IP security restrictions for SCM site" },
+        "scmIpSecurityRestrictionsUseMain": { "type": "boolean", "default": false, "label": "SCM Use Main IP Restrictions", "description": "Use main site IP restrictions for SCM" },
+        "http20ProxyFlag": { "type": "boolean", "default": true, "label": "HTTP/2 Proxy Flag", "description": "Enable HTTP/2 proxy" },
+        "useManagedIdentityCreds": { "type": "boolean", "default": false, "label": "Use Managed Identity Credentials", "description": "Use managed identity for credentials" },
+        "functionAppScaleLimit": { "type": "number", "default": 200, "label": "Function App Scale Limit", "description": "Maximum scale limit for Function Apps" }
       },
       "tags": ["compute", "web", "paas", "hosting"],
       "pros": ["Easy deployment", "Built-in scaling", "SSL certificates", "CI/CD integration"],
@@ -4794,7 +5811,90 @@
       "configSchema": {
         "appName": { "type": "string", "required": true, "label": "API App Name" },
         "runtime": { "type": "string", "default": "dotnet:8.0", "label": "Runtime Stack" },
-        "corsOrigins": { "type": "array", "default": [], "label": "CORS Origins" }
+        "corsOrigins": { "type": "array", "default": [], "label": "CORS Origins" },
+        "appSettings": { "type": "object", "default": {}, "label": "Application Settings", "description": "Key-value pairs injected as environment variables" },
+        "connectionStrings": { "type": "array", "default": [], "label": "Connection Strings", "description": "Database and service connection strings" },
+        "alwaysOn": { "type": "boolean", "default": true, "label": "Always On", "description": "Keep app loaded to avoid cold starts" },
+        "httpsOnly": { "type": "boolean", "default": true, "label": "HTTPS Only", "description": "Redirect HTTP to HTTPS" },
+        "minTlsVersion": { "type": "string", "default": "1.2", "label": "Minimum TLS Version", "description": "Minimum TLS version (1.0, 1.1, 1.2, 1.3)" },
+        "http20Enabled": { "type": "boolean", "default": true, "label": "HTTP/2 Enabled", "description": "Enable HTTP/2 protocol" },
+        "webSocketsEnabled": { "type": "boolean", "default": false, "label": "Web Sockets Enabled", "description": "Enable WebSocket support" },
+        "platformArchitecture": { "type": "string", "default": "x64", "label": "Platform Architecture", "description": "32-bit (x86) or 64-bit (x64)" },
+        "instanceCount": { "type": "number", "default": 1, "label": "Instance Count", "description": "Number of instances (manual scaling)" },
+        "minInstances": { "type": "number", "default": 0, "label": "Minimum Instances", "description": "Minimum instances for auto-scaling" },
+        "maxInstances": { "type": "number", "default": 10, "label": "Maximum Instances", "description": "Maximum instances for auto-scaling" },
+        "autoScaleEnabled": { "type": "boolean", "default": false, "label": "Auto-scale Enabled", "description": "Enable automatic scaling" },
+        "customDomainNames": { "type": "array", "default": [], "label": "Custom Domain Names", "description": "List of custom domain names" },
+        "sslCertificates": { "type": "array", "default": [], "label": "SSL Certificates", "description": "SSL certificate thumbprints or managed certificate references" },
+        "healthCheckPath": { "type": "string", "default": "/api/health", "label": "Health Check Path", "description": "Path for health check endpoint" },
+        "deploymentSlotCount": { "type": "number", "default": 0, "label": "Deployment Slots", "description": "Number of deployment slots (staging, production, etc.)" },
+        "deploymentSlotName": { "type": "string", "default": "production", "label": "Deployment Slot Name", "description": "Name of the deployment slot" },
+        "continuousDeploymentEnabled": { "type": "boolean", "default": false, "label": "Continuous Deployment", "description": "Enable continuous deployment from source control" },
+        "deploymentSource": { "type": "string", "default": "None", "label": "Deployment Source", "description": "Source for deployments (None, LocalGit, GitHub, AzureDevOps, ExternalGit, OneDrive, Dropbox, Bitbucket, VSO, External)" },
+        "deploymentSourceUrl": { "type": "string", "default": "", "label": "Deployment Source URL", "description": "URL for deployment source repository" },
+        "deploymentSourceBranch": { "type": "string", "default": "main", "label": "Deployment Source Branch", "description": "Branch to deploy from" },
+        "managedIdentityEnabled": { "type": "boolean", "default": false, "label": "Managed Identity Enabled", "description": "Enable system-assigned managed identity" },
+        "managedIdentityType": { "type": "string", "default": "SystemAssigned", "label": "Managed Identity Type", "description": "SystemAssigned, UserAssigned, or None" },
+        "userAssignedIdentities": { "type": "array", "default": [], "label": "User-Assigned Identities", "description": "List of user-assigned managed identity resource IDs" },
+        "authenticationEnabled": { "type": "boolean", "default": false, "label": "Authentication Enabled", "description": "Enable Easy Auth (App Service Authentication)" },
+        "authenticationProvider": { "type": "string", "default": "AzureActiveDirectory", "label": "Authentication Provider", "description": "Identity provider (AzureActiveDirectory, Facebook, Google, Twitter, MicrosoftAccount, GitHub)" },
+        "vnetIntegrationEnabled": { "type": "boolean", "default": false, "label": "VNet Integration Enabled", "description": "Enable virtual network integration" },
+        "vnetResourceGroup": { "type": "string", "default": "", "label": "VNet Resource Group", "description": "Resource group containing the virtual network" },
+        "vnetName": { "type": "string", "default": "", "label": "VNet Name", "description": "Name of the virtual network" },
+        "vnetSubnetName": { "type": "string", "default": "", "label": "VNet Subnet Name", "description": "Name of the subnet" },
+        "privateEndpointEnabled": { "type": "boolean", "default": false, "label": "Private Endpoint Enabled", "description": "Enable private endpoint for secure access" },
+        "ipRestrictions": { "type": "array", "default": [], "label": "IP Restrictions", "description": "IP access restrictions (allow/deny rules)" },
+        "scmIpRestrictions": { "type": "array", "default": [], "label": "SCM IP Restrictions", "description": "IP restrictions for SCM/Kudu site" },
+        "applicationInsightsEnabled": { "type": "boolean", "default": false, "label": "Application Insights Enabled", "description": "Enable Application Insights monitoring" },
+        "applicationInsightsKey": { "type": "string", "default": "", "label": "Application Insights Key", "description": "Application Insights instrumentation key or connection string" },
+        "diagnosticLogsEnabled": { "type": "boolean", "default": false, "label": "Diagnostic Logs Enabled", "description": "Enable application logging" },
+        "detailedErrorLoggingEnabled": { "type": "boolean", "default": false, "label": "Detailed Error Logging", "description": "Enable detailed error logging" },
+        "httpLoggingEnabled": { "type": "boolean", "default": false, "label": "HTTP Logging Enabled", "description": "Enable HTTP logging" },
+        "logsDirectorySizeLimit": { "type": "number", "default": 35, "label": "Logs Directory Size Limit (MB)", "description": "Maximum size for logs directory" },
+        "appServicePlanName": { "type": "string", "default": "", "label": "App Service Plan Name", "description": "Name of the App Service Plan (if creating new)" },
+        "appServicePlanSku": { "type": "string", "default": "Standard", "label": "App Service Plan SKU", "description": "Plan SKU (Free, Basic, Standard, Premium, PremiumV2, PremiumV3, PremiumV4)" },
+        "appServicePlanWorkerSize": { "type": "string", "default": "Small", "label": "App Service Plan Worker Size", "description": "Worker size (Small, Medium, Large, ExtraLarge)" },
+        "location": { "type": "string", "default": "eastus", "label": "Location", "description": "Azure region for deployment" },
+        "resourceGroup": { "type": "string", "default": "", "label": "Resource Group", "description": "Resource group name" },
+        "tags": { "type": "object", "default": {}, "label": "Tags", "description": "Resource tags as key-value pairs" },
+        "javaVersion": { "type": "string", "default": "", "label": "Java Version", "description": "Java version (1.8, 11, 17, 21) if using Java runtime" },
+        "javaContainer": { "type": "string", "default": "", "label": "Java Container", "description": "Java container (Tomcat, Jetty) if applicable" },
+        "javaContainerVersion": { "type": "string", "default": "", "label": "Java Container Version", "description": "Java container version" },
+        "phpVersion": { "type": "string", "default": "", "label": "PHP Version", "description": "PHP version (8.1, 8.2, 8.3) if using PHP runtime" },
+        "pythonVersion": { "type": "string", "default": "", "label": "Python Version", "description": "Python version (3.9, 3.10, 3.11, 3.12) if using Python runtime" },
+        "nodeVersion": { "type": "string", "default": "", "label": "Node.js Version", "description": "Node.js version (18-lts, 20-lts) if using Node.js runtime" },
+        "dotnetVersion": { "type": "string", "default": "8.0", "label": ".NET Version", "description": ".NET version (8.0, 7.0, 6.0) if using .NET runtime" },
+        "linuxFxVersion": { "type": "string", "default": "", "label": "Linux FX Version", "description": "Linux framework version (e.g., DOTNETCORE|8.0, NODE|18-lts, PYTHON|3.11)" },
+        "windowsFxVersion": { "type": "string", "default": "", "label": "Windows FX Version", "description": "Windows framework version" },
+        "dockerImage": { "type": "string", "default": "", "label": "Docker Image", "description": "Docker image name if using custom container" },
+        "dockerRegistryUrl": { "type": "string", "default": "", "label": "Docker Registry URL", "description": "Docker registry URL (Docker Hub, ACR, etc.)" },
+        "dockerRegistryUsername": { "type": "string", "default": "", "label": "Docker Registry Username", "description": "Docker registry username" },
+        "dockerRegistryPassword": { "type": "string", "default": "", "label": "Docker Registry Password", "description": "Docker registry password or managed identity" },
+        "acrUseManagedIdentityCreds": { "type": "boolean", "default": false, "label": "ACR Use Managed Identity", "description": "Use managed identity for Azure Container Registry authentication" },
+        "siteAuthEnabled": { "type": "boolean", "default": false, "label": "Site Authentication Enabled", "description": "Enable site-level authentication" },
+        "siteAuthSettings": { "type": "object", "default": {}, "label": "Site Authentication Settings", "description": "Authentication configuration object" },
+        "ipv6Supported": { "type": "boolean", "default": false, "label": "IPv6 Supported", "description": "Enable IPv6 support for inbound traffic" },
+        "availabilityZones": { "type": "array", "default": [], "label": "Availability Zones", "description": "Availability zones for zone redundancy (requires 2+ instances)" },
+        "zoneRedundant": { "type": "boolean", "default": false, "label": "Zone Redundant", "description": "Enable zone redundancy (requires Premium plans)" },
+        "corsAllowedOrigins": { "type": "array", "default": [], "label": "CORS Allowed Origins", "description": "Allowed origins for CORS (use * for all)" },
+        "corsSupportCredentials": { "type": "boolean", "default": true, "label": "CORS Support Credentials", "description": "Support credentials in CORS requests" },
+        "apiDefinitionUrl": { "type": "string", "default": "", "label": "API Definition URL", "description": "URL to OpenAPI/Swagger definition" },
+        "apiManagementConfigId": { "type": "string", "default": "", "label": "API Management Config ID", "description": "API Management configuration ID" },
+        "swaggerEnabled": { "type": "boolean", "default": true, "label": "Swagger Enabled", "description": "Enable Swagger/OpenAPI UI" },
+        "defaultDocuments": { "type": "array", "default": [], "label": "Default Documents", "description": "List of default documents (usually empty for APIs)" },
+        "handlerMappings": { "type": "array", "default": [], "label": "Handler Mappings", "description": "Custom handler mappings" },
+        "limits": { "type": "object", "default": {}, "label": "Limits", "description": "Site limits configuration (maxPercentageCpu, maxMemoryInMb, maxDiskSizeInMb)" },
+        "autoHealEnabled": { "type": "boolean", "default": false, "label": "Auto Heal Enabled", "description": "Enable auto-heal to restart unhealthy instances" },
+        "autoHealRules": { "type": "object", "default": {}, "label": "Auto Heal Rules", "description": "Auto-heal rules configuration" },
+        "ipSecurityRestrictions": { "type": "array", "default": [], "label": "IP Security Restrictions", "description": "IP security restrictions with priority" },
+        "scmIpSecurityRestrictions": { "type": "array", "default": [], "label": "SCM IP Security Restrictions", "description": "IP security restrictions for SCM site" },
+        "scmIpSecurityRestrictionsUseMain": { "type": "boolean", "default": false, "label": "SCM Use Main IP Restrictions", "description": "Use main site IP restrictions for SCM" },
+        "http20ProxyFlag": { "type": "boolean", "default": true, "label": "HTTP/2 Proxy Flag", "description": "Enable HTTP/2 proxy" },
+        "useManagedIdentityCreds": { "type": "boolean", "default": false, "label": "Use Managed Identity Credentials", "description": "Use managed identity for credentials" },
+        "healthCheckPath": { "type": "string", "default": "/api/health", "label": "Health Check Path", "description": "Path for health check endpoint" },
+        "healthCheckExpiration": { "type": "string", "default": "", "label": "Health Check Expiration", "description": "Health check expiration time" },
+        "rateLimitEnabled": { "type": "boolean", "default": false, "label": "Rate Limiting Enabled", "description": "Enable rate limiting for API endpoints" },
+        "rateLimitRules": { "type": "array", "default": [], "label": "Rate Limit Rules", "description": "Rate limiting rules configuration" }
       },
       "tags": ["compute", "api", "paas", "rest"],
       "pros": ["Easy API hosting", "Built-in authentication", "Scaling", "Swagger support"],

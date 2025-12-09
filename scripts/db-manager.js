@@ -411,8 +411,8 @@ async function migrateJsonToSqlite() {
 
             console.log(`Inserting ${jsonData.recipes?.length || 0} recipes...`);
             const insertRecipe = db.prepare(`
-                INSERT INTO recipes (id, nodeId, title, steps, bicepOutline, terraformOutline, links, skillLevel, estimatedTime)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO recipes (id, nodeId, title, steps, bicepOutline, terraformOutline, links, skillLevel, estimatedTime, configSchema)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
             let recipesInserted = 0;
             for (const recipe of jsonData.recipes || []) {
@@ -421,7 +421,8 @@ async function migrateJsonToSqlite() {
                     recipe.id || recipe.nodeId, recipe.nodeId, recipe.title || null,
                     stringifyJsonObject(recipe.steps), stringifyJsonObject(recipe.bicepOutline),
                     stringifyJsonObject(recipe.terraformOutline), stringifyJsonArray(recipe.links),
-                    recipe.skillLevel || null, recipe.estimatedTime || null
+                    recipe.skillLevel || null, recipe.estimatedTime || null,
+                    stringifyJsonObject(recipe.configSchema)
                 );
                 recipesInserted++;
             }

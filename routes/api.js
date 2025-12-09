@@ -12,7 +12,8 @@ import {
     fetchRelaySkus,
     fetchContainerInstancesSkus,
     fetchAKSSkus,
-    fetchBatchSkus
+    fetchBatchSkus,
+    fetchAPIMSkus
 } from '../scripts/azure-sku-fetchers.js';
 
 const router = express.Router();
@@ -211,7 +212,8 @@ router.get('/recipes/:nodeId', (req, res) => {
                 steps: parseJsonObject(recipe.steps),
                 bicepOutline: parseJsonObject(recipe.bicepOutline),
                 terraformOutline: parseJsonObject(recipe.terraformOutline),
-                links: parseJsonArray(recipe.links)
+                links: parseJsonArray(recipe.links),
+                configSchema: parseJsonObject(recipe.configSchema)
             }));
             return res.json(parsedRecipes);
         }
@@ -229,6 +231,7 @@ router.get('/recipes/:nodeId', (req, res) => {
         recipe.bicepOutline = parseJsonObject(recipe.bicepOutline);
         recipe.terraformOutline = parseJsonObject(recipe.terraformOutline);
         recipe.links = parseJsonArray(recipe.links);
+        recipe.configSchema = parseJsonObject(recipe.configSchema);
         
         res.json(recipe);
     } catch (error) {
@@ -1163,6 +1166,7 @@ router.get('/azure-offerings', (req, res) => {
             scaling: parseJsonObject(offering.scaling),
             regions: parseJsonArray(offering.regions),
             documentationLinks: parseJsonArray(offering.documentationLinks),
+            metadata: parseJsonObject(offering.metadata),
             isPreview: offering.isPreview === 1,
             isRecommended: offering.isRecommended === 1,
             isProductionReady: offering.isProductionReady === 1
@@ -1201,6 +1205,7 @@ router.get('/azure-offerings/:id', (req, res) => {
             scaling: parseJsonObject(offering.scaling),
             regions: parseJsonArray(offering.regions),
             documentationLinks: parseJsonArray(offering.documentationLinks),
+            metadata: parseJsonObject(offering.metadata),
             isPreview: offering.isPreview === 1,
             isRecommended: offering.isRecommended === 1,
             isProductionReady: offering.isProductionReady === 1
