@@ -35,6 +35,12 @@
 
         h1 {
             margin-bottom: 10px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        h1:hover {
+            color: #0078d4;
         }
 
         .mode-toggle {
@@ -258,6 +264,76 @@
 
         .export-button:hover {
             background: #0e6b0e;
+        }
+
+        /* Recipe Export Display */
+        #recipeExportDisplay {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        #recipeExportDisplay h3 {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .copy-recipe-btn {
+            padding: 8px 16px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .copy-recipe-btn:hover {
+            background: #106ebe;
+        }
+
+        .recipe-json-display {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 0;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #107c10;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .loading {
@@ -595,7 +671,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Azure Recipe Wizard</h1>
+            <h1 onclick="window.location.href='/'">Azure Recipe Wizard</h1>
             <div class="mode-toggle">
                 <button class="mode-btn active" data-mode="wizard">Wizard Mode</button>
                 <button class="mode-btn" data-mode="builder">Builder Mode</button>
@@ -636,6 +712,13 @@
                     <div class="recipe-steps" id="recipeSteps"></div>
                     <button class="export-button" id="exportButton">Export Recipe</button>
                     <button class="export-button" id="startBuildingButton" style="margin-left: 10px;">Start Building from Recipe</button>
+                    <div id="recipeExportDisplay" style="display: none; margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h3 style="margin: 0;">Recipe JSON</h3>
+                            <button class="copy-recipe-btn" id="copyRecipeButton">Copy Recipe</button>
+                        </div>
+                        <pre id="recipeJsonDisplay" class="recipe-json-display"></pre>
+                    </div>
                 </div>
             </div>
         </div>

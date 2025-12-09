@@ -118,14 +118,49 @@ function getRecipeForNode(db, nodeId, selectedFeatures = null) {
     
     // If this is an AI Gateway recipe, filter steps based on selected features
     if (nodeId === 'apim-ai-gateway-recipe' && selectedFeatures && selectedFeatures.length > 0) {
-        // Map features to recipe step numbers
+        // Map features to recipe step numbers (handle both old and new granular feature IDs)
         const featureToStepMap = {
+            // Token Limits (granular)
             'token-limits': 3,
+            'token-limits-request': 3,
+            'token-limits-response': 3,
+            'token-limits-total': 3,
+            'token-limits-precalc': 3,
+            'token-limits-per-consumer': 3,
+            'token-limits-counter-key': 3,
+            // Content Safety (granular)
             'content-safety': 4,
+            'content-safety-prompt-injection': 4,
+            'content-safety-moderation': 4,
+            'content-safety-pii': 4,
+            'content-safety-custom-filters': 4,
+            // Semantic Caching (granular)
             'semantic-caching': 5,
+            'semantic-caching-basic': 5,
+            'semantic-caching-threshold': 5,
+            'semantic-caching-provider': 5,
+            'semantic-caching-invalidation': 5,
+            'semantic-caching-cost-opt': 5,
+            // Rate Limiting (granular)
             'rate-limiting': 6,
+            'rate-limiting-token-based': 6,
+            'rate-limiting-request-based': 6,
+            'rate-limiting-cost-based': 6,
+            'rate-limiting-scope': 6,
+            // Monitoring
+            'llm-metrics': 6,
+            'custom-metrics': 6,
+            'alerting': 6,
+            'dashboards': 6,
+            'log-aggregation': 6,
+            'performance-monitoring': 6,
+            'cost-tracking': 6,
+            // Real-time
             'realtime-api': 7,
-            'mcp-support': null // Special handling
+            'realtime-websocket': 7,
+            'realtime-streaming': 7,
+            'realtime-token-limits': 7,
+            'realtime-connection-mgmt': 7
         };
         
         // Always include core steps (1, 2, 8)
@@ -147,14 +182,70 @@ function getRecipeForNode(db, nodeId, selectedFeatures = null) {
                 return selectedStepNumbers.has(stepNum);
             });
             
-            // If MCP support is selected, add MCP-specific step
-            if (selectedFeatures.includes('mcp-support')) {
-                const mcpStep = {
-                    number: 9,
+            // Add conditional steps based on selected features
+            let stepCounter = recipe.steps.length;
+            
+            // MCP Support
+            if (selectedFeatures.some(f => f.startsWith('mcp-'))) {
+                recipe.steps.push({
+                    number: ++stepCounter,
                     title: "Configure MCP Support",
                     description: "Set up Model Context Protocol endpoints for tool discovery and invocation by AI agents"
-                };
-                recipe.steps.push(mcpStep);
+                });
+            }
+            
+            // Load Balancing
+            if (selectedFeatures.includes('load-balancing')) {
+                recipe.steps.push({
+                    number: ++stepCounter,
+                    title: "Configure Load Balancing",
+                    description: "Set up load balancing across multiple backend providers"
+                });
+            }
+            
+            // Circuit Breaker
+            if (selectedFeatures.includes('circuit-breaker')) {
+                recipe.steps.push({
+                    number: ++stepCounter,
+                    title: "Configure Circuit Breaker",
+                    description: "Set up circuit breaker policies to protect against backend failures"
+                });
+            }
+            
+            // Authentication
+            if (selectedFeatures.some(f => f.startsWith('auth-'))) {
+                recipe.steps.push({
+                    number: ++stepCounter,
+                    title: "Configure Authentication",
+                    description: "Set up authentication policies (OAuth, API keys, certificates, or managed identity)"
+                });
+            }
+            
+            // Authorization
+            if (selectedFeatures.some(f => f.startsWith('authz-'))) {
+                recipe.steps.push({
+                    number: ++stepCounter,
+                    title: "Configure Authorization",
+                    description: "Set up authorization policies (RBAC or policy-based access control)"
+                });
+            }
+            
+            // Transformation
+            if (selectedFeatures.some(f => f.startsWith('transform-'))) {
+                recipe.steps.push({
+                    number: ++stepCounter,
+                    title: "Configure Request/Response Transformation",
+                    description: "Set up transformation policies for headers, body, or query parameters"
+                });
+            }
+            
+            // Resilience
+            if (selectedFeatures.some(f => f.startsWith('retry-') || f.startsWith('timeout-') || f.startsWith('fallback-') || f === 'health-check')) {
+                recipe.steps.push({
+                    number: ++stepCounter,
+                    title: "Configure Resilience Policies",
+                    description: "Set up retry, timeout, fallback, and health check policies"
+                });
             }
             
             // Renumber steps sequentially
@@ -191,49 +282,68 @@ function getRecipeForNode(db, nodeId, selectedFeatures = null) {
 /**
  * Filter AI Gateway details based on selected features
  * @param {Object} aiGatewayDetails - Full AI Gateway details object
- * @param {Array<string>} selectedFeatures - Selected feature IDs
+ * @param {Array<string>} selectedFeatures - Selected feature IDs (can be granular)
  * @returns {Object} Filtered AI Gateway details
  */
 function filterAiGatewayDetails(aiGatewayDetails, selectedFeatures) {
     const filtered = JSON.parse(JSON.stringify(aiGatewayDetails)); // Deep clone
     
+    // Helper to check if any feature in a group is selected
+    const hasFeatureGroup = (prefix) => selectedFeatures.some(f => f.startsWith(prefix) || f === prefix.replace('-', ''));
+    
     // Filter policies
     if (filtered.policies) {
-        if (!selectedFeatures.includes('token-limits') && filtered.policies.tokenLimits) {
+        // Token Limits (check for any token-limits feature)
+        if (!hasFeatureGroup('token-limits') && filtered.policies.tokenLimits) {
             delete filtered.policies.tokenLimits;
         }
-        if (!selectedFeatures.includes('content-safety') && filtered.policies.contentSafety) {
+        
+        // Content Safety (check for any content-safety feature)
+        if (!hasFeatureGroup('content-safety') && filtered.policies.contentSafety) {
             delete filtered.policies.contentSafety;
         }
-        if (!selectedFeatures.includes('semantic-caching') && filtered.policies.semanticCaching) {
+        
+        // Semantic Caching (check for any semantic-caching feature)
+        if (!hasFeatureGroup('semantic-caching') && filtered.policies.semanticCaching) {
             delete filtered.policies.semanticCaching;
         }
-        if (!selectedFeatures.includes('rate-limiting') && filtered.policies.rateLimiting) {
+        
+        // Rate Limiting (check for any rate-limiting feature)
+        if (!hasFeatureGroup('rate-limiting') && filtered.policies.rateLimiting) {
             delete filtered.policies.rateLimiting;
         }
     }
     
     // Filter integration
     if (filtered.integration) {
-        if (!selectedFeatures.includes('azure-openai') && filtered.integration.azureOpenAI) {
+        // Check for Azure OpenAI (including sub-features)
+        if (!selectedFeatures.some(f => f.startsWith('azure-openai')) && filtered.integration.azureOpenAI) {
             delete filtered.integration.azureOpenAI;
         }
-        if (!selectedFeatures.includes('openai') && filtered.integration.openAI) {
+        
+        // Check for OpenAI (including sub-features)
+        if (!selectedFeatures.some(f => f.startsWith('openai') && !f.startsWith('azure-openai')) && filtered.integration.openAI) {
             delete filtered.integration.openAI;
         }
+        
+        // Microsoft Foundry
         if (!selectedFeatures.includes('microsoft-foundry') && filtered.integration.microsoftFoundry) {
             delete filtered.integration.microsoftFoundry;
         }
+        
+        // Custom LLM
         if (!selectedFeatures.includes('custom-llm') && filtered.integration.customLLMProviders) {
             delete filtered.integration.customLLMProviders;
         }
-        if (!selectedFeatures.includes('self-hosted') && filtered.integration.selfHostedModels) {
+        
+        // Self-hosted (including sub-features)
+        if (!selectedFeatures.some(f => f.startsWith('self-hosted')) && filtered.integration.selfHostedModels) {
             delete filtered.integration.selfHostedModels;
         }
     }
     
-    // Filter MCP support
-    if (!selectedFeatures.includes('mcp-support') && filtered.mcpSupport) {
+    // Filter MCP support (check for any mcp- feature)
+    if (!hasFeatureGroup('mcp-') && filtered.mcpSupport) {
         filtered.mcpSupport = { enabled: false };
     }
     
@@ -276,7 +386,9 @@ router.get('/', async (req, res) => {
         let selectedFeatures = null;
         if (req.query.features) {
             try {
-                selectedFeatures = JSON.parse(decodeURIComponent(req.query.features));
+                const featuresData = JSON.parse(decodeURIComponent(req.query.features));
+                // Handle both old format (array) and new format (object with features array)
+                selectedFeatures = Array.isArray(featuresData) ? featuresData : featuresData.features;
             } catch (e) {
                 console.warn('Failed to parse features from query:', e);
             }

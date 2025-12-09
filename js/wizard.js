@@ -4,6 +4,7 @@
 import { WizardEngine } from './wizard-engine.js';
 import { loadData } from './data-loader.js';
 import * as ui from './ui.js';
+import { generateBicepTemplate, generateDeploymentScript, generateDeploymentScriptPowerShell, generateReadme } from './bicep-generator.js';
 
 let wizardEngine = null;
 let pendingMode = null;
@@ -257,14 +258,27 @@ async function handleFeatureSubmit(selectedFeatures) {
         return;
     }
 
+    // Get feature data from sessionStorage (includes config options)
+    const featureDataStr = sessionStorage.getItem('apim-ai-gateway-selected-features');
+    let featureData = { features: selectedFeatures };
+    if (featureDataStr) {
+        try {
+            const stored = JSON.parse(featureDataStr);
+            featureData = stored.features ? stored : { features: selectedFeatures, config: stored.config || {} };
+        } catch (e) {
+            // Fallback to array format
+            featureData = { features: selectedFeatures };
+        }
+    }
+
     // Store features in sessionStorage
-    sessionStorage.setItem('apim-ai-gateway-selected-features', JSON.stringify(selectedFeatures));
+    sessionStorage.setItem('apim-ai-gateway-selected-features', JSON.stringify(featureData));
 
     // If we have server-rendered data, navigate via server
     if (window.SERVER_DATA) {
         const currentNode = window.SERVER_DATA.currentNode;
         // Navigate to recipe with features as query params
-        const featuresParam = encodeURIComponent(JSON.stringify(selectedFeatures));
+        const featuresParam = encodeURIComponent(JSON.stringify(featureData));
         window.location.href = `/wizard/navigate?fromNodeId=${currentNode.id}&optionId=feature-selection-submit&features=${featuresParam}`;
         return;
     }
@@ -441,21 +455,125 @@ async function handleLoadResources() {
 /**
  * Handle export
  */
+/**
+ * Handle export - generate Bicep templates and export package
+ */
 async function handleExport() {
     if (!wizardEngine) {
         return;
     }
 
     try {
+        // Get current node - should be terminal node with recipe
+        const currentNode = await wizardEngine.getCurrentNode();
+        if (!currentNode || currentNode.nodeType !== 'terminal') {
+            ui.showError('No recipe available to export. Please navigate to a recipe first.');
+            return;
+        }
+
+        // Get recipe data using the correct method
+        const recipe = await wizardEngine.dataProvider.getRecipeForNode(currentNode.id);
+        if (!recipe) {
+            ui.showError('Recipe not found');
+            return;
+        }
+
+        // Get selected features
+        let selectedFeatures = [];
+        try {
+            const featuresStr = sessionStorage.getItem('apim-ai-gateway-selected-features');
+            if (featuresStr) {
+                const featuresData = JSON.parse(featuresStr);
+                selectedFeatures = Array.isArray(featuresData) ? featuresData : 
+                                 (featuresData.features || []);
+            }
+        } catch (e) {
+            console.warn('Could not parse selected features:', e);
+        }
+
+        // Generate Bicep templates
+        const bicepFiles = generateBicepTemplate(recipe, selectedFeatures, {});
+        
+        // Generate deployment scripts
+        const deployScript = generateDeploymentScript(recipe, selectedFeatures, {});
+        const deployScriptPS = generateDeploymentScriptPowerShell(recipe, selectedFeatures, {});
+        
+        // Generate README
+        const readme = generateReadme(recipe, selectedFeatures, {});
+        
+        // Get export data for JSON
         const exportData = await wizardEngine.exportPath();
-        const jsonStr = JSON.stringify(exportData, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `azure-recipe-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const recipeJson = JSON.stringify(exportData, null, 2);
+
+        // Display recipe JSON on screen
+        const recipeExportDisplay = document.getElementById('recipeExportDisplay');
+        const recipeJsonDisplay = document.getElementById('recipeJsonDisplay');
+        const copyRecipeButton = document.getElementById('copyRecipeButton');
+        
+        if (recipeExportDisplay && recipeJsonDisplay) {
+            recipeJsonDisplay.textContent = recipeJson;
+            recipeExportDisplay.style.display = 'block';
+            
+            // Scroll to the export display area
+            recipeExportDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Set up copy button functionality
+            if (copyRecipeButton) {
+                copyRecipeButton.onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(recipeJson);
+                        // Show feedback notification
+                        const notification = document.createElement('div');
+                        notification.className = 'copy-notification';
+                        notification.textContent = 'Recipe copied to clipboard!';
+                        document.body.appendChild(notification);
+                        setTimeout(() => notification.remove(), 2000);
+                    } catch (err) {
+                        console.error('Failed to copy recipe:', err);
+                        ui.showError('Failed to copy recipe to clipboard');
+                    }
+                };
+            }
+        }
+
+        // Create ZIP file using JSZip (if available) or download individual files
+        if (typeof JSZip !== 'undefined') {
+            const zip = new JSZip();
+            
+            // Add Bicep files
+            zip.file('main.bicep', bicepFiles.main);
+            zip.file('parameters.bicep', bicepFiles.parameters);
+            
+            // Add deployment scripts
+            zip.file('deploy.sh', deployScript);
+            zip.file('deploy.ps1', deployScriptPS);
+            
+            // Add README
+            zip.file('README.md', readme);
+            
+            // Add recipe metadata
+            zip.file('recipe.json', recipeJson);
+            
+            // Generate and download ZIP
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `azure-recipe-${recipe.title?.toLowerCase().replace(/\s+/g, '-') || 'deployment'}-${new Date().toISOString().split('T')[0]}.zip`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } else {
+            // Fallback: download main.bicep file
+            const blob = new Blob([bicepFiles.main], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `main.bicep`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            ui.showError('JSZip not available. Only main.bicep downloaded. Install JSZip for full export package.');
+        }
     } catch (error) {
         console.error('Export error:', error);
         ui.showError(`Error exporting: ${error.message}`);
