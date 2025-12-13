@@ -1,0 +1,1150 @@
+{
+  "version": "2025.01.20",
+  "policies": [
+    {
+      "id": "authenticate-basic",
+      "name": "authenticate-basic",
+      "category": "authentication",
+      "scope": ["api", "operation"],
+      "description": "Authenticate with a backend service using Basic authentication",
+      "parameters": {
+        "username": {
+          "type": "string",
+          "required": true,
+          "label": "Username",
+          "description": "Username for Basic authentication"
+        },
+        "password": {
+          "type": "string",
+          "required": true,
+          "label": "Password",
+          "description": "Password for Basic authentication",
+          "secret": true
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<authenticate-basic username=\"{{username}}\" password=\"{{password}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/authenticate-basic-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      },
+      "examples": [
+        {
+          "name": "Basic Auth",
+          "config": {
+            "username": "myuser",
+            "password": "mypassword"
+          }
+        }
+      ]
+    },
+    {
+      "id": "authenticate-certificate",
+      "name": "authenticate-certificate",
+      "category": "authentication",
+      "scope": ["api", "operation"],
+      "description": "Authenticate with a backend service using a client certificate",
+      "parameters": {
+        "thumbprint": {
+          "type": "string",
+          "required": true,
+          "label": "Certificate Thumbprint",
+          "description": "Thumbprint of the certificate stored in API Management"
+        },
+        "certificateId": {
+          "type": "string",
+          "required": false,
+          "label": "Certificate ID",
+          "description": "ID of the certificate (alternative to thumbprint)"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<authenticate-certificate thumbprint=\"{{thumbprint}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/authenticate-certificate-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "authenticate-managed-identity",
+      "name": "authenticate-managed-identity",
+      "category": "authentication",
+      "scope": ["api", "operation"],
+      "description": "Authenticate with a backend service using a managed identity",
+      "parameters": {
+        "identity": {
+          "type": "string",
+          "required": false,
+          "label": "Managed Identity",
+          "description": "Managed identity to use (default: system-assigned)",
+          "default": "managed-identity"
+        },
+        "ignore-error": {
+          "type": "boolean",
+          "required": false,
+          "label": "Ignore Error",
+          "description": "Continue execution if authentication fails",
+          "default": false
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<authenticate-managed-identity identity=\"{{identity}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/authenticate-managed-identity-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "rate-limit",
+      "name": "rate-limit",
+      "category": "rate-limiting",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Prevents API usage spikes by limiting the call rate per subscription",
+      "parameters": {
+        "calls": {
+          "type": "number",
+          "required": true,
+          "label": "Calls",
+          "description": "Maximum number of calls allowed during the time period"
+        },
+        "renewal-period": {
+          "type": "number",
+          "required": true,
+          "label": "Renewal Period (seconds)",
+          "description": "Time window in seconds for rate limit"
+        },
+        "counter-key": {
+          "type": "string",
+          "required": false,
+          "label": "Counter Key",
+          "description": "Expression to use as rate limit key (default: subscription key)"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<rate-limit calls=\"{{calls}}\" renewal-period=\"{{renewal-period}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/rate-limit-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      },
+      "examples": [
+        {
+          "name": "100 calls per minute",
+          "config": {
+            "calls": 100,
+            "renewal-period": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "rate-limit-by-key",
+      "name": "rate-limit-by-key",
+      "category": "rate-limiting",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Prevents API usage spikes by limiting the call rate per key",
+      "parameters": {
+        "calls": {
+          "type": "number",
+          "required": true,
+          "label": "Calls",
+          "description": "Maximum number of calls allowed"
+        },
+        "renewal-period": {
+          "type": "number",
+          "required": true,
+          "label": "Renewal Period (seconds)",
+          "description": "Time window in seconds"
+        },
+        "counter-key": {
+          "type": "string",
+          "required": true,
+          "label": "Counter Key Expression",
+          "description": "Expression to use as rate limit key"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<rate-limit-by-key calls=\"{{calls}}\" renewal-period=\"{{renewal-period}}\" counter-key=\"{{counter-key}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/rate-limit-by-key-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "quota",
+      "name": "quota",
+      "category": "rate-limiting",
+      "scope": ["product", "api", "operation"],
+      "description": "Enforces a renewable or lifetime call volume and/or bandwidth quota per subscription",
+      "parameters": {
+        "calls": {
+          "type": "number",
+          "required": false,
+          "label": "Calls",
+          "description": "Maximum number of calls allowed"
+        },
+        "bandwidth": {
+          "type": "number",
+          "required": false,
+          "label": "Bandwidth (KB)",
+          "description": "Maximum bandwidth in kilobytes"
+        },
+        "renewal-period": {
+          "type": "number",
+          "required": false,
+          "label": "Renewal Period (seconds)",
+          "description": "Time window for quota renewal (0 for lifetime quota)"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<quota calls=\"{{calls}}\" bandwidth=\"{{bandwidth}}\" renewal-period=\"{{renewal-period}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/quota-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "set-header",
+      "name": "set-header",
+      "category": "transformation",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Assigns a value to an existing response and/or request header or adds a new response and/or request header",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "label": "Header Name",
+          "description": "Name of the header to set"
+        },
+        "value": {
+          "type": "string",
+          "required": true,
+          "label": "Header Value",
+          "description": "Value to set for the header (can be expression)"
+        },
+        "exists-action": {
+          "type": "string",
+          "required": false,
+          "label": "Exists Action",
+          "description": "Action when header exists: override, skip, append",
+          "default": "override",
+          "enum": ["override", "skip", "append"]
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<set-header name=\"{{name}}\" exists-action=\"{{exists-action}}\" value=\"{{value}}\" />",
+        "outbound": "<set-header name=\"{{name}}\" exists-action=\"{{exists-action}}\" value=\"{{value}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/set-header-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "set-body",
+      "name": "set-body",
+      "category": "transformation",
+      "scope": ["api", "operation"],
+      "description": "Sets the message body for incoming and outgoing requests",
+      "parameters": {
+        "body": {
+          "type": "string",
+          "required": true,
+          "label": "Body Content",
+          "description": "Body content (can be expression or template)"
+        },
+        "mode": {
+          "type": "string",
+          "required": false,
+          "label": "Mode",
+          "description": "How to set body: raw, template, liquid",
+          "default": "raw",
+          "enum": ["raw", "template", "liquid"]
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<set-body mode=\"{{mode}}\">{{body}}</set-body>",
+        "outbound": "<set-body mode=\"{{mode}}\">{{body}}</set-body>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/set-body-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "find-and-replace",
+      "name": "find-and-replace",
+      "category": "transformation",
+      "scope": ["api", "operation"],
+      "description": "Finds a request or response substring and replaces it with another substring",
+      "parameters": {
+        "from": {
+          "type": "string",
+          "required": true,
+          "label": "Find",
+          "description": "String or regex pattern to find"
+        },
+        "to": {
+          "type": "string",
+          "required": true,
+          "label": "Replace",
+          "description": "Replacement string"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<find-and-replace from=\"{{from}}\" to=\"{{to}}\" />",
+        "outbound": "<find-and-replace from=\"{{from}}\" to=\"{{to}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/find-and-replace-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "json-to-xml",
+      "name": "json-to-xml",
+      "category": "transformation",
+      "scope": ["api", "operation"],
+      "description": "Converts request or response body from JSON to XML",
+      "parameters": {
+        "apply": {
+          "type": "string",
+          "required": false,
+          "label": "Apply",
+          "description": "When to apply: always, content-type-json",
+          "default": "always",
+          "enum": ["always", "content-type-json"]
+        },
+        "consider-accept-header": {
+          "type": "boolean",
+          "required": false,
+          "label": "Consider Accept Header",
+          "description": "Check Accept header before conversion",
+          "default": false
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<json-to-xml apply=\"{{apply}}\" consider-accept-header=\"{{consider-accept-header}}\" />",
+        "outbound": "<json-to-xml apply=\"{{apply}}\" consider-accept-header=\"{{consider-accept-header}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/json-to-xml-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "xml-to-json",
+      "name": "xml-to-json",
+      "category": "transformation",
+      "scope": ["api", "operation"],
+      "description": "Converts request or response body from XML to JSON",
+      "parameters": {
+        "apply": {
+          "type": "string",
+          "required": false,
+          "label": "Apply",
+          "description": "When to apply: always, content-type-xml",
+          "default": "always",
+          "enum": ["always", "content-type-xml"]
+        },
+        "consider-accept-header": {
+          "type": "boolean",
+          "required": false,
+          "label": "Consider Accept Header",
+          "description": "Check Accept header before conversion",
+          "default": false
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<xml-to-json apply=\"{{apply}}\" consider-accept-header=\"{{consider-accept-header}}\" />",
+        "outbound": "<xml-to-json apply=\"{{apply}}\" consider-accept-header=\"{{consider-accept-header}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/xml-to-json-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "cache-lookup",
+      "name": "cache-lookup",
+      "category": "caching",
+      "scope": ["api", "operation"],
+      "description": "Perform cache lookup and return a valid cached response when available",
+      "parameters": {
+        "vary-by-developer": {
+          "type": "boolean",
+          "required": false,
+          "label": "Vary by Developer",
+          "description": "Cache varies by developer ID",
+          "default": false
+        },
+        "vary-by-developer-groups": {
+          "type": "boolean",
+          "required": false,
+          "label": "Vary by Developer Groups",
+          "description": "Cache varies by developer groups",
+          "default": false
+        },
+        "downstream-caching-type": {
+          "type": "string",
+          "required": false,
+          "label": "Downstream Caching Type",
+          "description": "Type of downstream caching: none, private, public",
+          "enum": ["none", "private", "public"]
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<cache-lookup vary-by-developer=\"{{vary-by-developer}}\" vary-by-developer-groups=\"{{vary-by-developer-groups}}\" downstream-caching-type=\"{{downstream-caching-type}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/cache-lookup-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "cache-store",
+      "name": "cache-store",
+      "category": "caching",
+      "scope": ["api", "operation"],
+      "description": "Cache response according to the specified cache settings",
+      "parameters": {
+        "duration": {
+          "type": "number",
+          "required": true,
+          "label": "Duration (seconds)",
+          "description": "Cache duration in seconds"
+        }
+      },
+      "xmlTemplate": {
+        "outbound": "<cache-store duration=\"{{duration}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/cache-store-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "forward-request",
+      "name": "forward-request",
+      "category": "routing",
+      "scope": ["api", "operation"],
+      "description": "Forwards the incoming request to the backend service",
+      "parameters": {
+        "timeout": {
+          "type": "number",
+          "required": false,
+          "label": "Timeout (seconds)",
+          "description": "Request timeout in seconds"
+        },
+        "follow-redirects": {
+          "type": "string",
+          "required": false,
+          "label": "Follow Redirects",
+          "description": "How to handle redirects: none, false, true",
+          "enum": ["none", "false", "true"]
+        }
+      },
+      "xmlTemplate": {
+        "backend": "<forward-request timeout=\"{{timeout}}\" follow-redirects=\"{{follow-redirects}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/forward-request-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "set-backend-service",
+      "name": "set-backend-service",
+      "category": "routing",
+      "scope": ["api", "operation"],
+      "description": "Changes the backend service for an incoming request",
+      "parameters": {
+        "base-url": {
+          "type": "string",
+          "required": false,
+          "label": "Base URL",
+          "description": "Backend service base URL"
+        },
+        "backend-id": {
+          "type": "string",
+          "required": false,
+          "label": "Backend ID",
+          "description": "ID of the backend service"
+        }
+      },
+      "xmlTemplate": {
+        "backend": "<set-backend-service base-url=\"{{base-url}}\" backend-id=\"{{backend-id}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/set-backend-service-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "rewrite-uri",
+      "name": "rewrite-uri",
+      "category": "routing",
+      "scope": ["api", "operation"],
+      "description": "Converts a request URL from its public form to the form expected by the web service",
+      "parameters": {
+        "template": {
+          "type": "string",
+          "required": true,
+          "label": "URI Template",
+          "description": "URI template for rewriting"
+        },
+        "copy-unmatched-params": {
+          "type": "boolean",
+          "required": false,
+          "label": "Copy Unmatched Params",
+          "description": "Copy query parameters not in template",
+          "default": true
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<rewrite-uri template=\"{{template}}\" copy-unmatched-params=\"{{copy-unmatched-params}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/rewrite-uri-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "validate-jwt",
+      "name": "validate-jwt",
+      "category": "security",
+      "scope": ["api", "operation"],
+      "description": "Enforces existence and validity of a JWT extracted from either a specified HTTP header or a specified query parameter",
+      "parameters": {
+        "header-name": {
+          "type": "string",
+          "required": false,
+          "label": "Header Name",
+          "description": "HTTP header containing the JWT"
+        },
+        "query-parameter-name": {
+          "type": "string",
+          "required": false,
+          "label": "Query Parameter Name",
+          "description": "Query parameter containing the JWT"
+        },
+        "require-expiration-time": {
+          "type": "boolean",
+          "required": false,
+          "label": "Require Expiration Time",
+          "description": "Require expiration time claim",
+          "default": true
+        },
+        "require-scheme": {
+          "type": "string",
+          "required": false,
+          "label": "Require Scheme",
+          "description": "Required token scheme (e.g., Bearer)"
+        },
+        "require-signed-tokens": {
+          "type": "boolean",
+          "required": false,
+          "label": "Require Signed Tokens",
+          "description": "Require tokens to be signed",
+          "default": true
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<validate-jwt header-name=\"{{header-name}}\" require-expiration-time=\"{{require-expiration-time}}\" require-signed-tokens=\"{{require-signed-tokens}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/validate-jwt-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "check-header",
+      "name": "check-header",
+      "category": "security",
+      "scope": ["api", "operation"],
+      "description": "Enforces that a request has a specified HTTP header and/or that it has a specified value",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "label": "Header Name",
+          "description": "Name of the HTTP header to check"
+        },
+        "failed-check-httpcode": {
+          "type": "number",
+          "required": false,
+          "label": "Failed Check HTTP Code",
+          "description": "HTTP status code to return if check fails",
+          "default": 401
+        },
+        "failed-check-error-message": {
+          "type": "string",
+          "required": false,
+          "label": "Failed Check Error Message",
+          "description": "Error message to return if check fails"
+        },
+        "ignore-case": {
+          "type": "boolean",
+          "required": false,
+          "label": "Ignore Case",
+          "description": "Ignore case when comparing values",
+          "default": true
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<check-header name=\"{{name}}\" failed-check-httpcode=\"{{failed-check-httpcode}}\" failed-check-error-message=\"{{failed-check-error-message}}\" ignore-case=\"{{ignore-case}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/check-header-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "cors",
+      "name": "cors",
+      "category": "security",
+      "scope": ["api", "operation"],
+      "description": "Adds cross-origin resource sharing (CORS) support to an operation or an API",
+      "parameters": {
+        "allow-credentials": {
+          "type": "boolean",
+          "required": false,
+          "label": "Allow Credentials",
+          "description": "Allow credentials in CORS requests",
+          "default": false
+        },
+        "allowed-origins": {
+          "type": "array",
+          "required": true,
+          "label": "Allowed Origins",
+          "description": "List of allowed origins"
+        },
+        "allowed-methods": {
+          "type": "array",
+          "required": false,
+          "label": "Allowed Methods",
+          "description": "List of allowed HTTP methods",
+          "default": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        },
+        "allowed-headers": {
+          "type": "array",
+          "required": false,
+          "label": "Allowed Headers",
+          "description": "List of allowed headers"
+        },
+        "exposed-headers": {
+          "type": "array",
+          "required": false,
+          "label": "Exposed Headers",
+          "description": "List of exposed headers"
+        },
+        "max-age": {
+          "type": "number",
+          "required": false,
+          "label": "Max Age (seconds)",
+          "description": "Maximum age for preflight requests"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<cors allow-credentials=\"{{allow-credentials}}\"><allowed-origins>{{#each allowed-origins}}<origin>{{this}}</origin>{{/each}}</allowed-origins><allowed-methods>{{#each allowed-methods}}<method>{{this}}</method>{{/each}}</allowed-methods><allowed-headers>{{#each allowed-headers}}<header>{{this}}</header>{{/each}}</allowed-headers><exposed-headers>{{#each exposed-headers}}<header>{{this}}</header>{{/each}}</exposed-headers><max-age>{{max-age}}</max-age></cors>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/cors-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "trace",
+      "name": "trace",
+      "category": "logging",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Adds a custom trace into the API Inspector output, Application Insights telemetries, and/or Diagnostic Logs",
+      "parameters": {
+        "message": {
+          "type": "string",
+          "required": true,
+          "label": "Message",
+          "description": "Trace message (can be expression)"
+        },
+        "severity": {
+          "type": "string",
+          "required": false,
+          "label": "Severity",
+          "description": "Trace severity level",
+          "enum": ["verbose", "information", "warning", "error"],
+          "default": "information"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />",
+        "outbound": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />",
+        "backend": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />",
+        "on-error": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/trace-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "log-to-eventhub",
+      "name": "log-to-eventhub",
+      "category": "logging",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Sends messages in the specified format to an Event Hub defined by a Logger entity",
+      "parameters": {
+        "logger-id": {
+          "type": "string",
+          "required": true,
+          "label": "Logger ID",
+          "description": "ID of the Event Hub logger"
+        },
+        "partition-key": {
+          "type": "string",
+          "required": false,
+          "label": "Partition Key",
+          "description": "Partition key for Event Hub (can be expression)"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<log-to-eventhub logger-id=\"{{logger-id}}\" partition-key=\"{{partition-key}}\"><@(context.Request.Body.As<string>(preserveContent: true))></log-to-eventhub>",
+        "outbound": "<log-to-eventhub logger-id=\"{{logger-id}}\" partition-key=\"{{partition-key}}\"><@(context.Response.Body.As<string>(preserveContent: true))></log-to-eventhub>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/log-to-eventhub-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "emit-metric",
+      "name": "emit-metric",
+      "category": "logging",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Emits a custom metric to Application Insights",
+      "parameters": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "label": "Metric Name",
+          "description": "Name of the custom metric"
+        },
+        "value": {
+          "type": "string",
+          "required": true,
+          "label": "Value",
+          "description": "Metric value (can be expression)"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<emit-metric name=\"{{name}}\" value=\"{{value}}\" />",
+        "outbound": "<emit-metric name=\"{{name}}\" value=\"{{value}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/emit-metric-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "retry",
+      "name": "retry",
+      "category": "error-handling",
+      "scope": ["api", "operation"],
+      "description": "Retries execution of the enclosed policy statements, if and until the condition is met",
+      "parameters": {
+        "condition": {
+          "type": "string",
+          "required": false,
+          "label": "Condition",
+          "description": "Condition expression for retry"
+        },
+        "count": {
+          "type": "number",
+          "required": true,
+          "label": "Retry Count",
+          "description": "Maximum number of retry attempts",
+          "default": 3
+        },
+        "interval": {
+          "type": "number",
+          "required": false,
+          "label": "Interval (seconds)",
+          "description": "Wait interval between retries in seconds",
+          "default": 1
+        },
+        "max-interval": {
+          "type": "number",
+          "required": false,
+          "label": "Max Interval (seconds)",
+          "description": "Maximum wait interval"
+        },
+        "delta": {
+          "type": "number",
+          "required": false,
+          "label": "Delta (seconds)",
+          "description": "Interval increment for exponential backoff"
+        },
+        "first-fast-retry": {
+          "type": "boolean",
+          "required": false,
+          "label": "First Fast Retry",
+          "description": "Skip wait for first retry",
+          "default": false
+        }
+      },
+      "xmlTemplate": {
+        "backend": "<retry condition=\"{{condition}}\" count=\"{{count}}\" interval=\"{{interval}}\" max-interval=\"{{max-interval}}\" delta=\"{{delta}}\" first-fast-retry=\"{{first-fast-retry}}\"><forward-request /></retry>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/retry-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "circuit-breaker",
+      "name": "circuit-breaker",
+      "category": "error-handling",
+      "scope": ["api", "operation"],
+      "description": "Prevents an API from being overwhelmed when part of the backend is experiencing issues",
+      "parameters": {
+        "failure-threshold": {
+          "type": "number",
+          "required": true,
+          "label": "Failure Threshold",
+          "description": "Number of failures before opening circuit",
+          "default": 5
+        },
+        "half-open-after": {
+          "type": "number",
+          "required": true,
+          "label": "Half Open After (seconds)",
+          "description": "Time in seconds before attempting half-open",
+          "default": 60
+        },
+        "timeout": {
+          "type": "number",
+          "required": false,
+          "label": "Timeout (seconds)",
+          "description": "Request timeout"
+        }
+      },
+      "xmlTemplate": {
+        "backend": "<circuit-breaker failure-threshold=\"{{failure-threshold}}\" half-open-after=\"{{half-open-after}}\" timeout=\"{{timeout}}\"><forward-request /></circuit-breaker>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/circuit-breaker-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "return-response",
+      "name": "return-response",
+      "category": "error-handling",
+      "scope": ["api", "operation"],
+      "description": "Aborts pipeline execution and returns either a default or custom response to the caller",
+      "parameters": {
+        "status-code": {
+          "type": "number",
+          "required": false,
+          "label": "Status Code",
+          "description": "HTTP status code",
+          "default": 200
+        },
+        "reason-phrase": {
+          "type": "string",
+          "required": false,
+          "label": "Reason Phrase",
+          "description": "HTTP reason phrase"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<return-response status-code=\"{{status-code}}\" reason-phrase=\"{{reason-phrase}}\" />",
+        "outbound": "<return-response status-code=\"{{status-code}}\" reason-phrase=\"{{reason-phrase}}\" />",
+        "on-error": "<return-response status-code=\"{{status-code}}\" reason-phrase=\"{{reason-phrase}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/return-response-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "llm-token-limit",
+      "name": "llm-token-limit",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Limits the number of tokens that can be sent to an LLM backend per time period",
+      "parameters": {
+        "tokens-per-minute": {
+          "type": "number",
+          "required": true,
+          "label": "Tokens Per Minute",
+          "description": "Maximum tokens allowed per minute",
+          "default": 10000
+        },
+        "tokens-per-day": {
+          "type": "number",
+          "required": false,
+          "label": "Tokens Per Day",
+          "description": "Maximum tokens allowed per day"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<llm-token-limit tokens-per-minute=\"{{tokens-per-minute}}\" tokens-per-day=\"{{tokens-per-day}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/llm-token-limit-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
+      }
+    },
+    {
+      "id": "llm-content-safety",
+      "name": "llm-content-safety",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Validates content using Azure AI Content Safety before sending to LLM backend",
+      "parameters": {
+        "content-safety-resource-id": {
+          "type": "string",
+          "required": true,
+          "label": "Content Safety Resource ID",
+          "description": "Resource ID of Azure AI Content Safety resource"
+        },
+        "severity-level": {
+          "type": "string",
+          "required": false,
+          "label": "Severity Level",
+          "description": "Content safety severity level",
+          "enum": ["low", "medium", "high"],
+          "default": "medium"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<llm-content-safety content-safety-resource-id=\"{{content-safety-resource-id}}\" severity-level=\"{{severity-level}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/llm-content-safety-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
+      }
+    },
+    {
+      "id": "llm-semantic-cache-lookup",
+      "name": "llm-semantic-cache-lookup",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Looks up semantically similar requests in cache",
+      "parameters": {
+        "cache-provider-id": {
+          "type": "string",
+          "required": true,
+          "label": "Cache Provider ID",
+          "description": "ID of the cache provider (e.g., Redis connection string)"
+        },
+        "similarity-threshold": {
+          "type": "number",
+          "required": true,
+          "label": "Similarity Threshold",
+          "description": "Similarity threshold (0.0 to 1.0)",
+          "default": 0.8,
+          "min": 0,
+          "max": 1
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<llm-semantic-cache-lookup cache-provider-id=\"{{cache-provider-id}}\" similarity-threshold=\"{{similarity-threshold}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/llm-semantic-cache-lookup-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
+      }
+    },
+    {
+      "id": "llm-semantic-cache-store",
+      "name": "llm-semantic-cache-store",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Stores LLM request/response in semantic cache",
+      "parameters": {
+        "cache-provider-id": {
+          "type": "string",
+          "required": true,
+          "label": "Cache Provider ID",
+          "description": "ID of the cache provider"
+        }
+      },
+      "xmlTemplate": {
+        "outbound": "<llm-semantic-cache-store cache-provider-id=\"{{cache-provider-id}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/llm-semantic-cache-store-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
+      }
+    },
+    {
+      "id": "llm-emit-token-metric",
+      "name": "llm-emit-token-metric",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Emits token usage metrics to Application Insights",
+      "parameters": {
+        "namespace": {
+          "type": "string",
+          "required": false,
+          "label": "Namespace",
+          "description": "Metric namespace",
+          "default": "apim-llm"
+        }
+      },
+      "xmlTemplate": {
+        "outbound": "<llm-emit-token-metric namespace=\"{{namespace}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/llm-emit-token-metric-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
+      }
+    },
+    {
+      "id": "choose",
+      "name": "choose",
+      "category": "advanced",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Conditionally applies policy statements based on the evaluation of Boolean expressions",
+      "parameters": {},
+      "xmlTemplate": {
+        "inbound": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>",
+        "outbound": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>",
+        "backend": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>",
+        "on-error": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/choose-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "include",
+      "name": "include",
+      "category": "advanced",
+      "scope": ["global", "product", "api", "operation"],
+      "description": "Includes policy statements from a specified policy",
+      "parameters": {
+        "fragment-id": {
+          "type": "string",
+          "required": true,
+          "label": "Fragment ID",
+          "description": "ID of the policy fragment to include"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<include fragment-id=\"{{fragment-id}}\" />",
+        "outbound": "<include fragment-id=\"{{fragment-id}}\" />",
+        "backend": "<include fragment-id=\"{{fragment-id}}\" />",
+        "on-error": "<include fragment-id=\"{{fragment-id}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/include-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "send-request",
+      "name": "send-request",
+      "category": "advanced",
+      "scope": ["api", "operation"],
+      "description": "Sends a request to the specified URL",
+      "parameters": {
+        "mode": {
+          "type": "string",
+          "required": false,
+          "label": "Mode",
+          "description": "Request mode: new, copy",
+          "enum": ["new", "copy"],
+          "default": "new"
+        },
+        "response-variable-name": {
+          "type": "string",
+          "required": false,
+          "label": "Response Variable Name",
+          "description": "Variable name to store response"
+        },
+        "timeout": {
+          "type": "number",
+          "required": false,
+          "label": "Timeout (seconds)",
+          "description": "Request timeout"
+        },
+        "ignore-error": {
+          "type": "boolean",
+          "required": false,
+          "label": "Ignore Error",
+          "description": "Continue execution if request fails",
+          "default": false
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>",
+        "outbound": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>",
+        "backend": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>",
+        "on-error": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/send-request-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    },
+    {
+      "id": "wait",
+      "name": "wait",
+      "category": "advanced",
+      "scope": ["api", "operation"],
+      "description": "Waits for enclosed send-request policies to complete before proceeding",
+      "parameters": {},
+      "xmlTemplate": {
+        "inbound": "<wait><send-request><!-- request 1 --></send-request><send-request><!-- request 2 --></send-request></wait>",
+        "outbound": "<wait><send-request><!-- request 1 --></send-request><send-request><!-- request 2 --></send-request></wait>",
+        "backend": "<wait><send-request><!-- request 1 --></send-request><send-request><!-- request 2 --></send-request></wait>"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/wait-policy",
+      "compatibility": {
+        "apimVersions": ["all"],
+        "skuTiers": ["all"]
+      }
+    }
+  ]
+}

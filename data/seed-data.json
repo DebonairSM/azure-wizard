@@ -326,6 +326,108 @@
       "azObjectives": ["AZ-204.2"]
     },
     {
+      "id": "apim-policy-wizard-start",
+      "question": "Configure API Management Policies?",
+      "description": "Would you like to configure policies for your API Management instance? Policies control authentication, rate limiting, transformations, caching, and more.",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-scope",
+      "question": "Select Policy Scope",
+      "description": "Choose where to apply the policies. Global policies apply to all APIs, while API/operation policies are more specific.",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-category",
+      "question": "Select Policy Category",
+      "description": "Choose a category of policies to configure. You can configure multiple categories.",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-selection",
+      "question": "Select Policies",
+      "description": "Select the specific policies you want to configure. You can select multiple policies.",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-configuration",
+      "question": "Configure Policy Parameters",
+      "description": "Configure the parameters for the selected policies.",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-complete",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-policy-wizard-start",
+      "question": "Configure APIM Policies?",
+      "description": "Would you like to configure policies for your API Management instance?",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-scope",
+      "question": "Policy Scope?",
+      "description": "Select where to apply policies: globally, to a product, to an API, or to a specific operation",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-category",
+      "question": "Policy Category?",
+      "description": "Select the category of policies you want to configure",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-selection",
+      "question": "Select Policies",
+      "description": "Choose the specific policies you want to configure",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-configuration",
+      "question": "Configure Policy Parameters",
+      "description": "Configure parameters for the selected policies",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-policy-complete",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "policies"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
       "id": "compute-solution",
       "question": "What type of compute service?",
       "description": "Choose your compute hosting and processing model",
@@ -1511,6 +1613,174 @@
       "description": "Submit selected features and proceed to recipe"
     },
     {
+      "id": "opt-policy-wizard-configure",
+      "nodeId": "apim-policy-wizard-start",
+      "label": "Configure Policies",
+      "description": "Configure API Management policies for authentication, rate limiting, transformations, and more",
+      "pros": ["Customize API behavior", "Security controls", "Performance optimization"],
+      "cons": ["Requires configuration", "Policy complexity"],
+      "whenToUse": "When you need to customize API behavior, add security, or optimize performance",
+      "whenNotToUse": "When default API behavior is sufficient"
+    },
+    {
+      "id": "opt-policy-wizard-skip",
+      "nodeId": "apim-policy-wizard-start",
+      "label": "Skip for Now",
+      "description": "Skip policy configuration and use default settings",
+      "pros": ["Quick setup", "Default behavior"],
+      "cons": ["No customization", "Limited control"],
+      "whenToUse": "When default API behavior is sufficient or you'll configure policies later",
+      "whenNotToUse": "When you need specific policy configurations"
+    },
+    {
+      "id": "opt-policy-scope-global",
+      "nodeId": "apim-policy-scope",
+      "label": "Global",
+      "description": "Apply policies globally to all APIs in the service",
+      "pros": ["Applies to all APIs", "Centralized management"],
+      "cons": ["Less granular control"],
+      "whenToUse": "For policies that should apply to all APIs, such as authentication or logging",
+      "whenNotToUse": "When policies need to be API-specific"
+    },
+    {
+      "id": "opt-policy-scope-product",
+      "nodeId": "apim-policy-scope",
+      "label": "Product",
+      "description": "Apply policies to a specific product (group of APIs)",
+      "pros": ["Product-level control", "Grouped APIs"],
+      "cons": ["Requires product definition"],
+      "whenToUse": "When you have multiple APIs grouped in a product and want product-level policies",
+      "whenNotToUse": "When policies need to be global or API-specific"
+    },
+    {
+      "id": "opt-policy-scope-api",
+      "nodeId": "apim-policy-scope",
+      "label": "API",
+      "description": "Apply policies to a specific API",
+      "pros": ["API-specific control", "Granular management"],
+      "cons": ["Per-API configuration"],
+      "whenToUse": "For policies specific to a single API, such as API-specific rate limits or transformations",
+      "whenNotToUse": "When policies should apply globally or to multiple APIs"
+    },
+    {
+      "id": "opt-policy-scope-operation",
+      "nodeId": "apim-policy-scope",
+      "label": "Operation",
+      "description": "Apply policies to a specific operation (endpoint) within an API",
+      "pros": ["Most granular control", "Operation-specific"],
+      "cons": ["Per-operation configuration"],
+      "whenToUse": "For policies specific to individual operations, such as operation-level caching or validation",
+      "whenNotToUse": "When policies should apply to entire APIs or globally"
+    },
+    {
+      "id": "opt-policy-category-auth",
+      "nodeId": "apim-policy-category",
+      "label": "Authentication & Authorization",
+      "description": "Policies for authenticating requests and managing authorization",
+      "pros": ["Security", "Access control"],
+      "cons": ["Configuration required"],
+      "whenToUse": "When you need to authenticate requests or control access to APIs"
+    },
+    {
+      "id": "opt-policy-category-rate-limit",
+      "nodeId": "apim-policy-category",
+      "label": "Rate Limiting & Quotas",
+      "description": "Policies for limiting request rates and enforcing quotas",
+      "pros": ["Protection", "Fair usage"],
+      "cons": ["Configuration required"],
+      "whenToUse": "When you need to limit API usage or enforce quotas"
+    },
+    {
+      "id": "opt-policy-category-transformation",
+      "nodeId": "apim-policy-category",
+      "label": "Transformation",
+      "description": "Policies for transforming requests and responses",
+      "pros": ["Flexibility", "Data conversion"],
+      "cons": ["Complexity"],
+      "whenToUse": "When you need to modify request/response headers, body, or format"
+    },
+    {
+      "id": "opt-policy-category-caching",
+      "nodeId": "apim-policy-category",
+      "label": "Caching",
+      "description": "Policies for caching responses to improve performance",
+      "pros": ["Performance", "Reduced load"],
+      "cons": ["Cache management"],
+      "whenToUse": "When you want to cache API responses to improve performance"
+    },
+    {
+      "id": "opt-policy-category-routing",
+      "nodeId": "apim-policy-category",
+      "label": "Routing & Backend",
+      "description": "Policies for routing requests and configuring backend services",
+      "pros": ["Backend control", "Routing flexibility"],
+      "cons": ["Configuration required"],
+      "whenToUse": "When you need to route requests or configure backend services"
+    },
+    {
+      "id": "opt-policy-category-security",
+      "nodeId": "apim-policy-category",
+      "label": "Security",
+      "description": "Policies for security features like JWT validation, CORS, and header checks",
+      "pros": ["Security", "Validation"],
+      "cons": ["Configuration required"],
+      "whenToUse": "When you need to validate tokens, enable CORS, or check headers"
+    },
+    {
+      "id": "opt-policy-category-logging",
+      "nodeId": "apim-policy-category",
+      "label": "Logging & Monitoring",
+      "description": "Policies for logging requests and emitting metrics",
+      "pros": ["Observability", "Monitoring"],
+      "cons": ["Storage costs"],
+      "whenToUse": "When you need to log API requests or emit custom metrics"
+    },
+    {
+      "id": "opt-policy-category-error",
+      "nodeId": "apim-policy-category",
+      "label": "Error Handling",
+      "description": "Policies for handling errors, retries, and circuit breakers",
+      "pros": ["Resilience", "Error recovery"],
+      "cons": ["Configuration required"],
+      "whenToUse": "When you need retry logic, circuit breakers, or custom error responses"
+    },
+    {
+      "id": "opt-policy-category-ai",
+      "nodeId": "apim-policy-category",
+      "label": "AI Gateway",
+      "description": "Policies for AI Gateway features like token limits, content safety, and semantic caching",
+      "pros": ["AI features", "LLM support"],
+      "cons": ["v2 tier required"],
+      "whenToUse": "When using AI Gateway features with LLM backends (v2 tiers only)"
+    },
+    {
+      "id": "opt-policy-category-advanced",
+      "nodeId": "apim-policy-category",
+      "label": "Advanced",
+      "description": "Advanced policies like conditional logic, includes, and send-request",
+      "pros": ["Flexibility", "Advanced features"],
+      "cons": ["Complexity"],
+      "whenToUse": "When you need conditional logic, policy includes, or external API calls"
+    },
+    {
+      "id": "opt-policy-selection-done",
+      "nodeId": "apim-policy-selection",
+      "label": "Done Selecting",
+      "description": "Finish selecting policies and proceed to configuration",
+      "pros": ["Continue wizard"],
+      "cons": [],
+      "whenToUse": "When you've selected all policies you want to configure"
+    },
+    {
+      "id": "opt-policy-config-done",
+      "nodeId": "apim-policy-configuration",
+      "label": "Complete Configuration",
+      "description": "Finish configuring policies and generate Bicep template",
+      "pros": ["Generate output"],
+      "cons": [],
+      "whenToUse": "When you've configured all policy parameters"
+    },
+    {
       "id": "opt-vm",
       "nodeId": "compute-solution",
       "label": "Virtual Machines",
@@ -2283,6 +2553,36 @@
     { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-ai-gateway", "toNodeId": "apim-ai-gateway-features" },
     { "fromNodeId": "apim-ai-gateway-features", "fromOptionId": "feature-selection-submit", "toNodeId": "apim-ai-gateway-recipe" },
     { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-mcp", "toNodeId": "apim-mcp-recipe" },
+    { "fromNodeId": "apim-ai-gateway-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-mcp-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-classic-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-v2-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-consumption-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-developer-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-basic-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-standard-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-premium-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-v2-basic-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-v2-standard-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-v2-premium-recipe", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-wizard-start" },
+    { "fromNodeId": "apim-policy-wizard-start", "fromOptionId": "opt-policy-wizard-configure", "toNodeId": "apim-policy-scope" },
+    { "fromNodeId": "apim-policy-wizard-start", "fromOptionId": "opt-policy-wizard-skip", "toNodeId": "apim-policy-complete" },
+    { "fromNodeId": "apim-policy-scope", "fromOptionId": "opt-policy-scope-global", "toNodeId": "apim-policy-category" },
+    { "fromNodeId": "apim-policy-scope", "fromOptionId": "opt-policy-scope-product", "toNodeId": "apim-policy-category" },
+    { "fromNodeId": "apim-policy-scope", "fromOptionId": "opt-policy-scope-api", "toNodeId": "apim-policy-category" },
+    { "fromNodeId": "apim-policy-scope", "fromOptionId": "opt-policy-scope-operation", "toNodeId": "apim-policy-category" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-auth", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-rate-limit", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-transformation", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-caching", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-routing", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-security", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-logging", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-error", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-ai", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-category", "fromOptionId": "opt-policy-category-advanced", "toNodeId": "apim-policy-selection" },
+    { "fromNodeId": "apim-policy-selection", "fromOptionId": "opt-policy-selection-done", "toNodeId": "apim-policy-configuration" },
+    { "fromNodeId": "apim-policy-configuration", "fromOptionId": "opt-policy-config-done", "toNodeId": "apim-policy-complete" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-vm", "toNodeId": "vm-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-functions", "toNodeId": "functions-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-batch", "toNodeId": "batch-solution" },

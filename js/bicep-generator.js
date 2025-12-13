@@ -227,6 +227,69 @@ resource apiResource 'Microsoft.ApiManagement/service/apis@2023-05-01-preview' =
 }
 
 /**
+ * Generate policy Bicep resource from policy wizard configuration
+ * @param {Object} policyConfig - Policy configuration from wizard
+ * @param {string} scope - Policy scope (global, product, api, operation)
+ * @param {string} scopeId - Optional scope ID
+ * @param {string} parentResource - Parent resource name in Bicep
+ * @returns {string} Bicep code
+ */
+export function generatePolicyBicepResource(policyConfig, scope, scopeId, parentResource) {
+    // Import policy generator
+    return import('./apim-policy-generator.js').then(module => {
+        return module.generatePolicyBicep(policyConfig, scope, scopeId, parentResource);
+    }).catch(error => {
+        console.error('Error generating policy Bicep:', error);
+        return `// Error generating policy Bicep: ${error.message}`;
+    });
+}
+
+/**
+ * Generate combined policy Bicep from multiple policy configurations
+ * @param {Array} configurations - Array of policy configurations
+ * @param {string} scope - Policy scope
+ * @param {string} scopeId - Optional scope ID
+ * @param {string} parentResource - Parent resource name
+ * @returns {Promise<string>} Combined Bicep code
+ */
+export async function generateCombinedPolicyBicep(configurations, scope, scopeId, parentResource) {
+    try {
+        const policyGenerator = await import('./apim-policy-generator.js');
+        return await policyGenerator.generateCombinedBicep(configurations, scope, scopeId, parentResource);
+    } catch (error) {
+        console.error('Error generating combined policy Bicep:', error);
+        return `// Error generating combined policy Bicep: ${error.message}`;
+    }
+}
+
+/**
+ * Extend API Management Bicep with policy wizard output
+ * @param {string} baseBicep - Base APIM Bicep template
+ * @param {Array} policyConfigurations - Policy configurations from wizard
+ * @param {string} scope - Policy scope
+ * @param {string} scopeId - Optional scope ID
+ * @returns {Promise<string>} Extended Bicep template
+ */
+export async function extendApimBicepWithPolicies(baseBicep, policyConfigurations, scope = 'api', scopeId = null) {
+    if (!policyConfigurations || policyConfigurations.length === 0) {
+        return baseBicep;
+    }
+
+    try {
+        const policyBicep = await generateCombinedPolicyBicep(
+            policyConfigurations,
+            scope,
+            scopeId,
+            'apiResource'
+        );
+        return baseBicep + '\n' + policyBicep;
+    } catch (error) {
+        console.error('Error extending APIM Bicep with policies:', error);
+        return baseBicep + '\n// Error adding policies: ' + error.message;
+    }
+}
+
+/**
  * Generate token limit policy
  */
 function generateTokenLimitPolicy(parameters) {

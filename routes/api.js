@@ -1588,5 +1588,223 @@ router.post('/azure-resources/load', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/apim-policies - Get all APIM policies or filter by criteria
+ */
+router.get('/apim-policies', (req, res) => {
+    try {
+        const db = getDatabase();
+        const { category, scope, search } = req.query;
+        
+        let query = 'SELECT * FROM apimPolicies WHERE 1=1';
+        const params = [];
+        
+        if (category) {
+            query += ' AND category = ?';
+            params.push(category);
+        }
+        
+        if (search) {
+            query += ' AND (name LIKE ? OR description LIKE ?)';
+            const searchTerm = `%${search}%`;
+            params.push(searchTerm, searchTerm);
+        }
+        
+        query += ' ORDER BY category, name';
+        
+        const policies = db.prepare(query).all(...params);
+        
+        // Parse JSON fields
+        const parsedPolicies = policies.map(policy => ({
+            ...policy,
+            scope: parseJsonArray(policy.scope),
+            parameters: parseJsonObject(policy.parameters),
+            xmlTemplate: parseJsonObject(policy.xmlTemplate),
+            compatibility: parseJsonObject(policy.compatibility),
+            examples: parseJsonArray(policy.examples)
+        }));
+        
+        // Filter by scope if specified (client-side since SQLite doesn't handle JSON arrays well)
+        let filteredPolicies = parsedPolicies;
+        if (scope) {
+            filteredPolicies = parsedPolicies.filter(policy => 
+                policy.scope && policy.scope.includes(scope)
+            );
+        }
+        
+        res.json(filteredPolicies);
+    } catch (error) {
+        console.error('Error getting APIM policies:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * GET /api/apim-policies/:id - Get specific APIM policy by ID
+ */
+router.get('/apim-policies/:id', (req, res) => {
+    try {
+        const db = getDatabase();
+        const policy = db.prepare('SELECT * FROM apimPolicies WHERE id = ?').get(req.params.id);
+        
+        if (!policy) {
+            return res.status(404).json({ error: 'APIM policy not found' });
+        }
+        
+        // Parse JSON fields
+        const parsedPolicy = {
+            ...policy,
+            scope: parseJsonArray(policy.scope),
+            parameters: parseJsonObject(policy.parameters),
+            xmlTemplate: parseJsonObject(policy.xmlTemplate),
+            compatibility: parseJsonObject(policy.compatibility),
+            examples: parseJsonArray(policy.examples)
+        };
+        
+        res.json(parsedPolicy);
+    } catch (error) {
+        console.error('Error getting APIM policy:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * GET /api/apim-policies/categories - Get policies grouped by category
+ */
+router.get('/apim-policies/categories', (req, res) => {
+    try {
+        const db = getDatabase();
+        const summary = db.prepare(`
+            SELECT 
+                category,
+                COUNT(*) as count,
+                GROUP_CONCAT(name) as policyNames
+            FROM apimPolicies
+            GROUP BY category
+            ORDER BY category
+        `).all();
+        
+        res.json(summary);
+    } catch (error) {
+        console.error('Error getting APIM policy categories:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * POST /api/apim-policy-configurations - Create or update policy configuration
+ */
+router.post('/apim-policy-configurations', (req, res) => {
+    try {
+        const db = getDatabase();
+        const { id, policyId, scope, scopeId, configuration, bicepResource } = req.body;
+        
+        if (!policyId || !scope) {
+            return res.status(400).json({ error: 'Missing required fields: policyId, scope' });
+        }
+        
+        const configId = id || `config-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Check if exists
+        const existing = db.prepare('SELECT id FROM apimPolicyConfigurations WHERE id = ?').get(configId);
+        
+        if (existing) {
+            // Update
+            const update = db.prepare(`
+                UPDATE apimPolicyConfigurations 
+                SET policyId = ?, scope = ?, scopeId = ?, configuration = ?, bicepResource = ?, updatedAt = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `);
+            
+            update.run(
+                policyId,
+                scope,
+                scopeId || null,
+                configuration ? JSON.stringify(configuration) : null,
+                bicepResource || null,
+                configId
+            );
+            
+            res.json({ id: configId, message: 'Policy configuration updated' });
+        } else {
+            // Insert
+            const insert = db.prepare(`
+                INSERT INTO apimPolicyConfigurations (id, policyId, scope, scopeId, configuration, bicepResource)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `);
+            
+            insert.run(
+                configId,
+                policyId,
+                scope,
+                scopeId || null,
+                configuration ? JSON.stringify(configuration) : null,
+                bicepResource || null
+            );
+            
+            res.status(201).json({ id: configId, message: 'Policy configuration created' });
+        }
+    } catch (error) {
+        console.error('Error creating/updating policy configuration:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * GET /api/apim-policy-configurations/:id - Get policy configuration by ID
+ */
+router.get('/apim-policy-configurations/:id', (req, res) => {
+    try {
+        const db = getDatabase();
+        const config = db.prepare('SELECT * FROM apimPolicyConfigurations WHERE id = ?').get(req.params.id);
+        
+        if (!config) {
+            return res.status(404).json({ error: 'Policy configuration not found' });
+        }
+        
+        // Parse JSON fields
+        const parsedConfig = {
+            ...config,
+            configuration: parseJsonObject(config.configuration)
+        };
+        
+        res.json(parsedConfig);
+    } catch (error) {
+        console.error('Error getting policy configuration:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * POST /api/apim-policies/generate-bicep - Generate Bicep template from policy configurations
+ */
+router.post('/apim-policies/generate-bicep', async (req, res) => {
+    try {
+        const { configurations, scope, scopeId, parentResource } = req.body;
+        
+        if (!configurations || !Array.isArray(configurations) || configurations.length === 0) {
+            return res.status(400).json({ error: 'Missing or empty configurations array' });
+        }
+        
+        if (!scope) {
+            return res.status(400).json({ error: 'Missing required field: scope' });
+        }
+        
+        // Import policy generator
+        const { generateCombinedBicep } = await import('../js/apim-policy-generator.js');
+        
+        // Generate combined Bicep for all configurations
+        const bicep = await generateCombinedBicep(configurations, scope, scopeId, parentResource || 'apiResource');
+        
+        res.json({
+            bicep: bicep,
+            resources: 1
+        });
+    } catch (error) {
+        console.error('Error generating Bicep:', error);
+        res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+});
+
 export default router;
 

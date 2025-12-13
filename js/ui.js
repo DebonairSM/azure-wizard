@@ -1191,7 +1191,7 @@ function updateFeatureItemStyle(item, isChecked) {
  * @param {Function} onOptionSelect
  * @param {string} mode
  */
-export function renderNode(node, options, onOptionSelect, mode) {
+export async function renderNode(node, options, onOptionSelect, mode) {
     const questionTextEl = document.getElementById('questionText');
     const descriptionEl = document.getElementById('description');
     const optionsGridEl = document.getElementById('optionsGrid');
@@ -1208,6 +1208,28 @@ export function renderNode(node, options, onOptionSelect, mode) {
         optionsCount: options?.length || 0,
         mode
     });
+
+    // Check if this is a policy wizard node
+    const { isPolicyWizardNode, renderPolicyWizardNode } = await import('./apim-policy-ui.js');
+    if (isPolicyWizardNode(node.id)) {
+        try {
+            const policyHtml = await renderPolicyWizardNode(node, options);
+            if (policyHtml) {
+                // Render policy wizard UI
+                if (optionsGridEl) {
+                    optionsGridEl.innerHTML = policyHtml;
+                    // Attach event listeners for policy wizard
+                    attachPolicyWizardListeners(onOptionSelect);
+                }
+                questionTextEl.textContent = node.question || 'Question';
+                descriptionEl.textContent = node.description || '';
+                return;
+            }
+        } catch (error) {
+            console.error('Error rendering policy wizard node:', error);
+            // Fall through to default rendering
+        }
+    }
 
     questionTextEl.textContent = node.question || 'Question';
     descriptionEl.textContent = node.description || '';
@@ -2131,5 +2153,120 @@ function renderImproveButton(node) {
     } else {
         button.classList.add('hidden');
         button.onclick = null;
+    }
+}
+
+/**
+ * Attach event listeners for policy wizard UI
+ * @param {Function} onOptionSelect - Option selection handler
+ */
+async function attachPolicyWizardListeners(onOptionSelect) {
+    // Handle policy selection checkboxes
+    document.querySelectorAll('input[type="checkbox"][data-policy-id]').forEach(checkbox => {
+        checkbox.addEventListener('change', async (e) => {
+            const policyId = e.target.dataset.policyId;
+            const { initializePolicyEngine } = await import('./apim-policy-ui.js');
+            const engine = initializePolicyEngine();
+            
+            if (e.target.checked) {
+                await engine.addPolicy(policyId);
+            } else {
+                engine.removePolicy(policyId);
+            }
+            
+            // Update selected count
+            updateSelectedPoliciesCount(engine);
+        });
+    });
+    
+    // Handle policy configuration form changes
+    document.querySelectorAll('.policy-params-form').forEach(form => {
+        form.addEventListener('change', async (e) => {
+            const formElement = e.target.closest('form');
+            const policyIndex = parseInt(formElement.closest('.config-form').dataset.policyIndex);
+            const { initializePolicyEngine } = await import('./apim-policy-ui.js');
+            const engine = initializePolicyEngine();
+            const selectedPolicies = engine.getSelectedPolicies();
+            
+            if (policyIndex >= 0 && policyIndex < selectedPolicies.length) {
+                const policyItem = selectedPolicies[policyIndex];
+                const formData = new FormData(formElement);
+                const config = {};
+                
+                for (const [key, value] of formData.entries()) {
+                    const paramDef = policyItem.policy.parameters?.[key];
+                    if (paramDef?.type === 'number') {
+                        config[key] = parseFloat(value);
+                    } else if (paramDef?.type === 'boolean') {
+                        config[key] = value === 'on';
+                    } else if (paramDef?.type === 'array') {
+                        config[key] = value.split(',').map(v => v.trim()).filter(v => v);
+                    } else {
+                        config[key] = value;
+                    }
+                }
+                
+                engine.configurePolicy(policyItem.policyId, config);
+            }
+        });
+    });
+    
+    // Handle config tabs
+    document.querySelectorAll('.config-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.policyIndex);
+            // Switch active tab
+            document.querySelectorAll('.config-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.config-form').forEach(f => f.classList.remove('active'));
+            e.target.classList.add('active');
+            document.querySelector(`.config-form[data-policy-index="${index}"]`)?.classList.add('active');
+        });
+    });
+    
+    // Handle copy Bicep button
+    const copyBtn = document.querySelector('.btn-copy-bicep');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const bicepCode = document.querySelector('.bicep-output pre code')?.textContent;
+            if (bicepCode) {
+                navigator.clipboard.writeText(bicepCode).then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Copy Bicep';
+                    }, 2000);
+                });
+            }
+        });
+    }
+    
+    // Handle option selection buttons
+    document.querySelectorAll('.btn-select-option').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const optionId = e.target.dataset.optionId;
+            if (optionId && onOptionSelect) {
+                onOptionSelect(optionId);
+            }
+        });
+    });
+}
+
+/**
+ * Update selected policies count display
+ * @param {Object} engine - Policy engine
+ */
+function updateSelectedPoliciesCount(engine) {
+    const countEl = document.getElementById('selected-count');
+    const listEl = document.getElementById('selected-policies-list');
+    
+    if (countEl) {
+        const count = engine.getSelectedPolicies().length;
+        countEl.textContent = count;
+    }
+    
+    if (listEl) {
+        const policies = engine.getSelectedPolicies();
+        listEl.innerHTML = policies.map(p => `
+            <div class="selected-policy-item">${p.policy.name}</div>
+        `).join('');
     }
 }

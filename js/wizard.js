@@ -215,7 +215,7 @@ async function renderCurrentState() {
         } else {
             // Show node with options
             const options = await wizardEngine.getCurrentOptions();
-            ui.renderNode(currentNode, options, handleOptionSelect, mode);
+            await ui.renderNode(currentNode, options, handleOptionSelect, mode);
             
             // Hide recipe display
             document.getElementById('recipeDisplay').style.display = 'none';
@@ -285,7 +285,7 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
         // Ensure options is an array
         const optionsArray = Array.isArray(options) ? options : [];
         console.log('[renderNode] Rendering node with', optionsArray.length, 'options');
-        ui.renderNode(currentNode, optionsArray, handleOptionSelect, mode);
+        await ui.renderNode(currentNode, optionsArray, handleOptionSelect, mode);
         document.getElementById('recipeDisplay').style.display = 'none';
         document.getElementById('nodeDisplay').style.display = 'block';
     }

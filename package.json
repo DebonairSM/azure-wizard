@@ -10,6 +10,7 @@
     "serve": "node server.js",
     "migrate": "node scripts/db-manager.js migrate-json",
     "populate-apim": "node scripts/db-manager.js populate-apim",
+    "populate-apim-policies": "node scripts/populate-apim-policies.js",
     "migrate-apim-to-azure": "node scripts/db-manager.js migrate-apim",
     "query-azure-offerings": "node scripts/db-query.js query",
     "ensure-azure-offerings": "node scripts/db-manager.js ensure-table",
