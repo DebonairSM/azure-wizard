@@ -333,11 +333,109 @@ export class WizardEngine {
     }
 
     /**
+     * Reconstruct choice history from path (for server-rendered pages)
+     * Uses pathToNode array from server if available, otherwise traces backwards
+     * @param {string} currentNodeId - Current node ID
+     * @param {string} prevNodeId - Previous node ID (optional, can be null for root)
+     * @param {Array} pathToNode - Optional array of path segments from server: [{ fromNodeId, fromOptionId, toNodeId, optionLabel }]
+     * @returns {Promise<void>}
+     */
+    async reconstructChoiceHistory(currentNodeId, prevNodeId = null, pathToNode = null) {
+        console.log('[WizardEngine] Reconstructing choice history:', { currentNodeId, prevNodeId, pathToNodeLength: pathToNode?.length || 0 });
+        
+        this.choiceHistory = [];
+        
+        // If at root, no history needed
+        const rootNode = await this.dataProvider.getRootNode();
+        if (!rootNode) {
+            console.warn('[WizardEngine] Root node not found, cannot reconstruct history');
+            this.currentNodeId = currentNodeId;
+            return;
+        }
+        
+        if (currentNodeId === rootNode.id) {
+            console.log('[WizardEngine] At root node, no choice history');
+            this.currentNodeId = currentNodeId;
+            return;
+        }
+        
+        // Use server-provided path if available (most reliable)
+        if (pathToNode && Array.isArray(pathToNode) && pathToNode.length > 0) {
+            await this.initialize();
+            
+            // Rebuild choice history from the path array
+            for (const pathSegment of pathToNode) {
+                if (!pathSegment.fromNodeId || !pathSegment.fromOptionId) {
+                    continue;
+                }
+                
+                // Verify we're at the right node before adding choice
+                const currentNode = await this.getCurrentNode();
+                if (!currentNode || currentNode.id !== pathSegment.fromNodeId) {
+                    console.warn('[WizardEngine] Path segment mismatch. Expected node:', pathSegment.fromNodeId, 'but at:', currentNode?.id);
+                    // Try to navigate to the correct node if possible
+                    if (currentNode && currentNode.id !== rootNode.id) {
+                        break; // Can't reconstruct properly
+                    }
+                }
+                
+                // Add to choice history
+                this.choiceHistory.push({
+                    nodeId: pathSegment.fromNodeId,
+                    optionId: pathSegment.fromOptionId,
+                    optionLabel: pathSegment.optionLabel || pathSegment.fromOptionId,
+                });
+                
+                // Move to next node
+                this.currentNodeId = pathSegment.toNodeId;
+            }
+            
+            console.log('[WizardEngine] Reconstructed choice history from server path:', this.choiceHistory.length, 'choices');
+        } else {
+            // Fallback: try to reconstruct from prevNodeId (only gets one level)
+            if (prevNodeId) {
+                await this.initialize();
+                
+                // Find the option that leads from prevNodeId to currentNodeId
+                const prevNode = await this.dataProvider.getNodeById(prevNodeId);
+                if (prevNode) {
+                    const options = await this.dataProvider.getOptionsForNode(prevNodeId);
+                    for (const option of options) {
+                        const nextId = await this.dataProvider.getNextNodeId(prevNodeId, option.id);
+                        if (nextId === currentNodeId) {
+                            this.choiceHistory.push({
+                                nodeId: prevNodeId,
+                                optionId: option.id,
+                                optionLabel: option.label,
+                            });
+                            this.currentNodeId = currentNodeId;
+                            console.log('[WizardEngine] Reconstructed choice history from prevNodeId (single level):', this.choiceHistory.length, 'choices');
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // Last resort: just set the current node without history
+            console.warn('[WizardEngine] Could not reconstruct choice history, setting node without history');
+            this.currentNodeId = currentNodeId;
+        }
+    }
+
+    /**
      * Generate explanation of current path
      * @returns {Promise<string>}
      */
     async explainPath() {
         if (this.choiceHistory.length === 0) {
+            // If we're at a terminal node but have no history, return empty string instead of error message
+            // This happens when we have server-rendered data but couldn't reconstruct history
+            if (this.currentNodeId) {
+                const currentNode = await this.getCurrentNode();
+                if (currentNode && currentNode.nodeType === 'terminal') {
+                    return ''; // Empty explanation for terminal nodes without history
+                }
+            }
             return 'Start by selecting an option from the root question.';
         }
 

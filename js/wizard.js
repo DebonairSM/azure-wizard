@@ -59,21 +59,42 @@ async function initialize() {
             let options = window.SERVER_DATA.options || [];
             const recipe = window.SERVER_DATA.recipe;
             const isTerminal = window.SERVER_DATA.isTerminal;
+            const prevNodeId = window.SERVER_DATA.prevNodeId || null;
             
             // Debug logging
             console.log('[Wizard Init] Server data:', {
                 nodeId: currentNode?.id,
                 question: currentNode?.question,
                 optionsCount: options.length,
-                options: options.slice(0, 3).map(o => ({ id: o.id, label: o.label }))
+                prevNodeId: prevNodeId,
+                hasRecipe: !!recipe,
+                recipeNodeId: recipe?.nodeId,
+                recipeTitle: recipe?.title,
+                isTerminal: isTerminal
             });
+            
+            // Clean up APIM-specific sessionStorage if not viewing APIM recipe
+            if (currentNode?.id && !currentNode.id.includes('apim')) {
+                const apimFeaturesKey = 'apim-ai-gateway-selected-features';
+                if (sessionStorage.getItem(apimFeaturesKey)) {
+                    console.log('[Wizard Init] Clearing APIM sessionStorage for non-APIM recipe');
+                    sessionStorage.removeItem(apimFeaturesKey);
+                }
+            }
             
             // Create wizard engine (will use IndexedDB as fallback)
             wizardEngine = new WizardEngine();
             // Set mode from saved preference or pending mode
             const modeToUse = pendingMode || savedMode;
             wizardEngine.setMode(modeToUse);
-            wizardEngine.currentNodeId = currentNode.id;
+            
+            // Reconstruct choice history from URL path
+            if (currentNode?.id) {
+                const pathToNode = window.SERVER_DATA.pathToNode || null;
+                await wizardEngine.reconstructChoiceHistory(currentNode.id, prevNodeId, pathToNode);
+            } else {
+                wizardEngine.currentNodeId = currentNode?.id || null;
+            }
             
             // If no options from server, try loading from IndexedDB or API
             if (options.length === 0 && currentNode?.id) {
@@ -213,15 +234,30 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
     const breadcrumbs = wizardEngine ? await wizardEngine.getBreadcrumbs() : [];
     const mode = wizardEngine ? wizardEngine.getMode() : 'design';
     
-    // Debug logging
+    // Debug logging - track recipe source
     console.log('[renderNode] Called with:', {
         nodeId: currentNode?.id,
         question: currentNode?.question,
         optionsCount: options?.length || 0,
         isTerminal,
         hasRecipe: !!recipe,
+        recipeSource: 'server-rendered',
+        recipeNodeId: recipe?.nodeId,
+        recipeTitle: recipe?.title,
+        recipeId: recipe?.id,
         mode
     });
+    
+    // CRITICAL: Ensure we use the server-rendered recipe, never override with client-side fetch
+    if (isTerminal && !recipe) {
+        console.warn('[renderNode] Terminal node but no recipe provided - this should not happen with server-rendered data');
+    }
+    
+    // If client-side engine exists and we have a recipe, verify it matches
+    if (isTerminal && recipe && wizardEngine) {
+        // Double-check: do NOT fetch recipe from client-side, always use server-rendered one
+        console.log('[renderNode] Using server-rendered recipe, nodeId:', recipe.nodeId || 'unknown', 'title:', recipe.title || 'unknown');
+    }
     
     ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
     
@@ -232,7 +268,13 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
     backButton.disabled = false;
     
     if (isTerminal && recipe) {
+        // ALWAYS use the recipe parameter passed from server - never fetch from client
+        // Verify recipe matches current node
+        if (recipe.nodeId && currentNode?.id && recipe.nodeId !== currentNode.id) {
+            console.error('[renderNode] Recipe nodeId mismatch! Recipe nodeId:', recipe.nodeId, 'Current nodeId:', currentNode.id);
+        }
         const explanation = wizardEngine ? await wizardEngine.explainPath() : '';
+        console.log('[renderNode] Rendering recipe - nodeId:', recipe.nodeId || 'unknown', 'title:', recipe.title || 'unknown', 'matches current:', recipe.nodeId === currentNode?.id);
         ui.renderRecipe(recipe, mode, explanation);
     } else if (currentNode.nodeType === 'feature-selection') {
         // Show feature selection form
@@ -460,19 +502,51 @@ async function handleLoadResources() {
  */
 async function handleExport() {
     if (!wizardEngine) {
+        ui.showError('Wizard engine not initialized. Please refresh the page.');
         return;
     }
 
     try {
         // Get current node - should be terminal node with recipe
-        const currentNode = await wizardEngine.getCurrentNode();
+        let currentNode = await wizardEngine.getCurrentNode();
+        let nodeId = null;
+        
+        // If currentNode is null or not terminal, try fallback methods
+        if (!currentNode || currentNode.nodeType !== 'terminal') {
+            // Try to get node ID from wizardEngine's current node ID
+            if (wizardEngine.currentNodeId) {
+                nodeId = wizardEngine.currentNodeId;
+                currentNode = await wizardEngine.dataProvider.getNodeById(nodeId);
+            }
+            
+            // If still no valid terminal node, try SERVER_DATA as fallback
+            if ((!currentNode || currentNode.nodeType !== 'terminal') && window.SERVER_DATA) {
+                const serverNode = window.SERVER_DATA.currentNode;
+                if (serverNode && (serverNode.nodeType === 'terminal' || window.SERVER_DATA.isTerminal)) {
+                    currentNode = serverNode;
+                    nodeId = serverNode.id;
+                    // Update wizardEngine to track this node
+                    wizardEngine.currentNodeId = nodeId;
+                }
+            }
+        } else {
+            nodeId = currentNode.id;
+        }
+        
+        // Final check - if we still don't have a valid terminal node, show error
         if (!currentNode || currentNode.nodeType !== 'terminal') {
             ui.showError('No recipe available to export. Please navigate to a recipe first.');
             return;
         }
 
         // Get recipe data using the correct method
-        const recipe = await wizardEngine.dataProvider.getRecipeForNode(currentNode.id);
+        let recipe = await wizardEngine.dataProvider.getRecipeForNode(nodeId || currentNode.id);
+        
+        // If recipe not found, try SERVER_DATA as fallback
+        if (!recipe && window.SERVER_DATA && window.SERVER_DATA.recipe) {
+            recipe = window.SERVER_DATA.recipe;
+        }
+        
         if (!recipe) {
             ui.showError('Recipe not found');
             return;

@@ -215,3 +215,40 @@ CREATE INDEX IF NOT EXISTS idx_changelog_serviceName ON azureResourceChangelog(s
 CREATE INDEX IF NOT EXISTS idx_changelog_changeType ON azureResourceChangelog(changeType);
 CREATE INDEX IF NOT EXISTS idx_changelog_detectedAt ON azureResourceChangelog(detectedAt);
 
+-- APIM Policies table - Store policy metadata, categories, parameters, and XML templates
+CREATE TABLE IF NOT EXISTS apimPolicies (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL, -- authentication, rate-limiting, transformation, caching, routing, security, logging, error-handling, ai-gateway, advanced
+    scope TEXT, -- JSON array: ['global', 'product', 'api', 'operation']
+    description TEXT,
+    parameters TEXT, -- JSON object with parameter schemas
+    xmlTemplate TEXT, -- JSON object with XML template structure
+    bicepTemplate TEXT, -- Bicep template snippet
+    documentation TEXT, -- Documentation URL or markdown
+    compatibility TEXT, -- JSON object with compatibility info (apimVersions, skuTiers, etc.)
+    examples TEXT, -- JSON array of example configurations
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_apimPolicies_category ON apimPolicies(category);
+CREATE INDEX IF NOT EXISTS idx_apimPolicies_name ON apimPolicies(name);
+
+-- APIM Policy Configurations table - Store user-configured policy instances
+CREATE TABLE IF NOT EXISTS apimPolicyConfigurations (
+    id TEXT PRIMARY KEY,
+    policyId TEXT NOT NULL,
+    scope TEXT NOT NULL, -- 'global', 'product', 'api', 'operation'
+    scopeId TEXT, -- ID of the scope (product name, API name, operation name, null for global)
+    configuration TEXT, -- JSON object with policy configuration
+    bicepResource TEXT, -- Generated Bicep resource code
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (policyId) REFERENCES apimPolicies(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_apimPolicyConfigurations_policyId ON apimPolicyConfigurations(policyId);
+CREATE INDEX IF NOT EXISTS idx_apimPolicyConfigurations_scope ON apimPolicyConfigurations(scope);
+CREATE INDEX IF NOT EXISTS idx_apimPolicyConfigurations_scopeId ON apimPolicyConfigurations(scopeId);
+

@@ -195,34 +195,63 @@ export function calculateCosts(recipe, selectedFeatures = []) {
         oneTime: 0
     };
 
-    // API Management Premium v2 base cost
-    const apimBase = { min: 500, max: 2000, name: 'API Management Premium v2' };
-    costs.monthly.breakdown.push(apimBase);
-    costs.monthly.min += apimBase.min;
-    costs.monthly.max += apimBase.max;
+    // Determine recipe type from nodeId or title
+    const nodeId = recipe.nodeId || '';
+    const title = (recipe.title || '').toLowerCase();
+    const isApimRecipe = nodeId.includes('apim') || title.includes('api management');
+    const isSqlRecipe = nodeId.includes('sql') || title.includes('sql');
 
-    // Azure Cache for Redis (if semantic caching selected)
-    if (selectedFeatures.some(f => f.includes('semantic-caching'))) {
-        const redis = { min: 15, max: 100, name: 'Azure Cache for Redis (Basic)' };
-        costs.monthly.breakdown.push(redis);
-        costs.monthly.min += redis.min;
-        costs.monthly.max += redis.max;
+    // API Management Premium v2 base cost (only for APIM recipes)
+    if (isApimRecipe) {
+        const apimBase = { min: 500, max: 2000, name: 'API Management Premium v2' };
+        costs.monthly.breakdown.push(apimBase);
+        costs.monthly.min += apimBase.min;
+        costs.monthly.max += apimBase.max;
+
+        // Azure Cache for Redis (if semantic caching selected)
+        if (selectedFeatures.some(f => f.includes('semantic-caching'))) {
+            const redis = { min: 15, max: 100, name: 'Azure Cache for Redis (Basic)' };
+            costs.monthly.breakdown.push(redis);
+            costs.monthly.min += redis.min;
+            costs.monthly.max += redis.max;
+        }
+
+        // Azure AI Content Safety (if content safety selected)
+        if (selectedFeatures.some(f => f.includes('content-safety'))) {
+            const contentSafety = { min: 1, max: 50, name: 'Azure AI Content Safety' };
+            costs.monthly.breakdown.push(contentSafety);
+            costs.monthly.min += contentSafety.min;
+            costs.monthly.max += contentSafety.max;
+        }
+
+        // Application Insights (if monitoring selected)
+        if (selectedFeatures.some(f => f.includes('monitoring') || f.includes('metrics'))) {
+            const insights = { min: 0, max: 20, name: 'Application Insights' };
+            costs.monthly.breakdown.push(insights);
+            costs.monthly.min += insights.min;
+            costs.monthly.max += insights.max;
+        }
     }
+    // SQL Database costs (for SQL Server recipes)
+    else if (isSqlRecipe) {
+        const sqlServer = { min: 5, max: 30, name: 'SQL Server' };
+        costs.monthly.breakdown.push(sqlServer);
+        costs.monthly.min += sqlServer.min;
+        costs.monthly.max += sqlServer.max;
 
-    // Azure AI Content Safety (if content safety selected)
-    if (selectedFeatures.some(f => f.includes('content-safety'))) {
-        const contentSafety = { min: 1, max: 50, name: 'Azure AI Content Safety' };
-        costs.monthly.breakdown.push(contentSafety);
-        costs.monthly.min += contentSafety.min;
-        costs.monthly.max += contentSafety.max;
+        const sqlDatabase = { min: 5, max: 4000, name: 'Azure SQL Database' };
+        costs.monthly.breakdown.push(sqlDatabase);
+        costs.monthly.min += sqlDatabase.min;
+        costs.monthly.max += sqlDatabase.max;
     }
-
-    // Application Insights (if monitoring selected)
-    if (selectedFeatures.some(f => f.includes('monitoring') || f.includes('metrics'))) {
-        const insights = { min: 0, max: 20, name: 'Application Insights' };
-        costs.monthly.breakdown.push(insights);
-        costs.monthly.min += insights.min;
-        costs.monthly.max += insights.max;
+    // Generic/default costs for other recipes
+    else {
+        // If no specific recipe type detected, don't add default costs
+        // Recipes should define their own cost structure
+        if (costs.monthly.breakdown.length === 0) {
+            costs.monthly.min = 0;
+            costs.monthly.max = 0;
+        }
     }
 
     return costs;
@@ -281,13 +310,18 @@ export function calculateDeploymentTime(recipe, selectedFeatures = []) {
  * @returns {Array} Prerequisites list
  */
 export function getPrerequisites(recipe, selectedFeatures = []) {
+    // Determine recipe type from nodeId or title
+    const nodeId = recipe.nodeId || '';
+    const title = (recipe.title || '').toLowerCase();
+    const isApimRecipe = nodeId.includes('apim') || title.includes('api management');
+    const isSqlRecipe = nodeId.includes('sql') || title.includes('sql');
+
     const prerequisites = [
         {
             category: 'Azure Subscription',
             items: [
                 'Active Azure subscription',
-                'Contributor or Owner role on subscription',
-                'API Management service quota available'
+                'Contributor or Owner role on subscription'
             ]
         },
         {
@@ -301,13 +335,27 @@ export function getPrerequisites(recipe, selectedFeatures = []) {
         {
             category: 'Permissions',
             items: [
-                'Permission to create resource groups',
-                'Permission to create API Management services',
-                'Permission to create Azure Cache for Redis (if using semantic caching)',
-                'Permission to create Azure AI services (if using content safety)'
+                'Permission to create resource groups'
             ]
         }
     ];
+
+    // Add recipe-specific prerequisites
+    if (isApimRecipe) {
+        prerequisites[0].items.push('API Management service quota available');
+        prerequisites[2].items.push('Permission to create API Management services');
+        
+        if (selectedFeatures.some(f => f.includes('semantic-caching'))) {
+            prerequisites[2].items.push('Permission to create Azure Cache for Redis');
+        }
+        
+        if (selectedFeatures.some(f => f.includes('content-safety'))) {
+            prerequisites[2].items.push('Permission to create Azure AI services');
+        }
+    } else if (isSqlRecipe) {
+        prerequisites[0].items.push('SQL Database quota available');
+        prerequisites[2].items.push('Permission to create SQL servers and databases');
+    }
 
     if (selectedFeatures.some(f => f.includes('semantic-caching'))) {
         prerequisites.push({
@@ -338,52 +386,129 @@ export function getPrerequisites(recipe, selectedFeatures = []) {
  * @returns {Array} Troubleshooting tips
  */
 export function getTroubleshootingTips(recipe) {
-    return [
-        {
-            issue: 'API Management creation fails',
-            solutions: [
-                'Verify you have sufficient quota for API Management in your subscription',
-                'Check that the service name is globally unique',
-                'Ensure you have Contributor or Owner permissions',
-                'Try a different Azure region if quota is exhausted'
-            ]
-        },
-        {
-            issue: 'Token limit policy not working',
-            solutions: [
-                'Verify the policy XML syntax is correct',
-                'Check that the API is properly configured',
-                'Ensure you are using Premium v2 tier (required for AI Gateway features)',
-                'Review API Management logs for policy errors'
-            ]
-        },
-        {
-            issue: 'Content Safety integration fails',
-            solutions: [
-                'Verify Azure AI Content Safety resource exists and is accessible',
-                'Check the resource ID format in the policy',
-                'Ensure managed identity or API key is properly configured',
-                'Verify Content Safety service is available in your region'
-            ]
-        },
-        {
-            issue: 'Semantic caching not working',
-            solutions: [
-                'Verify Redis connection string is correct',
-                'Check Redis instance is running and accessible',
-                'Ensure similarity threshold is between 0.0 and 1.0',
-                'Verify embeddings API is configured correctly'
-            ]
-        },
-        {
-            issue: 'Deployment takes too long',
-            solutions: [
-                'API Management creation can take 30-60 minutes',
-                'Check Azure service health status',
-                'Verify network connectivity to Azure',
-                'Consider using Azure Resource Manager templates for faster deployment'
-            ]
-        }
-    ];
+    // Determine recipe type from nodeId or title
+    const nodeId = recipe.nodeId || '';
+    const title = (recipe.title || '').toLowerCase();
+    const isApimRecipe = nodeId.includes('apim') || title.includes('api management');
+    const isSqlRecipe = nodeId.includes('sql') || title.includes('sql');
+
+    const tips = [];
+
+    // API Management specific tips
+    if (isApimRecipe) {
+        tips.push(
+            {
+                issue: 'API Management creation fails',
+                solutions: [
+                    'Verify you have sufficient quota for API Management in your subscription',
+                    'Check that the service name is globally unique',
+                    'Ensure you have Contributor or Owner permissions',
+                    'Try a different Azure region if quota is exhausted'
+                ]
+            },
+            {
+                issue: 'Token limit policy not working',
+                solutions: [
+                    'Verify the policy XML syntax is correct',
+                    'Check that the API is properly configured',
+                    'Ensure you are using Premium v2 tier (required for AI Gateway features)',
+                    'Review API Management logs for policy errors'
+                ]
+            },
+            {
+                issue: 'Content Safety integration fails',
+                solutions: [
+                    'Verify Azure AI Content Safety resource exists and is accessible',
+                    'Check the resource ID format in the policy',
+                    'Ensure managed identity or API key is properly configured',
+                    'Verify Content Safety service is available in your region'
+                ]
+            },
+            {
+                issue: 'Semantic caching not working',
+                solutions: [
+                    'Verify Redis connection string is correct',
+                    'Check Redis instance is running and accessible',
+                    'Ensure similarity threshold is between 0.0 and 1.0',
+                    'Verify embeddings API is configured correctly'
+                ]
+            },
+            {
+                issue: 'Deployment takes too long',
+                solutions: [
+                    'API Management creation can take 30-60 minutes',
+                    'Check Azure service health status',
+                    'Verify network connectivity to Azure',
+                    'Consider using Azure Resource Manager templates for faster deployment'
+                ]
+            }
+        );
+    }
+    // SQL Database specific tips
+    else if (isSqlRecipe) {
+        tips.push(
+            {
+                issue: 'SQL Database creation fails',
+                solutions: [
+                    'Verify you have sufficient quota for SQL Database in your subscription',
+                    'Check that the server name is globally unique',
+                    'Ensure you have Contributor or Owner permissions',
+                    'Verify the selected service tier is available in your region'
+                ]
+            },
+            {
+                issue: 'Cannot connect to SQL Database',
+                solutions: [
+                    'Verify firewall rules allow your IP address or Azure services',
+                    'Check that the server is running and accessible',
+                    'Ensure connection string credentials are correct',
+                    'Verify network security groups allow SQL port 1433'
+                ]
+            },
+            {
+                issue: 'Database performance issues',
+                solutions: [
+                    'Review database DTU/vCore usage in Azure Portal',
+                    'Consider scaling up to a higher service tier',
+                    'Check for long-running queries in Query Store',
+                    'Review index usage and optimize queries'
+                ]
+            },
+            {
+                issue: 'Backup and restore issues',
+                solutions: [
+                    'Verify automated backup is enabled for your service tier',
+                    'Check backup retention policy settings',
+                    'Ensure sufficient storage quota for point-in-time restore',
+                    'Verify restore permissions and point-in-time restore window'
+                ]
+            }
+        );
+    }
+    // Generic tips for other recipes
+    else {
+        tips.push(
+            {
+                issue: 'Deployment fails',
+                solutions: [
+                    'Verify you have sufficient quota in your subscription',
+                    'Check that resource names meet naming requirements',
+                    'Ensure you have Contributor or Owner permissions',
+                    'Try a different Azure region if quota is exhausted'
+                ]
+            },
+            {
+                issue: 'Cannot access deployed resources',
+                solutions: [
+                    'Verify network security groups and firewall rules',
+                    'Check that resources are running and accessible',
+                    'Ensure connection strings and credentials are correct',
+                    'Review Azure service health status'
+                ]
+            }
+        );
+    }
+
+    return tips;
 }
 

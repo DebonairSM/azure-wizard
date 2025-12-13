@@ -26,6 +26,115 @@ export function generateBicepTemplate(recipe, selectedFeatures = [], parameters 
  * Generate main Bicep file
  */
 function generateMainBicep(recipe, selectedFeatures, parameters) {
+    // Detect recipe type based on deploymentTemplateId or bicepOutline resources
+    const templateId = recipe.deploymentTemplateId || '';
+    const resources = recipe.bicepOutline?.resources || [];
+    const isSqlRecipe = templateId.includes('sql') || 
+                       resources.some(r => r.includes('Microsoft.Sql'));
+    const isApiManagementRecipe = templateId.includes('apim') || 
+                                  templateId.includes('api-management') ||
+                                  resources.some(r => r.includes('Microsoft.ApiManagement'));
+
+    // Generate SQL Server Bicep template
+    if (isSqlRecipe) {
+        return generateSqlBicep(recipe, selectedFeatures, parameters);
+    }
+
+    // Generate API Management Bicep template (default)
+    if (isApiManagementRecipe) {
+        return generateApiManagementBicep(recipe, selectedFeatures, parameters);
+    }
+
+    // Default to API Management for backward compatibility
+    return generateApiManagementBicep(recipe, selectedFeatures, parameters);
+}
+
+/**
+ * Generate SQL Server Bicep template
+ */
+function generateSqlBicep(recipe, selectedFeatures, parameters) {
+    const sqlServerName = parameters.sqlServerName || 'sql-server';
+    const databaseName = parameters.databaseName || 'sqldb';
+    const adminLogin = parameters.adminLogin || 'sqladmin';
+    const adminPassword = parameters.adminPassword || 'ChangeMe123!';
+
+    let bicep = `@description('Bicep template for ${recipe.title || 'Azure SQL Database'}')
+@description('SQL Server name')
+param sqlServerName string = '${sqlServerName}'
+
+@description('SQL Database name')
+param databaseName string = '${databaseName}'
+
+@description('SQL Server administrator login')
+param adminLogin string = '${adminLogin}'
+
+@secure()
+@description('SQL Server administrator password')
+param adminPassword string = '${adminPassword}'
+
+@description('Resource group location')
+param location string = resourceGroup().location
+
+@description('Database service tier')
+@allowed(['Basic', 'S0', 'S1', 'S2', 'S3', 'P1', 'P2', 'P4', 'P6', 'P11', 'P15'])
+param serviceTier string = 'Basic'
+
+@description('Database max size in GB')
+param maxSizeGB int = 2
+
+// SQL Server
+resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
+  name: sqlServerName
+  location: location
+  properties: {
+    administratorLogin: adminLogin
+    administratorLoginPassword: adminPassword
+    version: '12.0'
+    minimalTlsVersion: '1.2'
+  }
+  tags: {
+    environment: 'production'
+    managedBy: 'azure-wizard'
+  }
+}
+
+// SQL Database
+resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
+  parent: sqlServer
+  name: databaseName
+  location: location
+  sku: {
+    name: serviceTier
+  }
+  properties: {
+    maxSizeBytes: maxSizeGB * 1024 * 1024 * 1024
+    requestedBackupStorageRedundancy: 'Geo'
+  }
+  tags: {
+    environment: 'production'
+    managedBy: 'azure-wizard'
+  }
+}
+
+// Firewall rule to allow Azure services
+resource allowAzureServices 'Microsoft.Sql/servers/firewallRules@2023-05-01-preview' = {
+  parent: sqlServer
+  name: 'AllowAzureServices'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+`;
+
+    return bicep;
+}
+
+/**
+ * Generate API Management Bicep template
+ */
+function generateApiManagementBicep(recipe, selectedFeatures, parameters) {
     let bicep = `@description('Bicep template for ${recipe.title || 'Azure deployment'}')
 @allowed([
   'PremiumV2'
@@ -260,9 +369,6 @@ resource redisCache 'Microsoft.Cache/redis@2023-04-01' = {
     managedBy: 'azure-wizard'
   }
 }
-
-// Output Redis connection string
-output redisConnectionString string = '${redisCache.properties.hostName}:${redisCache.properties.sslPort},ssl=true,password=${redisCache.listKeys().primaryKey}'
 `;
 }
 
@@ -290,9 +396,6 @@ resource contentSafety 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
     managedBy: 'azure-wizard'
   }
 }
-
-// Output Content Safety resource ID
-output contentSafetyResourceId string = contentSafety.id
 `;
 }
 
@@ -316,9 +419,6 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
     managedBy: 'azure-wizard'
   }
 }
-
-// Output Application Insights instrumentation key
-output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
 `;
 }
 
@@ -326,6 +426,47 @@ output appInsightsInstrumentationKey string = appInsights.properties.Instrumenta
  * Generate parameters file
  */
 function generateParametersBicep(recipe, selectedFeatures, parameters) {
+    // Detect recipe type
+    const templateId = recipe.deploymentTemplateId || '';
+    const resources = recipe.bicepOutline?.resources || [];
+    const isSqlRecipe = templateId.includes('sql') || 
+                       resources.some(r => r.includes('Microsoft.Sql'));
+
+    if (isSqlRecipe) {
+        return `@description('Parameters for ${recipe.title || 'Azure SQL Database'}')
+
+param sqlServerName = {
+  value: 'sql-server-${Date.now()}'
+}
+
+param databaseName = {
+  value: 'sqldb'
+}
+
+param adminLogin = {
+  value: 'sqladmin'
+}
+
+param adminPassword = {
+  value: 'ChangeMe123!'
+}
+
+param location = {
+  value: 'eastus'
+}
+
+param serviceTier = {
+  value: 'Basic'
+}
+
+param maxSizeGB = {
+  value: 2
+}
+
+`;
+    }
+
+    // API Management parameters (default)
     return `@description('Parameters for ${recipe.title || 'Azure deployment'}')
 
 param apimServiceName = {
@@ -351,25 +492,42 @@ param location = {
  * Generate outputs
  */
 function generateOutputsBicep(recipe, selectedFeatures) {
+    // Detect recipe type
+    const templateId = recipe.deploymentTemplateId || '';
+    const resources = recipe.bicepOutline?.resources || [];
+    const isSqlRecipe = templateId.includes('sql') || 
+                       resources.some(r => r.includes('Microsoft.Sql'));
+
+    if (isSqlRecipe) {
+        return `
+// Outputs
+output sqlServerName string = sqlServer.name
+output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
+output databaseName string = sqlDatabase.name
+output connectionString string = 'Server=tcp:\${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=\${sqlDatabase.name};Persist Security Info=False;User ID=\${sqlServer.properties.administratorLogin};Password=\${sqlServer.properties.administratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+`;
+    }
+
+    // API Management outputs (default)
     let outputs = `
 // Outputs
-output apimServiceUrl string = 'https://${apimServiceName}.azure-api.net'
+output apimServiceUrl string = 'https://\${apimServiceName}.azure-api.net'
 output apimServiceId string = apimService.id
-output apiUrl string = 'https://${apimServiceName}.azure-api.net/llm'
+output apiUrl string = 'https://\${apimServiceName}.azure-api.net/llm'
 `;
 
     if (selectedFeatures.some(f => f.includes('semantic-caching'))) {
-        outputs += `output redisConnectionString string = redisConnectionString
+        outputs += `output redisConnectionString string = '\${redisCache.properties.hostName}:\${redisCache.properties.sslPort},ssl=true,password=\${redisCache.listKeys().primaryKey}'
 `;
     }
 
     if (selectedFeatures.some(f => f.includes('content-safety'))) {
-        outputs += `output contentSafetyResourceId string = contentSafetyResourceId
+        outputs += `output contentSafetyResourceId string = contentSafety.id
 `;
     }
 
     if (selectedFeatures.some(f => f.includes('monitoring') || f.includes('metrics'))) {
-        outputs += `output appInsightsInstrumentationKey string = appInsightsInstrumentationKey
+        outputs += `output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
 `;
     }
 
@@ -380,6 +538,39 @@ output apiUrl string = 'https://${apimServiceName}.azure-api.net/llm'
  * Generate deployment script (Azure CLI)
  */
 export function generateDeploymentScript(recipe, selectedFeatures, parameters) {
+    // Detect recipe type
+    const templateId = recipe.deploymentTemplateId || '';
+    const resources = recipe.bicepOutline?.resources || [];
+    const isSqlRecipe = templateId.includes('sql') || 
+                       resources.some(r => r.includes('Microsoft.Sql'));
+
+    if (isSqlRecipe) {
+        return `#!/bin/bash
+# Deployment script for ${recipe.title || 'Azure SQL Database'}
+# Generated by Azure Wizard
+
+set -e
+
+RESOURCE_GROUP="myResourceGroup"
+LOCATION="eastus"
+SQL_SERVER_NAME="sql-server-${Date.now()}"
+
+echo "Creating resource group..."
+az group create --name $RESOURCE_GROUP --location $LOCATION
+
+echo "Deploying Bicep template..."
+az deployment group create \\
+  --resource-group $RESOURCE_GROUP \\
+  --template-file main.bicep \\
+  --parameters @parameters.bicep \\
+  --parameters sqlServerName=$SQL_SERVER_NAME
+
+echo "Deployment complete!"
+echo "SQL Server: $SQL_SERVER_NAME.database.windows.net"
+`;
+    }
+
+    // API Management script (default)
     return `#!/bin/bash
 # Deployment script for ${recipe.title || 'Azure deployment'}
 # Generated by Azure Wizard
@@ -409,6 +600,38 @@ echo "API Management URL: https://$APIM_SERVICE_NAME.azure-api.net"
  * Generate deployment script (PowerShell)
  */
 export function generateDeploymentScriptPowerShell(recipe, selectedFeatures, parameters) {
+    // Detect recipe type
+    const templateId = recipe.deploymentTemplateId || '';
+    const resources = recipe.bicepOutline?.resources || [];
+    const isSqlRecipe = templateId.includes('sql') || 
+                       resources.some(r => r.includes('Microsoft.Sql'));
+
+    if (isSqlRecipe) {
+        return `# Deployment script for ${recipe.title || 'Azure SQL Database'}
+# Generated by Azure Wizard
+
+$ErrorActionPreference = "Stop"
+
+$ResourceGroup = "myResourceGroup"
+$Location = "eastus"
+$SqlServerName = "sql-server-$(Get-Date -Format 'yyyyMMddHHmmss')"
+
+Write-Host "Creating resource group..."
+New-AzResourceGroup -Name $ResourceGroup -Location $Location
+
+Write-Host "Deploying Bicep template..."
+New-AzResourceGroupDeployment \`
+  -ResourceGroupName $ResourceGroup \`
+  -TemplateFile "main.bicep" \`
+  -TemplateParameterFile "parameters.bicep" \`
+  -sqlServerName $SqlServerName
+
+Write-Host "Deployment complete!"
+Write-Host "SQL Server: $SqlServerName.database.windows.net"
+`;
+    }
+
+    // API Management script (default)
     return `# Deployment script for ${recipe.title || 'Azure deployment'}
 # Generated by Azure Wizard
 

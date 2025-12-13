@@ -8,6 +8,82 @@
  * @returns {string} Mermaid diagram syntax
  */
 export function generateArchitectureDiagram(recipe, selectedFeatures = []) {
+    // Detect recipe type based on deploymentTemplateId or bicepOutline resources
+    const templateId = recipe.deploymentTemplateId || '';
+    const resources = recipe.bicepOutline?.resources || [];
+    const isSqlRecipe = templateId.includes('sql') || 
+                       resources.some(r => r.includes('Microsoft.Sql'));
+    const isApiManagementRecipe = templateId.includes('apim') || 
+                                  templateId.includes('api-management') ||
+                                  resources.some(r => r.includes('Microsoft.ApiManagement'));
+
+    // Generate SQL Server diagram
+    if (isSqlRecipe) {
+        return generateSqlDiagram(recipe, selectedFeatures);
+    }
+
+    // Generate API Management diagram (default)
+    if (isApiManagementRecipe) {
+        return generateApiManagementDiagram(recipe, selectedFeatures);
+    }
+
+    // Default to API Management for backward compatibility
+    return generateApiManagementDiagram(recipe, selectedFeatures);
+}
+
+/**
+ * Generate SQL Server architecture diagram
+ */
+function generateSqlDiagram(recipe, selectedFeatures = []) {
+    let diagram = 'graph TB\n';
+    diagram += '    subgraph "Azure SQL Database"\n';
+    diagram += '        SQLSERVER[SQL Server]\n';
+    diagram += '        DATABASE[SQL Database]\n';
+    diagram += '        FIREWALL[Firewall Rules]\n';
+    diagram += '    end\n\n';
+
+    diagram += '    subgraph "Application Layer"\n';
+    diagram += '        APP[Application<br/>.NET/Node.js/etc]\n';
+    diagram += '        DAL[Data Access Layer<br/>EF Core/Dapper]\n';
+    diagram += '    end\n\n';
+
+    diagram += '    subgraph "Security & Configuration"\n';
+    diagram += '        KEYVAULT[Azure Key Vault<br/>Connection Strings]\n';
+    diagram += '    end\n\n';
+
+    diagram += '    subgraph "Monitoring"\n';
+    diagram += '        MONITOR[Azure Monitor]\n';
+    diagram += '        INSIGHTS[Application Insights]\n';
+    diagram += '    end\n\n';
+
+    // Connections
+    diagram += '    APP -->|Connection String| KEYVAULT\n';
+    diagram += '    KEYVAULT -->|Retrieve| DATABASE\n';
+    diagram += '    APP --> DAL\n';
+    diagram += '    DAL -->|SQL Queries| DATABASE\n';
+    diagram += '    DATABASE --> SQLSERVER\n';
+    diagram += '    FIREWALL -->|Controls Access| SQLSERVER\n';
+    diagram += '    SQLSERVER -->|Metrics & Logs| MONITOR\n';
+    diagram += '    APP -->|Telemetry| INSIGHTS\n';
+
+    // Styling
+    diagram += '\n    classDef sql fill:#0078d4,stroke:#005a9e,stroke-width:2px,color:#fff\n';
+    diagram += '    classDef app fill:#107c10,stroke:#0e6b0e,stroke-width:2px,color:#fff\n';
+    diagram += '    classDef security fill:#ff8c00,stroke:#cc7000,stroke-width:2px,color:#fff\n';
+    diagram += '    classDef monitor fill:#5c2d91,stroke:#4a2473,stroke-width:2px,color:#fff\n';
+    diagram += '\n';
+    diagram += '    class SQLSERVER,DATABASE,FIREWALL sql\n';
+    diagram += '    class APP,DAL app\n';
+    diagram += '    class KEYVAULT security\n';
+    diagram += '    class MONITOR,INSIGHTS monitor\n';
+
+    return diagram;
+}
+
+/**
+ * Generate API Management architecture diagram
+ */
+function generateApiManagementDiagram(recipe, selectedFeatures = []) {
     const hasSemanticCache = selectedFeatures.some(f => f.includes('semantic-caching'));
     const hasContentSafety = selectedFeatures.some(f => f.includes('content-safety'));
     const hasRealTime = selectedFeatures.some(f => f.includes('realtime'));
@@ -250,4 +326,6 @@ export function generateResourceTree(recipe, selectedFeatures = []) {
     resources.push(resourceGroup);
     return resources;
 }
+
+
 

@@ -219,10 +219,28 @@
     },
     {
       "id": "api-management-type",
-      "question": "API Management requirements?",
-      "description": "Choose API gateway and management features",
+      "question": "API Management version?",
+      "description": "Choose the API Management version",
       "nodeType": "question",
       "tags": ["web", "api", "gateway"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-classic-tiers",
+      "question": "Select Classic tier?",
+      "description": "Choose the Classic (v1) API Management tier",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "classic"],
+      "azObjectives": ["AZ-204.2"],
+      "roleFocus": ["api-dev"]
+    },
+    {
+      "id": "apim-v2-tiers",
+      "question": "Select v2 tier?",
+      "description": "Choose the v2 API Management tier or feature",
+      "nodeType": "question",
+      "tags": ["web", "api", "gateway", "v2"],
       "azObjectives": ["AZ-204.2"],
       "roleFocus": ["api-dev"]
     },
@@ -286,7 +304,25 @@
     {
       "id": "apim-premium-recipe",
       "nodeType": "terminal",
-      "tags": ["web", "api", "gateway", "v2"],
+      "tags": ["web", "api", "gateway", "premium"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-v2-basic-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "v2", "basic"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-v2-standard-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "v2", "standard"],
+      "azObjectives": ["AZ-204.2"]
+    },
+    {
+      "id": "apim-v2-premium-recipe",
+      "nodeType": "terminal",
+      "tags": ["web", "api", "gateway", "v2", "premium"],
       "azObjectives": ["AZ-204.2"]
     },
     {
@@ -544,7 +580,7 @@
     {
       "id": "sql-server-options",
       "question": "SQL Server deployment model?",
-      "description": "Choose Azure SQL Database or SQL Managed Instance",
+      "description": "Choose your SQL Server deployment model",
       "nodeType": "question",
       "tags": ["data", "database", "sql"],
       "azObjectives": ["AZ-204.5"],
@@ -560,6 +596,12 @@
       "id": "sql-server-managed-recipe",
       "nodeType": "terminal",
       "tags": ["data", "database", "sql", "managed-instance"],
+      "azObjectives": ["AZ-204.5"]
+    },
+    {
+      "id": "sql-server-vm-recipe",
+      "nodeType": "terminal",
+      "tags": ["data", "database", "sql", "vm", "iaas"],
       "azObjectives": ["AZ-204.5"]
     },
     {
@@ -1343,35 +1385,9 @@
       "whenNotToUse": "For enterprise applications requiring advanced features"
     },
     {
-      "id": "opt-apim-ai-gateway",
-      "nodeId": "api-management-type",
-      "label": "AI Gateway",
-      "description": "AI Gateway with LLM policies and content safety (2025 feature)",
-      "pros": ["LLM policies", "Content safety", "Token limits", "Semantic caching"],
-      "cons": ["AI-specific", "Additional configuration"],
-      "whenToUse": "For managing LLM APIs, AI applications, or OpenAI integrations requiring governance",
-      "whenNotToUse": "For standard REST APIs without AI/LLM requirements"
-    },
-    {
-      "id": "feature-selection-submit",
-      "nodeId": "apim-ai-gateway-features",
-      "label": "Continue to Recipe",
-      "description": "Submit selected features and proceed to recipe"
-    },
-    {
-      "id": "opt-apim-mcp",
-      "nodeId": "api-management-type",
-      "label": "Model Context Protocol",
-      "description": "MCP support for AI agent tool integration (2025 feature)",
-      "pros": ["MCP compliance", "AI agent integration", "Tool exposure", "Context-aware"],
-      "cons": ["MCP-specific", "New protocol"],
-      "whenToUse": "For exposing APIs as tools for AI agents using Model Context Protocol",
-      "whenNotToUse": "For standard API management without AI agent requirements"
-    },
-    {
       "id": "opt-apim-classic",
       "nodeId": "api-management-type",
-      "label": "Classic API Gateway",
+      "label": "Classic (v1)",
       "description": "Traditional API Management with gateway features",
       "pros": ["Mature", "Full features", "Workspaces", "Comprehensive"],
       "cons": ["Legacy tier", "Higher cost"],
@@ -1381,7 +1397,7 @@
     {
       "id": "opt-apim-v2",
       "nodeId": "api-management-type",
-      "label": "API Management v2",
+      "label": "v2",
       "description": "New v2 tier with enhanced features",
       "pros": ["Modern tier", "Enhanced performance", "New features", "MCP support"],
       "cons": ["Newer service", "Migration needed"],
@@ -1400,7 +1416,7 @@
     },
     {
       "id": "opt-apim-developer",
-      "nodeId": "api-management-type",
+      "nodeId": "apim-classic-tiers",
       "label": "Developer Tier",
       "description": "Non-production tier for development and evaluation with all features",
       "pros": ["All features", "Low cost", "Full policy support", "Developer portal"],
@@ -1410,7 +1426,7 @@
     },
     {
       "id": "opt-apim-basic",
-      "nodeId": "api-management-type",
+      "nodeId": "apim-classic-tiers",
       "label": "Basic Tier",
       "description": "Entry-level production tier with 99.9% SLA and basic scaling",
       "pros": ["Production SLA", "50MB cache per unit", "Up to 2 units", "Cost-effective"],
@@ -1420,7 +1436,7 @@
     },
     {
       "id": "opt-apim-standard",
-      "nodeId": "api-management-type",
+      "nodeId": "apim-classic-tiers",
       "label": "Standard Tier",
       "description": "Production tier with VNET integration and multi-region support",
       "pros": ["VNET integration", "Multi-region", "1GB cache per unit", "Up to 4 units", "99.9% SLA"],
@@ -1430,13 +1446,69 @@
     },
     {
       "id": "opt-apim-premium",
-      "nodeId": "api-management-type",
+      "nodeId": "apim-classic-tiers",
       "label": "Premium Tier",
       "description": "Enterprise tier with highest scalability, multi-region active-active, and self-hosted gateway",
       "pros": ["Up to 10 units per region", "Multi-region active-active", "Self-hosted gateway", "5GB cache", "99.95% SLA", "VNET injection"],
       "cons": ["Higher cost", "More complex setup"],
       "whenToUse": "For enterprise-scale deployments, high availability, hybrid/multi-cloud, or compliance requirements",
       "whenNotToUse": "For small to medium workloads where Standard tier is sufficient"
+    },
+    {
+      "id": "opt-apim-v2-basic",
+      "nodeId": "apim-v2-tiers",
+      "label": "Basic Tier",
+      "description": "Entry-level production tier with 99.9% SLA and basic scaling",
+      "pros": ["Production SLA", "50MB cache per unit", "Up to 2 units", "Cost-effective", "v2 features"],
+      "cons": ["No VNET support", "Limited to 2 units", "No multi-region"],
+      "whenToUse": "For entry-level production APIs with predictable traffic and no VNET needs, using v2 features",
+      "whenNotToUse": "For high-volume APIs, VNET integration, or multi-region deployments"
+    },
+    {
+      "id": "opt-apim-v2-standard",
+      "nodeId": "apim-v2-tiers",
+      "label": "Standard Tier",
+      "description": "Production tier with VNET integration and multi-region support",
+      "pros": ["VNET integration", "Multi-region", "1GB cache per unit", "Up to 4 units", "99.9% SLA", "v2 features"],
+      "cons": ["No self-hosted gateway", "Limited to 4 units"],
+      "whenToUse": "For business-critical APIs requiring VNET connectivity or multi-region deployments, using v2 features",
+      "whenNotToUse": "For enterprise-scale deployments requiring self-hosted gateway or 10+ units"
+    },
+    {
+      "id": "opt-apim-v2-premium",
+      "nodeId": "apim-v2-tiers",
+      "label": "Premium Tier",
+      "description": "Enterprise tier with highest scalability, multi-region active-active, and self-hosted gateway",
+      "pros": ["Up to 10 units per region", "Multi-region active-active", "Self-hosted gateway", "5GB cache", "99.95% SLA", "VNET injection", "v2 features"],
+      "cons": ["Higher cost", "More complex setup"],
+      "whenToUse": "For enterprise-scale deployments, high availability, hybrid/multi-cloud, or compliance requirements, using v2 features",
+      "whenNotToUse": "For small to medium workloads where Standard tier is sufficient"
+    },
+    {
+      "id": "opt-apim-ai-gateway",
+      "nodeId": "apim-v2-tiers",
+      "label": "AI Gateway",
+      "description": "AI Gateway with LLM policies and content safety (2025 feature)",
+      "pros": ["LLM policies", "Content safety", "Token limits", "Semantic caching"],
+      "cons": ["AI-specific", "Additional configuration"],
+      "whenToUse": "For managing LLM APIs, AI applications, or OpenAI integrations requiring governance",
+      "whenNotToUse": "For standard REST APIs without AI/LLM requirements"
+    },
+    {
+      "id": "opt-apim-mcp",
+      "nodeId": "apim-v2-tiers",
+      "label": "Model Context Protocol",
+      "description": "MCP support for AI agent tool integration (2025 feature)",
+      "pros": ["MCP compliance", "AI agent integration", "Tool exposure", "Context-aware"],
+      "cons": ["MCP-specific", "New protocol"],
+      "whenToUse": "For exposing APIs as tools for AI agents using Model Context Protocol",
+      "whenNotToUse": "For standard API management without AI agent requirements"
+    },
+    {
+      "id": "feature-selection-submit",
+      "nodeId": "apim-ai-gateway-features",
+      "label": "Continue to Recipe",
+      "description": "Submit selected features and proceed to recipe"
     },
     {
       "id": "opt-vm",
@@ -1819,6 +1891,16 @@
       "whenNotToUse": "For new applications that don't need instance-level features"
     },
     {
+      "id": "opt-sql-server-vm",
+      "nodeId": "sql-server-options",
+      "label": "SQL Server on Azure Virtual Machines",
+      "description": "IaaS SQL Server deployment with full control and customization",
+      "pros": ["Full control", "Full SQL Server features", "Custom configurations", "Cost-effective for reserved instances"],
+      "cons": ["Management overhead", "You manage patching", "Infrastructure responsibility"],
+      "whenToUse": "For full SQL Server control, custom configurations, or when Managed Instance features aren't sufficient",
+      "whenNotToUse": "When you want fully managed PaaS services"
+    },
+    {
       "id": "opt-clean-architecture",
       "nodeId": "architecture-pattern",
       "label": "Clean Architecture",
@@ -2188,16 +2270,19 @@
     { "fromNodeId": "signalr-solution", "fromOptionId": "opt-signalr-serverless", "toNodeId": "signalr-serverless-recipe" },
     { "fromNodeId": "signalr-solution", "fromOptionId": "opt-signalr-premium", "toNodeId": "signalr-premium-recipe" },
     { "fromNodeId": "signalr-solution", "fromOptionId": "opt-signalr-basic", "toNodeId": "signalr-basic-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-ai-gateway", "toNodeId": "apim-ai-gateway-features" },
-    { "fromNodeId": "apim-ai-gateway-features", "fromOptionId": "feature-selection-submit", "toNodeId": "apim-ai-gateway-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-mcp", "toNodeId": "apim-mcp-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-classic", "toNodeId": "apim-classic-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-v2", "toNodeId": "apim-v2-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-classic", "toNodeId": "apim-classic-tiers" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-v2", "toNodeId": "apim-v2-tiers" },
     { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-consumption", "toNodeId": "apim-consumption-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-developer", "toNodeId": "apim-developer-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-basic", "toNodeId": "apim-basic-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-standard", "toNodeId": "apim-standard-recipe" },
-    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-premium", "toNodeId": "apim-premium-recipe" },
+    { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-developer", "toNodeId": "apim-developer-recipe" },
+    { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-basic", "toNodeId": "apim-basic-recipe" },
+    { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-standard", "toNodeId": "apim-standard-recipe" },
+    { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-premium", "toNodeId": "apim-premium-recipe" },
+    { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-v2-basic", "toNodeId": "apim-v2-basic-recipe" },
+    { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-v2-standard", "toNodeId": "apim-v2-standard-recipe" },
+    { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-v2-premium", "toNodeId": "apim-v2-premium-recipe" },
+    { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-ai-gateway", "toNodeId": "apim-ai-gateway-features" },
+    { "fromNodeId": "apim-ai-gateway-features", "fromOptionId": "feature-selection-submit", "toNodeId": "apim-ai-gateway-recipe" },
+    { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-mcp", "toNodeId": "apim-mcp-recipe" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-vm", "toNodeId": "vm-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-functions", "toNodeId": "functions-solution" },
     { "fromNodeId": "compute-solution", "fromOptionId": "opt-batch", "toNodeId": "batch-solution" },
@@ -2244,6 +2329,7 @@
     { "fromNodeId": "azure-storage-type", "fromOptionId": "opt-table-storage", "toNodeId": "table-storage-recipe" },
     { "fromNodeId": "sql-server-options", "fromOptionId": "opt-sql-database", "toNodeId": "sql-server-basic-recipe" },
     { "fromNodeId": "sql-server-options", "fromOptionId": "opt-sql-managed-instance", "toNodeId": "sql-server-managed-recipe" },
+    { "fromNodeId": "sql-server-options", "fromOptionId": "opt-sql-server-vm", "toNodeId": "sql-server-vm-recipe" },
     { "fromNodeId": "root", "fromOptionId": "opt-web", "toNodeId": "architecture-pattern" },
     { "fromNodeId": "architecture-pattern", "fromOptionId": "opt-clean-architecture", "toNodeId": "clean-architecture-net-recipe" },
     { "fromNodeId": "architecture-pattern", "fromOptionId": "opt-microservices", "toNodeId": "microservices-approach" },
@@ -5340,6 +5426,74 @@
       "deploymentTemplateId": "sql-database"
     },
     {
+      "id": "recipe-sql-server-vm",
+      "nodeId": "sql-server-vm-recipe",
+      "title": "SQL Server on Azure Virtual Machines Setup",
+      "steps": [
+        {
+          "number": 1,
+          "title": "Select VM Size and SQL Server Image",
+          "description": "Choose appropriate VM size and SQL Server edition (Standard, Enterprise, Developer) from Azure Marketplace"
+        },
+        {
+          "number": 2,
+          "title": "Create Resource Group and Virtual Network",
+          "description": "Set up resource group and virtual network with subnet for SQL Server VM"
+        },
+        {
+          "number": 3,
+          "title": "Deploy SQL Server VM",
+          "description": "Deploy VM with SQL Server pre-installed using Azure Marketplace image or custom image"
+        },
+        {
+          "number": 4,
+          "title": "Configure SQL Server Security",
+          "description": "Set up Windows authentication, SQL authentication, firewall rules, and network security groups"
+        },
+        {
+          "number": 5,
+          "title": "Configure Storage for SQL Server",
+          "description": "Attach premium managed disks for data, log, and tempdb files with appropriate performance tiers"
+        },
+        {
+          "number": 6,
+          "title": "Configure SQL Server Settings",
+          "description": "Optimize SQL Server configuration including memory, max degree of parallelism, and backup settings"
+        },
+        {
+          "number": 7,
+          "title": "Set Up Backup Strategy",
+          "description": "Configure automated backups to Azure Blob Storage or managed disks with retention policies"
+        },
+        {
+          "number": 8,
+          "title": "Configure High Availability (Optional)",
+          "description": "Set up Always On Availability Groups, Failover Cluster Instances, or database mirroring for high availability"
+        },
+        {
+          "number": 9,
+          "title": "Enable Monitoring and Alerts",
+          "description": "Configure Azure Monitor, SQL Server Agent, and alerting for performance and availability"
+        }
+      ],
+      "bicepOutline": {
+        "resources": [
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.Network/virtualNetworks",
+          "Microsoft.Network/networkInterfaces",
+          "Microsoft.Compute/disks",
+          "Microsoft.Network/networkSecurityGroups"
+        ]
+      },
+      "links": [
+        { "label": "SQL Server on Azure VMs Documentation", "url": "https://docs.microsoft.com/azure/azure-sql/virtual-machines/windows/sql-server-on-azure-vm-iaas-what-is-overview" },
+        { "label": "SQL Server VM Best Practices", "url": "https://docs.microsoft.com/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices" }
+      ],
+      "skillLevel": "advanced",
+      "deploymentTemplateType": "bicep",
+      "deploymentTemplateId": "sql-server-vm"
+    },
+    {
       "id": "recipe-clean-architecture",
       "nodeId": "clean-architecture-net-recipe",
       "title": "Clean Architecture with .NET",
@@ -6092,6 +6246,22 @@
       "pros": ["Near-complete compatibility", "VNet integration", "Instance-level features"],
       "cons": ["Higher cost", "Longer provisioning"],
       "recipeNodeId": "sql-server-managed-recipe",
+      "azObjectives": ["AZ-204.5"]
+    },
+    {
+      "id": "sql-server-vm",
+      "name": "SQL Server on Azure Virtual Machines",
+      "category": "database",
+      "description": "IaaS SQL Server deployment with full control and customization",
+      "configSchema": {
+        "vmName": { "type": "string", "required": true, "label": "VM Name" },
+        "sqlServerEdition": { "type": "string", "default": "Standard", "label": "SQL Server Edition" },
+        "vmSize": { "type": "string", "default": "Standard_D2s_v3", "label": "VM Size" }
+      },
+      "tags": ["database", "sql", "vm", "iaas"],
+      "pros": ["Full control", "Full SQL Server features", "Custom configurations", "Cost-effective for reserved instances"],
+      "cons": ["Management overhead", "You manage patching", "Infrastructure responsibility"],
+      "recipeNodeId": "sql-server-vm-recipe",
       "azObjectives": ["AZ-204.5"]
     },
     {

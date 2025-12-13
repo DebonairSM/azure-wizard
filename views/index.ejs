@@ -1122,7 +1122,8 @@
             isTerminal: <%- JSON.stringify(isTerminal) %>,
             version: '<%= version %>',
             nodeId: '<%= nodeId %>',
-            prevNodeId: '<%= prevNodeId || "" %>'
+            prevNodeId: '<%= prevNodeId || "" %>',
+            pathToNode: <%- JSON.stringify(pathToNode || []) %>
         };
         
         // Handle option click for server-rendered options

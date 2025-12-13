@@ -126,6 +126,55 @@ export function initDatabase() {
         console.log('Azure offerings table created');
     }
 
+    // Ensure apimPolicies table exists (for existing databases)
+    if (!tableExists('apimPolicies')) {
+        const apimPoliciesSchema = `
+            CREATE TABLE IF NOT EXISTS apimPolicies (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                scope TEXT,
+                description TEXT,
+                parameters TEXT,
+                xmlTemplate TEXT,
+                bicepTemplate TEXT,
+                documentation TEXT,
+                compatibility TEXT,
+                examples TEXT,
+                createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+            
+            CREATE INDEX IF NOT EXISTS idx_apimPolicies_category ON apimPolicies(category);
+            CREATE INDEX IF NOT EXISTS idx_apimPolicies_name ON apimPolicies(name);
+        `;
+        db.exec(apimPoliciesSchema);
+        console.log('APIM policies table created');
+    }
+
+    // Ensure apimPolicyConfigurations table exists (for existing databases)
+    if (!tableExists('apimPolicyConfigurations')) {
+        const apimPolicyConfigurationsSchema = `
+            CREATE TABLE IF NOT EXISTS apimPolicyConfigurations (
+                id TEXT PRIMARY KEY,
+                policyId TEXT NOT NULL,
+                scope TEXT NOT NULL,
+                scopeId TEXT,
+                configuration TEXT,
+                bicepResource TEXT,
+                createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (policyId) REFERENCES apimPolicies(id) ON DELETE CASCADE
+            );
+            
+            CREATE INDEX IF NOT EXISTS idx_apimPolicyConfigurations_policyId ON apimPolicyConfigurations(policyId);
+            CREATE INDEX IF NOT EXISTS idx_apimPolicyConfigurations_scope ON apimPolicyConfigurations(scope);
+            CREATE INDEX IF NOT EXISTS idx_apimPolicyConfigurations_scopeId ON apimPolicyConfigurations(scopeId);
+        `;
+        db.exec(apimPolicyConfigurationsSchema);
+        console.log('APIM policy configurations table created');
+    }
+
     return db;
 }
 

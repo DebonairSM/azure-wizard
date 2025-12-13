@@ -96,6 +96,53 @@ function getNextNodeId(db, fromNodeId, optionId) {
 }
 
 /**
+ * Get full path from a node back to root (for breadcrumb reconstruction)
+ * Returns array of { fromNodeId, fromOptionId, toNodeId, optionLabel } in order from root to target
+ */
+function getPathToNode(db, targetNodeId) {
+    if (!targetNodeId) return [];
+    
+    const rootNode = getRootNode(db);
+    if (!rootNode || targetNodeId === rootNode.id) {
+        return [];
+    }
+    
+    // Trace backwards from target to root by finding which paths lead to each node
+    const path = [];
+    const visited = new Set(); // Prevent infinite loops
+    let current = targetNodeId;
+    
+    while (current && current !== rootNode.id && !visited.has(current)) {
+        visited.add(current);
+        
+        // Find all paths that lead TO current node
+        const incomingPaths = db.prepare(`
+            SELECT p.fromNodeId, p.fromOptionId, p.toNodeId, o.label as optionLabel
+            FROM paths p
+            LEFT JOIN options o ON p.fromNodeId = o.nodeId AND p.fromOptionId = o.id
+            WHERE p.toNodeId = ?
+        `).all(current);
+        
+        if (incomingPaths.length === 0) {
+            break; // Can't go further back
+        }
+        
+        // Use the first path (if multiple, just pick one)
+        const incomingPath = incomingPaths[0];
+        path.unshift({
+            fromNodeId: incomingPath.fromNodeId,
+            fromOptionId: incomingPath.fromOptionId,
+            toNodeId: incomingPath.toNodeId,
+            optionLabel: incomingPath.optionLabel || null
+        });
+        
+        current = incomingPath.fromNodeId;
+    }
+    
+    return path;
+}
+
+/**
  * Get recipe for node - ALWAYS fetches fresh from database (no caching)
  * @param {Object} db - Database connection
  * @param {string} nodeId - Node ID
@@ -255,7 +302,8 @@ function getRecipeForNode(db, nodeId, selectedFeatures = null) {
         }
     }
     
-    // If this is an AI Gateway recipe, ALWAYS fetch fresh AI Gateway data from database
+    // CRITICAL: Only add AI Gateway details for APIM AI Gateway recipes
+    // For all other recipes, explicitly remove aiGatewayDetails to prevent contamination
     if (nodeId === 'apim-ai-gateway-recipe') {
         // Direct database query - always fresh, no cache
         const aiGatewayData = db.prepare(`
@@ -273,6 +321,11 @@ function getRecipeForNode(db, nodeId, selectedFeatures = null) {
                     recipe.aiGatewayDetails = filterAiGatewayDetails(recipe.aiGatewayDetails, selectedFeatures);
                 }
             }
+        }
+    } else {
+        // Explicitly remove aiGatewayDetails from non-APIM recipes to prevent contamination
+        if (recipe.aiGatewayDetails) {
+            delete recipe.aiGatewayDetails;
         }
     }
     
@@ -401,6 +454,12 @@ router.get('/', async (req, res) => {
         // Get version - direct database query
         const version = db.prepare('SELECT version FROM version ORDER BY updatedAt DESC LIMIT 1').get();
         
+        // Get full path for breadcrumb reconstruction (if not at root)
+        let pathToNode = [];
+        if (currentNode.id && nodeId) {
+            pathToNode = getPathToNode(db, currentNode.id);
+        }
+        
         // Render with fresh data - no caching
         res.render('index', {
             currentNode,
@@ -409,7 +468,8 @@ router.get('/', async (req, res) => {
             isTerminal: isTerminal || false,
             version: version?.version || '1.0.0',
             nodeId: currentNode.id,
-            prevNodeId: prevNodeId
+            prevNodeId: prevNodeId,
+            pathToNode: pathToNode // Pass path for client-side reconstruction
         });
     } catch (error) {
         console.error('Error rendering wizard:', error);
