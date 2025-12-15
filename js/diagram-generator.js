@@ -88,8 +88,22 @@ function generateApiManagementDiagram(recipe, selectedFeatures = []) {
     const hasContentSafety = selectedFeatures.some(f => f.includes('content-safety'));
     const hasRealTime = selectedFeatures.some(f => f.includes('realtime'));
     const hasMCP = selectedFeatures.some(f => f.includes('mcp'));
+    
+    // Check for Traffic Manager configuration
+    const hasTrafficManager = recipe.configSchema && 
+                              recipe.configSchema.trafficManagerEnabled && 
+                              (recipe.configSchema.trafficManagerEnabled.default === true);
+    const trafficManagerRoutingMethod = recipe.configSchema?.trafficManagerRoutingMethod?.default || 'Performance';
 
     let diagram = 'graph TB\n';
+    
+    // Add Traffic Manager if enabled
+    if (hasTrafficManager) {
+        diagram += '    subgraph "Global Load Balancing"\n';
+        diagram += `        TM[Traffic Manager<br/>${trafficManagerRoutingMethod} Routing]\n`;
+        diagram += '    end\n\n';
+    }
+    
     diagram += '    subgraph "Azure API Management"\n';
     diagram += '        APIM[API Management<br/>Premium v2]\n';
     diagram += '        API[LLM API]\n';
@@ -132,7 +146,12 @@ function generateApiManagementDiagram(recipe, selectedFeatures = []) {
     diagram += '    end\n\n';
 
     // Connections
-    diagram += '    CLIENT[Client Applications] -->|HTTPS/WebSocket| APIM\n';
+    if (hasTrafficManager) {
+        diagram += '    CLIENT[Client Applications] -->|DNS Query| TM\n';
+        diagram += '    TM -->|HTTPS/WebSocket| APIM\n';
+    } else {
+        diagram += '    CLIENT[Client Applications] -->|HTTPS/WebSocket| APIM\n';
+    }
     diagram += '    APIM --> API\n';
     diagram += '    API --> POLICIES\n';
     
@@ -180,6 +199,9 @@ function generateApiManagementDiagram(recipe, selectedFeatures = []) {
     diagram += '    classDef monitor fill:#5c2d91,stroke:#4a2473,stroke-width:2px,color:#fff\n';
     diagram += '\n';
     diagram += '    class APIM,API,POLICIES apim\n';
+    if (hasTrafficManager) {
+        diagram += '    class TM apim\n';
+    }
     if (selectedFeatures.some(f => f.includes('azure-openai'))) {
         diagram += '    class AOAI llm\n';
     }
@@ -210,6 +232,34 @@ export function generateResourceTree(recipe, selectedFeatures = []) {
         type: 'Microsoft.Resources/resourceGroups',
         children: []
     };
+
+    // Check for Traffic Manager configuration
+    const hasTrafficManager = recipe.configSchema && 
+                              recipe.configSchema.trafficManagerEnabled && 
+                              (recipe.configSchema.trafficManagerEnabled.default === true);
+    const trafficManagerRoutingMethod = recipe.configSchema?.trafficManagerRoutingMethod?.default || 'Performance';
+
+    // Traffic Manager (add before APIM if enabled)
+    if (hasTrafficManager) {
+        resourceGroup.children.push({
+            id: 'tm',
+            name: 'Traffic Manager Profile',
+            type: 'Microsoft.Network/trafficManagerProfiles',
+            properties: {
+                trafficRoutingMethod: trafficManagerRoutingMethod,
+                monitorProtocol: recipe.configSchema?.trafficManagerMonitorProtocol?.default || 'HTTP'
+            },
+            children: [{
+                id: 'tm-endpoint',
+                name: 'APIM Endpoint',
+                type: 'Microsoft.Network/trafficManagerProfiles/azureEndpoints',
+                properties: {
+                    endpointStatus: 'Enabled'
+                },
+                children: []
+            }]
+        });
+    }
 
     // API Management
     const apim = {

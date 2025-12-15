@@ -60,6 +60,20 @@ export async function getRecipeForNode(nodeId) {
 }
 
 /**
+ * Search recipes
+ */
+export async function searchRecipes(query) {
+    const params = new URLSearchParams();
+    if (query) params.append('search', query);
+    
+    const response = await fetch(`${API_BASE}/recipes?${params}`);
+    if (!response.ok) {
+        throw new Error(`Failed to search recipes: ${response.statusText}`);
+    }
+    return response.json();
+}
+
+/**
  * Search nodes
  */
 export async function searchNodes(query, tag) {

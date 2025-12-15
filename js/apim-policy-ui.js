@@ -9,8 +9,14 @@ let policyEngine = null;
  * Initialize policy engine
  */
 export function initializePolicyEngine() {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:11',message:'initializePolicyEngine called',data:{engineExists:!!policyEngine},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     if (!policyEngine) {
         policyEngine = new ApimPolicyEngine();
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:14',message:'initializePolicyEngine created new engine',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
     }
     return policyEngine;
 }
@@ -100,9 +106,17 @@ export async function renderPolicySelection(node, options) {
     const engine = initializePolicyEngine();
     const scope = engine.getScope();
     const category = engine.getCategory();
+    const selectedPolicies = engine.getSelectedPolicies();
+    const selectedPolicyIds = selectedPolicies.map(p => p.policyId);
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:99',message:'renderPolicySelection called',data:{scope:scope.scope,scopeId:scope.scopeId,category,selectedPoliciesCount:selectedPolicies.length,selectedPolicyIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     
     // Fetch available policies
     const policies = await engine.getAvailablePolicies();
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:105',message:'renderPolicySelection policies fetched',data:{policiesCount:policies.length,policyIds:policies.map(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     
     return `
         <div class="policy-selection">
@@ -113,18 +127,24 @@ export async function renderPolicySelection(node, options) {
                 ${category ? `<p><strong>Category:</strong> ${category}</p>` : ''}
             </div>
             <div class="policies-list">
-                ${policies.map(policy => `
+                ${policies.map(policy => {
+                    const isChecked = selectedPolicyIds.includes(policy.id);
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:118',message:'renderPolicySelection checkbox rendered',data:{policyId:policy.id,isChecked},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                    // #endregion
+                    return `
                     <div class="policy-item" data-policy-id="${policy.id}">
-                        <input type="checkbox" id="policy-${policy.id}" data-policy-id="${policy.id}" />
+                        <input type="checkbox" id="policy-${policy.id}" data-policy-id="${policy.id}" ${isChecked ? 'checked' : ''} />
                         <label for="policy-${policy.id}">
                             <strong>${policy.name}</strong>
                             <p>${policy.description || ''}</p>
                         </label>
                     </div>
-                `).join('')}
+                `;
+                }).join('')}
             </div>
             <div class="selected-policies-summary">
-                <h3>Selected Policies (<span id="selected-count">0</span>)</h3>
+                <h3>Selected Policies (<span id="selected-count">${selectedPolicies.length}</span>)</h3>
                 <div id="selected-policies-list"></div>
             </div>
             <div class="policy-selection-actions">
@@ -333,6 +353,9 @@ export async function handlePolicyWizardOption(optionId, option) {
     // Handle scope selection
     if (optionId.startsWith('opt-policy-scope-')) {
         const scope = optionId.replace('opt-policy-scope-', '');
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:334',message:'handlePolicyWizardOption scope selection',data:{optionId,scope},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         engine.selectScope(scope);
     }
     
@@ -352,6 +375,10 @@ export async function handlePolicyWizardOption(optionId, option) {
             'ai': 'ai-gateway',
             'advanced': 'advanced'
         };
-        engine.selectCategory(categoryMap[category] || category);
+        const mappedCategory = categoryMap[category] || category;
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:355',message:'handlePolicyWizardOption category selection',data:{optionId,category:mappedCategory},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
+        engine.selectCategory(mappedCategory);
     }
 }

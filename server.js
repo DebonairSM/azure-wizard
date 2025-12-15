@@ -22,6 +22,8 @@ app.use(express.json());
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/data', express.static(path.join(__dirname, 'data')));
 app.use('/favicon.svg', express.static(path.join(__dirname, 'favicon.svg')));
+// Serve index.html as static file for client-side view with builder mode
+app.use('/app.html', express.static(path.join(__dirname, 'index.html')));
 
 // Set up EJS templating
 app.set('view engine', 'ejs');

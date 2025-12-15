@@ -14,6 +14,9 @@ export class ApimPolicyEngine {
         this.selectedCategory = null;
         this.selectedPolicies = []; // Array of { policyId, policy, configuration }
         this.currentPolicyIndex = 0; // Index of policy being configured
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:17',message:'ApimPolicyEngine constructor',data:{selectedScope:this.selectedScope,selectedCategory:this.selectedCategory,selectedPoliciesCount:this.selectedPolicies.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
     }
 
     /**
@@ -37,8 +40,14 @@ export class ApimPolicyEngine {
         if (!['global', 'product', 'api', 'operation'].includes(scope)) {
             throw new Error(`Invalid scope: ${scope}`);
         }
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:36',message:'selectScope called BEFORE',data:{scope,scopeId,currentScope:this.selectedScope},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
         this.selectedScope = scope;
         this.scopeId = scopeId;
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:42',message:'selectScope called AFTER',data:{scope:this.selectedScope,scopeId:this.scopeId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        // #endregion
     }
 
     /**
@@ -46,10 +55,14 @@ export class ApimPolicyEngine {
      * @returns {Object} - { scope, scopeId }
      */
     getScope() {
-        return {
+        const result = {
             scope: this.selectedScope,
             scopeId: this.scopeId
         };
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:48',message:'getScope called',data:result,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        return result;
     }
 
     /**
@@ -115,6 +128,9 @@ export class ApimPolicyEngine {
      * @returns {Promise<Object>} - { success: boolean, policy: Object }
      */
     async addPolicy(policyId) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:117',message:'addPolicy called BEFORE',data:{policyId,currentSelectedCount:this.selectedPolicies.length,selectedPolicyIds:this.selectedPolicies.map(p=>p.policyId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         // Check if already selected
         if (this.selectedPolicies.find(p => p.policyId === policyId)) {
             return {
@@ -139,6 +155,9 @@ export class ApimPolicyEngine {
                 policy: policy,
                 configuration: configuration
             });
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:141',message:'addPolicy called AFTER',data:{policyId,selectedCount:this.selectedPolicies.length,selectedPolicyIds:this.selectedPolicies.map(p=>p.policyId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+            // #endregion
 
             return {
                 success: true,
@@ -166,11 +185,15 @@ export class ApimPolicyEngine {
      * @returns {Array}
      */
     getSelectedPolicies() {
-        return this.selectedPolicies.map(p => ({
+        const result = this.selectedPolicies.map(p => ({
             policyId: p.policyId,
             policy: p.policy,
             configuration: p.configuration
         }));
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:168',message:'getSelectedPolicies called',data:{count:result.length,policyIds:result.map(p=>p.policyId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+        return result;
     }
 
     /**

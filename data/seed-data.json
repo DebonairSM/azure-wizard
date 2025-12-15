@@ -327,57 +327,6 @@
     },
     {
       "id": "apim-policy-wizard-start",
-      "question": "Configure API Management Policies?",
-      "description": "Would you like to configure policies for your API Management instance? Policies control authentication, rate limiting, transformations, caching, and more.",
-      "nodeType": "question",
-      "tags": ["web", "api", "gateway", "policies"],
-      "azObjectives": ["AZ-204.2"],
-      "roleFocus": ["api-dev"]
-    },
-    {
-      "id": "apim-policy-scope",
-      "question": "Select Policy Scope",
-      "description": "Choose where to apply the policies. Global policies apply to all APIs, while API/operation policies are more specific.",
-      "nodeType": "question",
-      "tags": ["web", "api", "gateway", "policies"],
-      "azObjectives": ["AZ-204.2"],
-      "roleFocus": ["api-dev"]
-    },
-    {
-      "id": "apim-policy-category",
-      "question": "Select Policy Category",
-      "description": "Choose a category of policies to configure. You can configure multiple categories.",
-      "nodeType": "question",
-      "tags": ["web", "api", "gateway", "policies"],
-      "azObjectives": ["AZ-204.2"],
-      "roleFocus": ["api-dev"]
-    },
-    {
-      "id": "apim-policy-selection",
-      "question": "Select Policies",
-      "description": "Select the specific policies you want to configure. You can select multiple policies.",
-      "nodeType": "question",
-      "tags": ["web", "api", "gateway", "policies"],
-      "azObjectives": ["AZ-204.2"],
-      "roleFocus": ["api-dev"]
-    },
-    {
-      "id": "apim-policy-configuration",
-      "question": "Configure Policy Parameters",
-      "description": "Configure the parameters for the selected policies.",
-      "nodeType": "question",
-      "tags": ["web", "api", "gateway", "policies"],
-      "azObjectives": ["AZ-204.2"],
-      "roleFocus": ["api-dev"]
-    },
-    {
-      "id": "apim-policy-complete",
-      "nodeType": "terminal",
-      "tags": ["web", "api", "gateway", "policies"],
-      "azObjectives": ["AZ-204.2"]
-    },
-    {
-      "id": "apim-policy-wizard-start",
       "question": "Configure APIM Policies?",
       "description": "Would you like to configure policies for your API Management instance?",
       "nodeType": "question",
@@ -4139,7 +4088,29 @@
       ],
       "skillLevel": "advanced",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-ai-gateway"
+      "deploymentTemplateId": "apim-ai-gateway",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-mcp",
@@ -4194,7 +4165,29 @@
       ],
       "skillLevel": "advanced",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-mcp"
+      "deploymentTemplateId": "apim-mcp",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-classic",
@@ -4255,7 +4248,29 @@
       ],
       "skillLevel": "intermediate",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-classic"
+      "deploymentTemplateId": "apim-classic",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-v2",
@@ -4315,7 +4330,29 @@
       ],
       "skillLevel": "advanced",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-v2"
+      "deploymentTemplateId": "apim-v2",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-consumption",
@@ -4364,7 +4401,29 @@
       ],
       "skillLevel": "beginner",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-consumption"
+      "deploymentTemplateId": "apim-consumption",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-developer",
@@ -4407,7 +4466,29 @@
       ],
       "skillLevel": "beginner",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-developer"
+      "deploymentTemplateId": "apim-developer",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-basic",
@@ -4456,7 +4537,29 @@
       ],
       "skillLevel": "intermediate",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-basic"
+      "deploymentTemplateId": "apim-basic",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-standard",
@@ -4512,7 +4615,29 @@
       ],
       "skillLevel": "intermediate",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-standard"
+      "deploymentTemplateId": "apim-standard",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-apim-premium",
@@ -4578,7 +4703,29 @@
       ],
       "skillLevel": "advanced",
       "deploymentTemplateType": "bicep",
-      "deploymentTemplateId": "apim-premium"
+      "deploymentTemplateId": "apim-premium",
+      "configSchema": {
+        "trafficManagerEnabled": {
+          "type": "boolean",
+          "label": "Enable Traffic Manager",
+          "description": "Enable Azure Traffic Manager for global load balancing",
+          "default": false
+        },
+        "trafficManagerRoutingMethod": {
+          "type": "string",
+          "label": "Traffic Manager Routing Method",
+          "description": "Select how Traffic Manager routes traffic to endpoints",
+          "default": "Performance",
+          "options": ["Performance", "Priority", "Weighted", "Geographic", "Subnet", "MultiValue"]
+        },
+        "trafficManagerMonitorProtocol": {
+          "type": "string",
+          "label": "Monitor Protocol",
+          "description": "Protocol used for endpoint health checks",
+          "default": "HTTP",
+          "options": ["HTTP", "HTTPS", "TCP"]
+        }
+      }
     },
     {
       "id": "recipe-vm-general",

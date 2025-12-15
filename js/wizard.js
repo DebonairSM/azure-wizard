@@ -4,101 +4,41 @@
 import { WizardEngine } from './wizard-engine.js';
 import { loadData } from './data-loader.js';
 import * as ui from './ui.js';
-import { generateBicepTemplate, generateDeploymentScript, generateDeploymentScriptPowerShell, generateReadme } from './bicep-generator.js';
+import * as builder from './builder.js';
+import * as research from './research-service.js';
 
 let wizardEngine = null;
-let pendingMode = null;
-
-// Mode persistence key
-const MODE_STORAGE_KEY = 'azureWizardMode';
-
-/**
- * Get saved mode from localStorage
- * @returns {string} - 'study' or 'design' (default: 'design')
- */
-function getSavedMode() {
-    try {
-        const saved = localStorage.getItem(MODE_STORAGE_KEY);
-        return saved === 'study' || saved === 'design' ? saved : 'design';
-    } catch (error) {
-        console.warn('[Wizard] Failed to get saved mode:', error);
-        return 'design';
-    }
-}
-
-/**
- * Save mode to localStorage
- * @param {string} mode - 'study' or 'design'
- */
-function saveMode(mode) {
-    try {
-        if (mode === 'study' || mode === 'design') {
-            localStorage.setItem(MODE_STORAGE_KEY, mode);
-            console.log('[Wizard] Saved mode to localStorage:', mode);
-        }
-    } catch (error) {
-        console.warn('[Wizard] Failed to save mode:', error);
-    }
-}
+let currentMode = 'wizard'; // 'wizard' or 'builder'
 
 /**
  * Initialize the wizard
  */
 async function initialize() {
     try {
-        // Load saved mode from localStorage
-        const savedMode = getSavedMode();
-        if (!pendingMode) {
-            pendingMode = savedMode;
-        }
-        
+        ui.showLoading();
+
         // Check if we have server-rendered data
         if (window.SERVER_DATA) {
-            // Use server-rendered data directly - no need to show loading
+            // Use server-rendered data directly
             const currentNode = window.SERVER_DATA.currentNode;
             let options = window.SERVER_DATA.options || [];
             const recipe = window.SERVER_DATA.recipe;
             const isTerminal = window.SERVER_DATA.isTerminal;
-            const prevNodeId = window.SERVER_DATA.prevNodeId || null;
             
             // Debug logging
             console.log('[Wizard Init] Server data:', {
                 nodeId: currentNode?.id,
                 question: currentNode?.question,
                 optionsCount: options.length,
-                prevNodeId: prevNodeId,
-                hasRecipe: !!recipe,
-                recipeNodeId: recipe?.nodeId,
-                recipeTitle: recipe?.title,
-                isTerminal: isTerminal
+                options: options.slice(0, 3).map(o => ({ id: o.id, label: o.label }))
             });
-            
-            // Clean up APIM-specific sessionStorage if not viewing APIM recipe
-            if (currentNode?.id && !currentNode.id.includes('apim')) {
-                const apimFeaturesKey = 'apim-ai-gateway-selected-features';
-                if (sessionStorage.getItem(apimFeaturesKey)) {
-                    console.log('[Wizard Init] Clearing APIM sessionStorage for non-APIM recipe');
-                    sessionStorage.removeItem(apimFeaturesKey);
-                }
-            }
             
             // Create wizard engine (will use IndexedDB as fallback)
             wizardEngine = new WizardEngine();
-            // Set mode from saved preference or pending mode
-            const modeToUse = pendingMode || savedMode;
-            wizardEngine.setMode(modeToUse);
-            
-            // Reconstruct choice history from URL path
-            if (currentNode?.id) {
-                const pathToNode = window.SERVER_DATA.pathToNode || null;
-                await wizardEngine.reconstructChoiceHistory(currentNode.id, prevNodeId, pathToNode);
-            } else {
-                wizardEngine.currentNodeId = currentNode?.id || null;
-            }
+            wizardEngine.currentNodeId = currentNode.id;
             
             // If no options from server, try loading from IndexedDB or API
             if (options.length === 0 && currentNode?.id) {
-                ui.showLoading();
                 console.log('[Wizard Init] No options from server, trying fallback...');
                 try {
                     // First try IndexedDB
@@ -110,63 +50,33 @@ async function initialize() {
                         console.log('[Wizard Init] No options in IndexedDB, loading from API...');
                         await loadData();
                         wizardEngine = new WizardEngine();
-                        // Restore mode after recreating engine
-                        wizardEngine.setMode(modeToUse);
                         wizardEngine.currentNodeId = currentNode.id;
                         options = await wizardEngine.getCurrentOptions();
                         console.log('[Wizard Init] Loaded', options.length, 'options from API');
                     }
-                    ui.hideLoading();
                 } catch (error) {
-                    ui.hideLoading();
                     console.error('[Wizard Init] Error loading options:', error);
                 }
             }
             
             // Render with server data
             await renderNode(currentNode, options, recipe, isTerminal);
-            // Ensure content is visible (server already rendered it)
-            document.getElementById('wizardContent').style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
-            
-            // Update mode buttons to reflect current mode
-            const currentMode = wizardEngine.getMode();
-            updateModeButtons(currentMode);
         } else {
             // Load data (will use cache if version matches)
-            ui.showLoading();
             await loadData();
 
             // Create wizard engine
             wizardEngine = new WizardEngine();
             await wizardEngine.initialize();
 
-            // Apply any mode chosen before initialization, or use saved mode
-            const modeToUse = pendingMode || savedMode;
-            wizardEngine.setMode(modeToUse);
-
             // Render initial state
             await renderCurrentState();
-            ui.hideLoading();
-            
-            // Update mode buttons to reflect current mode
-            const currentMode = wizardEngine.getMode();
-            updateModeButtons(currentMode);
         }
+
+        ui.hideLoading();
     } catch (error) {
         console.error('Initialization error:', error);
-        ui.hideLoading();
         ui.showError(`Failed to initialize wizard: ${error.message}`);
-    } finally {
-        // As a final safeguard, ensure content is visible
-        const wizardContent = document.getElementById('wizardContent');
-        const loading = document.getElementById('loading');
-        if (wizardContent) {
-            wizardContent.style.display = 'block';
-        }
-        if (loading) {
-            loading.style.display = 'none';
-        }
     }
 }
 
@@ -185,37 +95,43 @@ async function renderCurrentState() {
         }
 
         const mode = wizardEngine.getMode();
-
         const breadcrumbs = await wizardEngine.getBreadcrumbs();
         ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
 
-        // Show back button only if not at root - check nodeType directly
+        // Show/hide back button
         const backButton = document.getElementById('backButton');
-        const isAtRoot = currentNode.nodeType === 'root';
-        backButton.style.display = isAtRoot ? 'none' : 'block';
-        backButton.disabled = false;
+        backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
 
         // Check if terminal
         if (currentNode.nodeType === 'terminal') {
-            const recipe = await wizardEngine.dataProvider.getRecipeForNode(currentNode.id);
+            let recipe = await wizardEngine.dataProvider.getRecipeForNode(currentNode.id);
+            
+            // If no recipe, try to research and generate one
+            if (!recipe) {
+                try {
+                    const breadcrumbs = await wizardEngine.getBreadcrumbs();
+                    recipe = await research.researchRecipe(currentNode.id, currentNode, breadcrumbs);
+                    
+                    if (recipe) {
+                        // Reload data to get the new recipe
+                        await loadData();
+                        recipe = await wizardEngine.dataProvider.getRecipeForNode(currentNode.id);
+                    }
+                } catch (researchError) {
+                    console.error('Research recipe error:', researchError);
+                }
+            }
             
             if (recipe) {
                 const explanation = await wizardEngine.explainPath();
                 ui.renderRecipe(recipe, mode, explanation);
             } else {
-                ui.showError('Recipe not found for this node.');
+                ui.showError('Recipe not found. Research is in progress or failed. Please try again.');
             }
-        } else if (currentNode.nodeType === 'feature-selection') {
-            // Show feature selection form
-            ui.renderFeatureSelection(currentNode, handleFeatureSubmit);
-            
-            // Hide recipe display
-            document.getElementById('recipeDisplay').style.display = 'none';
-            document.getElementById('nodeDisplay').style.display = 'block';
         } else {
             // Show node with options
             const options = await wizardEngine.getCurrentOptions();
-            await ui.renderNode(currentNode, options, handleOptionSelect, mode);
+            ui.renderNode(currentNode, options, handleOptionSelect, mode);
             
             // Hide recipe display
             document.getElementById('recipeDisplay').style.display = 'none';
@@ -231,113 +147,33 @@ async function renderCurrentState() {
  * Render node with server-rendered data
  */
 async function renderNode(currentNode, options, recipe, isTerminal) {
-    const breadcrumbs = wizardEngine ? await wizardEngine.getBreadcrumbs() : [];
     const mode = wizardEngine ? wizardEngine.getMode() : 'design';
+    const breadcrumbs = wizardEngine ? await wizardEngine.getBreadcrumbs() : [];
     
-    // Debug logging - track recipe source
+    // Debug logging
     console.log('[renderNode] Called with:', {
         nodeId: currentNode?.id,
         question: currentNode?.question,
         optionsCount: options?.length || 0,
         isTerminal,
-        hasRecipe: !!recipe,
-        recipeSource: 'server-rendered',
-        recipeNodeId: recipe?.nodeId,
-        recipeTitle: recipe?.title,
-        recipeId: recipe?.id,
-        mode
+        hasRecipe: !!recipe
     });
-    
-    // CRITICAL: Ensure we use the server-rendered recipe, never override with client-side fetch
-    if (isTerminal && !recipe) {
-        console.warn('[renderNode] Terminal node but no recipe provided - this should not happen with server-rendered data');
-    }
-    
-    // If client-side engine exists and we have a recipe, verify it matches
-    if (isTerminal && recipe && wizardEngine) {
-        // Double-check: do NOT fetch recipe from client-side, always use server-rendered one
-        console.log('[renderNode] Using server-rendered recipe, nodeId:', recipe.nodeId || 'unknown', 'title:', recipe.title || 'unknown');
-    }
     
     ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
     
-    // Show back button only if not at root - check nodeType directly
     const backButton = document.getElementById('backButton');
-    const isAtRoot = currentNode.nodeType === 'root';
-    backButton.style.display = isAtRoot ? 'none' : 'block';
-    backButton.disabled = false;
+    backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
     
     if (isTerminal && recipe) {
-        // ALWAYS use the recipe parameter passed from server - never fetch from client
-        // Verify recipe matches current node
-        if (recipe.nodeId && currentNode?.id && recipe.nodeId !== currentNode.id) {
-            console.error('[renderNode] Recipe nodeId mismatch! Recipe nodeId:', recipe.nodeId, 'Current nodeId:', currentNode.id);
-        }
         const explanation = wizardEngine ? await wizardEngine.explainPath() : '';
-        console.log('[renderNode] Rendering recipe - nodeId:', recipe.nodeId || 'unknown', 'title:', recipe.title || 'unknown', 'matches current:', recipe.nodeId === currentNode?.id);
         ui.renderRecipe(recipe, mode, explanation);
-    } else if (currentNode.nodeType === 'feature-selection') {
-        // Show feature selection form
-        ui.renderFeatureSelection(currentNode, handleFeatureSubmit);
-        document.getElementById('recipeDisplay').style.display = 'none';
-        document.getElementById('nodeDisplay').style.display = 'block';
     } else {
         // Ensure options is an array
         const optionsArray = Array.isArray(options) ? options : [];
         console.log('[renderNode] Rendering node with', optionsArray.length, 'options');
-        await ui.renderNode(currentNode, optionsArray, handleOptionSelect, mode);
+        ui.renderNode(currentNode, optionsArray, handleOptionSelect, mode);
         document.getElementById('recipeDisplay').style.display = 'none';
         document.getElementById('nodeDisplay').style.display = 'block';
-    }
-}
-
-/**
- * Handle feature selection form submission
- * @param {Array<string>} selectedFeatures
- */
-async function handleFeatureSubmit(selectedFeatures) {
-    if (!wizardEngine) {
-        return;
-    }
-
-    // Get feature data from sessionStorage (includes config options)
-    const featureDataStr = sessionStorage.getItem('apim-ai-gateway-selected-features');
-    let featureData = { features: selectedFeatures };
-    if (featureDataStr) {
-        try {
-            const stored = JSON.parse(featureDataStr);
-            featureData = stored.features ? stored : { features: selectedFeatures, config: stored.config || {} };
-        } catch (e) {
-            // Fallback to array format
-            featureData = { features: selectedFeatures };
-        }
-    }
-
-    // Store features in sessionStorage
-    sessionStorage.setItem('apim-ai-gateway-selected-features', JSON.stringify(featureData));
-
-    // If we have server-rendered data, navigate via server
-    if (window.SERVER_DATA) {
-        const currentNode = window.SERVER_DATA.currentNode;
-        // Navigate to recipe with features as query params
-        const featuresParam = encodeURIComponent(JSON.stringify(featureData));
-        window.location.href = `/wizard/navigate?fromNodeId=${currentNode.id}&optionId=feature-selection-submit&features=${featuresParam}`;
-        return;
-    }
-    
-    // Otherwise use client-side navigation
-    ui.showLoading();
-    ui.hideError();
-    
-    try {
-        // Navigate to recipe node using the special option ID
-        const result = await wizardEngine.selectOption('feature-selection-submit');
-        ui.hideLoading();
-        await renderCurrentState();
-    } catch (error) {
-        ui.hideLoading();
-        console.error('Feature selection error:', error);
-        ui.showError(`Error submitting features: ${error.message || 'Unknown error'}`);
     }
 }
 
@@ -350,26 +186,20 @@ async function handleOptionSelect(optionId) {
         return;
     }
 
-    // If we have server-rendered data, navigate via server
-    if (window.SERVER_DATA) {
-        const currentNode = window.SERVER_DATA.currentNode;
-        window.location.href = `/wizard/navigate?fromNodeId=${currentNode.id}&optionId=${optionId}`;
-        return;
-    }
-    
-    // Otherwise use client-side navigation
-    // Show loading state during option selection (may trigger research)
-    ui.showLoading();
-    ui.hideError();
-    
     try {
+        // If we have server-rendered data, navigate via server
+        if (window.SERVER_DATA) {
+            const currentNode = window.SERVER_DATA.currentNode;
+            window.location.href = `/wizard/navigate?fromNodeId=${currentNode.id}&optionId=${optionId}`;
+            return;
+        }
+        
+        // Otherwise use client-side navigation
         const result = await wizardEngine.selectOption(optionId);
-        ui.hideLoading();
         await renderCurrentState();
     } catch (error) {
-        ui.hideLoading();
         console.error('Option selection error:', error);
-        ui.showError(`Error selecting option: ${error.message || 'Unknown error'}`);
+        ui.showError(`Error selecting option: ${error.message}`);
     }
 }
 
@@ -377,19 +207,6 @@ async function handleOptionSelect(optionId) {
  * Handle back button click
  */
 async function handleBack() {
-    // If using server-side rendering, use server route to go back one step
-    if (window.SERVER_DATA) {
-        const currentNode = window.SERVER_DATA.currentNode;
-        if (currentNode && currentNode.nodeType === 'root') {
-            // Already at root, do nothing
-            return;
-        }
-        // Navigate back via server using prevNodeId from URL
-        const prevNodeId = window.SERVER_DATA.prevNodeId || '';
-        window.location.href = `/wizard/back?currentNodeId=${currentNode.id}&prevNodeId=${prevNodeId}`;
-        return;
-    }
-
     if (!wizardEngine) {
         return;
     }
@@ -459,356 +276,309 @@ async function handleBreadcrumbClick(nodeId) {
 }
 
 /**
- * Handle load Azure resources
+ * Handle wizard mode toggle (study/design)
+ * @param {string} mode
  */
-async function handleLoadResources() {
-    const button = document.getElementById('loadResourcesButton');
-    const originalText = button.textContent;
-    
-    try {
-        button.disabled = true;
-        button.textContent = 'Loading...';
-        ui.showError('Loading Azure resources and SKUs... This may take a moment.');
-        
-        const response = await fetch('/api/azure-resources/load', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+async function handleWizardModeToggle(mode) {
+    if (!wizardEngine) {
+        return;
+    }
+
+    wizardEngine.setMode(mode);
+    await renderCurrentState();
+
+    // Update button states
+    document.querySelectorAll('[data-wizard-mode]').forEach(btn => {
+        if (btn.dataset.wizardMode === mode) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
         }
+    });
+}
+
+/**
+ * Handle app mode toggle (wizard/builder)
+ * @param {string} mode
+ */
+async function handleAppModeToggle(mode) {
+    currentMode = mode;
+
+    if (mode === 'wizard') {
+        // Show wizard, hide builder
+        document.getElementById('wizardContainer').style.display = 'block';
+        document.getElementById('builderContainer').style.display = 'none';
+        document.getElementById('wizardModeToggle').style.display = 'flex';
         
-        const result = await response.json();
+        // Render wizard state
+        if (wizardEngine) {
+            await renderCurrentState();
+        }
+    } else if (mode === 'builder') {
+        // Show builder, hide wizard
+        document.getElementById('wizardContainer').style.display = 'none';
+        document.getElementById('builderContainer').style.display = 'block';
+        document.getElementById('wizardModeToggle').style.display = 'none';
         
-        ui.showError(`Successfully loaded ${result.loaded || 0} Azure resources and SKUs.`);
-        setTimeout(() => ui.hideError(), 5000);
+        // Initialize builder
+        await builder.initialize();
+    }
+
+    // Update button states
+    document.querySelectorAll('[data-mode]').forEach(btn => {
+        if (btn.dataset.mode === mode) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+/**
+ * Handle start building from recipe
+ */
+async function handleStartBuilding() {
+    if (!wizardEngine) {
+        return;
+    }
+
+    const currentNode = await wizardEngine.getCurrentNode();
+    if (!currentNode || currentNode.nodeType !== 'terminal') {
+        return;
+    }
+
+    // Switch to builder mode
+    await handleAppModeToggle('builder');
+
+    // Load components from recipe
+    await builder.loadComponentsFromRecipe(currentNode.id);
+}
+
+/**
+ * Handle search
+ * @param {string} query
+ */
+async function handleSearch(query) {
+    if (!wizardEngine || !query.trim()) {
+        ui.hideSearchResults();
+        return;
+    }
+
+    try {
+        // Try text search first
+        const textResults = await wizardEngine.searchNodesByText(query);
+        
+        // Also try tag search
+        const tagResults = await wizardEngine.searchNodesByTag(query);
+
+        // Combine and deduplicate
+        const allResults = [...textResults, ...tagResults];
+        const uniqueResults = Array.from(
+            new Map(allResults.map(node => [node.id, node])).values()
+        );
+
+        // If no results, offer to research
+        if (uniqueResults.length === 0) {
+            ui.showResearchPrompt(query, async () => {
+                try {
+                    ui.showLoading();
+                    const newNodes = await research.researchSearchQuery(query);
+                    ui.hideLoading();
+                    
+                    if (newNodes && newNodes.length > 0) {
+                        // Reload data and show results
+                        await loadData();
+                        await wizardEngine.initialize();
+                        ui.renderSearchResults(newNodes, handleSearchNodeSelect);
+                    } else {
+                        ui.showError('No new information found. Try a different search term.');
+                    }
+                } catch (error) {
+                    ui.hideLoading();
+                    ui.showError(`Research error: ${error.message}`);
+                }
+            });
+        } else {
+            ui.renderSearchResults(uniqueResults, handleSearchNodeSelect);
+        }
     } catch (error) {
-        console.error('Load resources error:', error);
-        ui.showError(`Error loading resources: ${error.message}`);
-    } finally {
-        button.disabled = false;
-        button.textContent = originalText;
+        console.error('Search error:', error);
+    }
+}
+
+/**
+ * Handle search result selection
+ * @param {string} nodeId
+ */
+async function handleSearchNodeSelect(nodeId) {
+    if (!wizardEngine) {
+        return;
+    }
+
+    try {
+        await wizardEngine.jumpToNode(nodeId);
+        await renderCurrentState();
+    } catch (error) {
+        console.error('Search navigation error:', error);
+        ui.showError(`Error navigating to node: ${error.message}`);
     }
 }
 
 /**
  * Handle export
  */
-/**
- * Handle export - generate Bicep templates and export package
- */
 async function handleExport() {
     if (!wizardEngine) {
-        ui.showError('Wizard engine not initialized. Please refresh the page.');
         return;
     }
 
     try {
-        // Get current node - should be terminal node with recipe
-        let currentNode = await wizardEngine.getCurrentNode();
-        let nodeId = null;
-        
-        // If currentNode is null or not terminal, try fallback methods
-        if (!currentNode || currentNode.nodeType !== 'terminal') {
-            // Try to get node ID from wizardEngine's current node ID
-            if (wizardEngine.currentNodeId) {
-                nodeId = wizardEngine.currentNodeId;
-                currentNode = await wizardEngine.dataProvider.getNodeById(nodeId);
-            }
-            
-            // If still no valid terminal node, try SERVER_DATA as fallback
-            if ((!currentNode || currentNode.nodeType !== 'terminal') && window.SERVER_DATA) {
-                const serverNode = window.SERVER_DATA.currentNode;
-                if (serverNode && (serverNode.nodeType === 'terminal' || window.SERVER_DATA.isTerminal)) {
-                    currentNode = serverNode;
-                    nodeId = serverNode.id;
-                    // Update wizardEngine to track this node
-                    wizardEngine.currentNodeId = nodeId;
-                }
-            }
-        } else {
-            nodeId = currentNode.id;
-        }
-        
-        // Final check - if we still don't have a valid terminal node, show error
-        if (!currentNode || currentNode.nodeType !== 'terminal') {
-            ui.showError('No recipe available to export. Please navigate to a recipe first.');
-            return;
-        }
-
-        // Get recipe data using the correct method
-        let recipe = await wizardEngine.dataProvider.getRecipeForNode(nodeId || currentNode.id);
-        
-        // If recipe not found, try SERVER_DATA as fallback
-        if (!recipe && window.SERVER_DATA && window.SERVER_DATA.recipe) {
-            recipe = window.SERVER_DATA.recipe;
-        }
-        
-        if (!recipe) {
-            ui.showError('Recipe not found');
-            return;
-        }
-
-        // Get selected features
-        let selectedFeatures = [];
-        try {
-            const featuresStr = sessionStorage.getItem('apim-ai-gateway-selected-features');
-            if (featuresStr) {
-                const featuresData = JSON.parse(featuresStr);
-                selectedFeatures = Array.isArray(featuresData) ? featuresData : 
-                                 (featuresData.features || []);
-            }
-        } catch (e) {
-            console.warn('Could not parse selected features:', e);
-        }
-
-        // Generate Bicep templates
-        const bicepFiles = generateBicepTemplate(recipe, selectedFeatures, {});
-        
-        // Generate deployment scripts
-        const deployScript = generateDeploymentScript(recipe, selectedFeatures, {});
-        const deployScriptPS = generateDeploymentScriptPowerShell(recipe, selectedFeatures, {});
-        
-        // Generate README
-        const readme = generateReadme(recipe, selectedFeatures, {});
-        
-        // Get export data for JSON
         const exportData = await wizardEngine.exportPath();
-        const recipeJson = JSON.stringify(exportData, null, 2);
-
-        // Display recipe JSON on screen
-        const recipeExportDisplay = document.getElementById('recipeExportDisplay');
-        const recipeJsonDisplay = document.getElementById('recipeJsonDisplay');
-        const copyRecipeButton = document.getElementById('copyRecipeButton');
-        
-        if (recipeExportDisplay && recipeJsonDisplay) {
-            recipeJsonDisplay.textContent = recipeJson;
-            recipeExportDisplay.style.display = 'block';
-            
-            // Scroll to the export display area
-            recipeExportDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            
-            // Set up copy button functionality
-            if (copyRecipeButton) {
-                copyRecipeButton.onclick = async () => {
-                    try {
-                        await navigator.clipboard.writeText(recipeJson);
-                        // Show feedback notification
-                        const notification = document.createElement('div');
-                        notification.className = 'copy-notification';
-                        notification.textContent = 'Recipe copied to clipboard!';
-                        document.body.appendChild(notification);
-                        setTimeout(() => notification.remove(), 2000);
-                    } catch (err) {
-                        console.error('Failed to copy recipe:', err);
-                        ui.showError('Failed to copy recipe to clipboard');
-                    }
-                };
-            }
-        }
-
-        // Create ZIP file using JSZip (if available) or download individual files
-        if (typeof JSZip !== 'undefined') {
-            const zip = new JSZip();
-            
-            // Add Bicep files
-            zip.file('main.bicep', bicepFiles.main);
-            zip.file('parameters.bicep', bicepFiles.parameters);
-            
-            // Add deployment scripts
-            zip.file('deploy.sh', deployScript);
-            zip.file('deploy.ps1', deployScriptPS);
-            
-            // Add README
-            zip.file('README.md', readme);
-            
-            // Add recipe metadata
-            zip.file('recipe.json', recipeJson);
-            
-            // Generate and download ZIP
-            const zipBlob = await zip.generateAsync({ type: 'blob' });
-            const url = URL.createObjectURL(zipBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `azure-recipe-${recipe.title?.toLowerCase().replace(/\s+/g, '-') || 'deployment'}-${new Date().toISOString().split('T')[0]}.zip`;
-            a.click();
-            URL.revokeObjectURL(url);
-        } else {
-            // Fallback: download main.bicep file
-            const blob = new Blob([bicepFiles.main], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `main.bicep`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            ui.showError('JSZip not available. Only main.bicep downloaded. Install JSZip for full export package.');
-        }
+        const jsonStr = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `azure-recipe-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     } catch (error) {
         console.error('Export error:', error);
         ui.showError(`Error exporting: ${error.message}`);
     }
 }
 
-/**
- * Update mode buttons active state
- * @param {string} mode
- */
-function updateModeButtons(mode) {
-    const designBtn = document.getElementById('designModeButton');
-    const studyBtn = document.getElementById('studyModeButton');
-    console.log('[Wizard] updateModeButtons called with mode:', mode);
-    console.log('[Wizard] Buttons found:', { design: !!designBtn, study: !!studyBtn });
-    
-    if (designBtn && studyBtn) {
-        designBtn.classList.toggle('active', mode === 'design');
-        studyBtn.classList.toggle('active', mode === 'study');
-        console.log('[Wizard] Updated button states:', {
-            design: designBtn.classList.contains('active'),
-            study: studyBtn.classList.contains('active')
+// Set up event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // App mode toggle buttons (wizard/builder)
+    document.querySelectorAll('[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            handleAppModeToggle(btn.dataset.mode);
         });
-    } else {
-        console.warn('[Wizard] Could not update mode buttons - buttons not found');
-    }
-}
-
-/**
- * Handle mode change
- * @param {string} mode
- */
-async function handleModeChange(mode) {
-    console.log('[Wizard] handleModeChange called with mode:', mode);
-    console.log('[Wizard] wizardEngine exists:', !!wizardEngine);
-    console.log('[Wizard] Has SERVER_DATA:', !!window.SERVER_DATA);
-    
-    if (!wizardEngine) {
-        console.log('[Wizard] No wizardEngine yet, setting pendingMode to:', mode);
-        pendingMode = mode;
-        saveMode(mode); // Persist mode even before engine is ready
-        updateModeButtons(mode);
-        return;
-    }
-
-    console.log('[Wizard] Setting mode to:', mode);
-    wizardEngine.setMode(mode);
-    saveMode(mode); // Persist mode to localStorage
-    updateModeButtons(mode);
-    
-    // If we have server-rendered data, re-render using that data with new mode
-    if (window.SERVER_DATA) {
-        console.log('[Wizard] Re-rendering with server data and new mode...');
-        const currentNode = window.SERVER_DATA.currentNode;
-        const options = window.SERVER_DATA.options || [];
-        const recipe = window.SERVER_DATA.recipe;
-        const isTerminal = window.SERVER_DATA.isTerminal;
-        
-        await renderNode(currentNode, options, recipe, isTerminal);
-    } else {
-        console.log('[Wizard] Rendering current state...');
-        await renderCurrentState();
-    }
-    console.log('[Wizard] Mode change complete');
-}
-
-/**
- * Set up event listeners
- */
-function setupEventListeners() {
-    console.log('[Wizard] Setting up event listeners');
-    
-    // Back button
-    const backButton = document.getElementById('backButton');
-    if (backButton) {
-        backButton.addEventListener('click', handleBack);
-    }
-
-    // Mode buttons
-    const designModeButton = document.getElementById('designModeButton');
-    const studyModeButton = document.getElementById('studyModeButton');
-    
-    console.log('[Wizard] Mode buttons found:', {
-        design: !!designModeButton,
-        study: !!studyModeButton
     });
-    
-    if (designModeButton) {
-        designModeButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('[Wizard] Design mode button clicked');
-            handleModeChange('design').catch(error => {
-                console.error('Error changing to design mode:', error);
-                ui.showError(`Error changing mode: ${error.message}`);
-            });
+
+    // Wizard mode toggle buttons (study/design)
+    document.querySelectorAll('[data-wizard-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            handleWizardModeToggle(btn.dataset.wizardMode);
         });
-        console.log('[Wizard] Design mode button event listener attached');
-    } else {
-        console.warn('[Wizard] Design mode button not found');
-    }
-    
-    if (studyModeButton) {
-        studyModeButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('[Wizard] Study mode button clicked');
-            handleModeChange('study').catch(error => {
-                console.error('Error changing to study mode:', error);
-                ui.showError(`Error changing mode: ${error.message}`);
-            });
-        });
-        console.log('[Wizard] Study mode button event listener attached');
-    } else {
-        console.warn('[Wizard] Study mode button not found');
-    }
+    });
+
+    // Back button
+    document.getElementById('backButton').addEventListener('click', handleBack);
 
     // Export button
-    const exportButton = document.getElementById('exportButton');
-    if (exportButton) {
-        exportButton.addEventListener('click', handleExport);
+    document.getElementById('exportButton').addEventListener('click', handleExport);
+
+    // Start building button
+    const startBuildingButton = document.getElementById('startBuildingButton');
+    if (startBuildingButton) {
+        startBuildingButton.addEventListener('click', handleStartBuilding);
     }
 
-    // Load Azure Resources button
-    const loadResourcesButton = document.getElementById('loadResourcesButton');
-    if (loadResourcesButton) {
-        loadResourcesButton.addEventListener('click', handleLoadResources);
-    }
+    // Search box
+    const searchBox = document.querySelector('.search-box');
+    let searchTimeout;
+    searchBox.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            handleSearch(e.target.value);
+        }, 300);
+    });
 
-    // Ensure content is visible if we have server-rendered data
-    if (window.SERVER_DATA) {
-        const wizardContent = document.getElementById('wizardContent');
-        const loading = document.getElementById('loading');
-        if (wizardContent) {
-            wizardContent.style.display = 'block';
-        }
-        if (loading) {
-            loading.style.display = 'none';
-        }
-    }
-
-    // Initialize
-    initialize().catch(error => {
-        console.error('Failed to initialize wizard:', error);
-        // Ensure content is visible even on error
-        const wizardContent = document.getElementById('wizardContent');
-        const loading = document.getElementById('loading');
-        if (wizardContent) {
-            wizardContent.style.display = 'block';
-        }
-        if (loading) {
-            loading.style.display = 'none';
+    // Hide search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-box') && !e.target.closest('.search-results')) {
+            ui.hideSearchResults();
         }
     });
-}
 
-// Set up event listeners - handle both cases (DOM already ready or not)
-if (document.readyState === 'loading') {
-    // DOM is still loading, wait for DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', setupEventListeners);
-} else {
-    // DOM is already ready, run setup immediately
-    setupEventListeners();
-}
+    // Research button
+    const researchButton = document.getElementById('researchButton');
+    const researchInput = document.getElementById('researchInput');
+    researchButton.addEventListener('click', async () => {
+        const topic = researchInput.value.trim();
+        if (!topic) {
+            ui.showError('Please enter a topic to research');
+            return;
+        }
+
+        try {
+            ui.showLoading();
+            const result = await research.researchTopic(topic);
+            ui.hideLoading();
+            
+            // Reload data and navigate to new node
+            await loadData();
+            await wizardEngine.initialize();
+            await wizardEngine.jumpToNode(result.node.id);
+            await renderCurrentState();
+            
+            researchInput.value = '';
+            ui.showError('Research completed! New node added.');
+            setTimeout(() => ui.hideError(), 3000);
+        } catch (error) {
+            ui.hideLoading();
+            ui.showError(`Research error: ${error.message}`);
+        }
+    });
+
+    // Research input enter key
+    researchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            researchButton.click();
+        }
+    });
+
+    // API Key button
+    document.getElementById('apiKeyButton').addEventListener('click', () => {
+        ui.showApiKeyDialog();
+    });
+
+    // Improve button
+    const improveButton = document.getElementById('improveButton');
+    improveButton.addEventListener('click', async () => {
+        const nodeId = improveButton.dataset.nodeId;
+        if (!nodeId || !wizardEngine) {
+            return;
+        }
+
+        try {
+            // Set loading state
+            ui.setImproveButtonLoading(true);
+            ui.showError('Improving node options... This may take a moment.');
+
+            // Call improve function
+            const result = await research.improveNode(nodeId);
+
+            // Reload data to get updated options
+            await loadData();
+            
+            // Navigate back to the same node to show updated options
+            await wizardEngine.jumpToNode(nodeId);
+            await renderCurrentState();
+
+            // Show success message
+            const newCount = result.newOptions?.length || 0;
+            const enrichedCount = result.enrichedOptions?.length || 0;
+            let message = 'Improvement completed! ';
+            if (newCount > 0) {
+                message += `Added ${newCount} new option${newCount > 1 ? 's' : ''}. `;
+            }
+            if (enrichedCount > 0) {
+                message += `Enriched ${enrichedCount} existing option${enrichedCount > 1 ? 's' : ''}.`;
+            }
+            ui.showError(message);
+            setTimeout(() => ui.hideError(), 5000);
+        } catch (error) {
+            console.error('Improve node error:', error);
+            ui.showError(`Improvement error: ${error.message}`);
+        } finally {
+            ui.setImproveButtonLoading(false);
+        }
+    });
+
+    // Initialize
+    initialize();
+});
+

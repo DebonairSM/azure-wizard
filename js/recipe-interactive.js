@@ -150,6 +150,95 @@ az apim policy create \\
 }`;
     }
 
+    // Traffic Manager
+    if (stepTitle.includes('traffic manager')) {
+        const routingMethod = recipe?.configSchema?.trafficManagerRoutingMethod?.default || 'Performance';
+        const monitorProtocol = recipe?.configSchema?.trafficManagerMonitorProtocol?.default || 'HTTP';
+        
+        snippets.azureCli = `# Create Traffic Manager profile
+az network traffic-manager profile create \\
+  --resource-group myResourceGroup \\
+  --name my-traffic-manager \\
+  --routing-method ${routingMethod} \\
+  --unique-dns-name my-traffic-manager \\
+  --protocol ${monitorProtocol} \\
+  --port ${monitorProtocol === 'HTTPS' ? 443 : 80} \\
+  --path "/status-0123456789abcdef"`;
+
+        snippets.powershell = `# Create Traffic Manager profile
+New-AzTrafficManagerProfile \`
+  -ResourceGroupName "myResourceGroup" \`
+  -Name "my-traffic-manager" \`
+  -TrafficRoutingMethod "${routingMethod}" \`
+  -RelativeDnsName "my-traffic-manager" \`
+  -Ttl 60 \`
+  -MonitorProtocol "${monitorProtocol}" \`
+  -MonitorPort ${monitorProtocol === 'HTTPS' ? 443 : 80} \`
+  -MonitorPath "/status-0123456789abcdef"`;
+
+        snippets.bicep = `resource tmProfile 'Microsoft.Network/trafficManagerProfiles@2022-04-01' = {
+  name: 'my-traffic-manager'
+  location: 'global'
+  properties: {
+    trafficRoutingMethod: '${routingMethod}'
+    dnsConfig: {
+      relativeName: 'my-traffic-manager'
+      ttl: 60
+    }
+    monitorConfig: {
+      protocol: '${monitorProtocol}'
+      port: ${monitorProtocol === 'HTTPS' ? 443 : 80}
+      path: '/status-0123456789abcdef'
+      intervalInSeconds: 30
+      timeoutInSeconds: 10
+      toleratedNumberOfFailures: 3
+    }
+    endpoints: [
+      {
+        name: 'apim-primary'
+        type: 'Microsoft.Network/trafficManagerProfiles/azureEndpoints'
+        properties: {
+          targetResourceId: apimService.id
+          endpointStatus: 'Enabled'
+        }
+      }
+    ]
+  }
+}`;
+
+        snippets.restApi = `PUT https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficManagerProfiles/{profileName}?api-version=2022-04-01
+Content-Type: application/json
+
+{
+  "location": "global",
+  "properties": {
+    "trafficRoutingMethod": "${routingMethod}",
+    "dnsConfig": {
+      "relativeName": "my-traffic-manager",
+      "ttl": 60
+    },
+    "monitorConfig": {
+      "protocol": "${monitorProtocol}",
+      "port": ${monitorProtocol === 'HTTPS' ? 443 : 80},
+      "path": "/status-0123456789abcdef",
+      "intervalInSeconds": 30,
+      "timeoutInSeconds": 10,
+      "toleratedNumberOfFailures": 3
+    },
+    "endpoints": [
+      {
+        "name": "apim-primary",
+        "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+        "properties": {
+          "targetResourceId": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{apimServiceName}",
+          "endpointStatus": "Enabled"
+        }
+      }
+    ]
+  }
+}`;
+    }
+
     // LLM Metrics
     if (stepTitle.includes('llm metrics') || stepTitle.includes('metrics') || stepNumber === 6) {
         snippets.azureCli = `# Configure LLM metrics

@@ -75,22 +75,44 @@
 
         .search-results {
             background: white;
+            border: 1px solid #ddd;
             border-radius: 8px;
             padding: 10px;
             margin-top: 10px;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             display: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1000;
         }
 
         .search-result-item {
-            padding: 8px;
+            padding: 10px;
             cursor: pointer;
             border-radius: 4px;
+            margin-bottom: 4px;
+            transition: background 0.2s;
         }
 
         .search-result-item:hover {
             background: #f0f0f0;
+        }
+
+        .search-result-item mark {
+            background: #fff3cd;
+            padding: 0 2px;
+            font-weight: 600;
+        }
+
+        .search-type-node {
+            background: #0078d4;
+            color: white;
+        }
+
+        .search-type-component {
+            background: #107c10;
+            color: white;
         }
 
         .wizard-container {
@@ -680,7 +702,7 @@
                 <button class="mode-btn active" data-wizard-mode="design">Design Mode</button>
                 <button class="mode-btn" data-wizard-mode="study">Study Mode</button>
             </div>
-            <input type="text" class="search-box" placeholder="Search nodes by text or tag...">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search nodes, components, and resources...">
             <div class="search-results" id="searchResults"></div>
             <div style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
                 <input type="text" id="researchInput" placeholder="Research a new Azure topic..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">

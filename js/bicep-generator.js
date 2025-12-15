@@ -13,7 +13,7 @@ import { getPrerequisites, calculateDeploymentTime, calculateCosts } from './rec
 export function generateBicepTemplate(recipe, selectedFeatures = [], parameters = {}) {
     const mainBicep = generateMainBicep(recipe, selectedFeatures, parameters);
     const parametersBicep = generateParametersBicep(recipe, selectedFeatures, parameters);
-    const outputsBicep = generateOutputsBicep(recipe, selectedFeatures);
+    const outputsBicep = generateOutputsBicep(recipe, selectedFeatures, parameters);
 
     return {
         main: mainBicep,
@@ -221,6 +221,13 @@ resource apiResource 'Microsoft.ApiManagement/service/apis@2023-05-01-preview' =
     // Application Insights (if monitoring selected)
     if (selectedFeatures.some(f => f.includes('monitoring') || f.includes('metrics'))) {
         bicep += generateApplicationInsights(parameters);
+    }
+
+    // Traffic Manager (if enabled via parameters/configSchema)
+    if (parameters?.trafficManagerEnabled || 
+        (recipe.configSchema && recipe.configSchema.trafficManagerEnabled && 
+         (recipe.configSchema.trafficManagerEnabled.default === true || parameters?.trafficManagerEnabled))) {
+        bicep += generateTrafficManagerProfile(recipe, parameters, apimServiceName);
     }
 
     return bicep;
@@ -486,6 +493,70 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 /**
+ * Generate Traffic Manager profile
+ */
+function generateTrafficManagerProfile(recipe, parameters, apimServiceName) {
+    const trafficManagerName = parameters.trafficManagerName || `\${apimServiceName}-tm`;
+    const routingMethod = parameters.trafficManagerRoutingMethod || 
+                         (recipe.configSchema?.trafficManagerRoutingMethod?.default) || 
+                         'Performance';
+    const monitorProtocol = parameters.trafficManagerMonitorProtocol || 
+                           (recipe.configSchema?.trafficManagerMonitorProtocol?.default) || 
+                           'HTTP';
+    const monitorPort = parameters.trafficManagerMonitorPort || (monitorProtocol === 'HTTPS' ? 443 : 80);
+    const monitorPath = parameters.trafficManagerMonitorPath || '/status-0123456789abcdef';
+    
+    // Build Traffic Manager profile based on routing method
+    let trafficRoutingConfig = '';
+    
+    if (routingMethod === 'Weighted') {
+        const endpointWeight = parameters.trafficManagerEndpointWeight || 1;
+        trafficRoutingConfig = `weight: ${endpointWeight}`;
+    } else if (routingMethod === 'Priority') {
+        const endpointPriority = parameters.trafficManagerEndpointPriority || 1;
+        trafficRoutingConfig = `priority: ${endpointPriority}`;
+    }
+    
+    return `
+// Traffic Manager Profile
+resource tmProfile 'Microsoft.Network/trafficManagerProfiles@2022-04-01' = {
+  name: trafficManagerName
+  location: 'global'
+  properties: {
+    trafficRoutingMethod: '${routingMethod}'
+    dnsConfig: {
+      relativeName: trafficManagerName
+      ttl: 60
+    }
+    monitorConfig: {
+      protocol: '${monitorProtocol}'
+      port: ${monitorPort}
+      path: '${monitorPath}'
+      intervalInSeconds: 30
+      timeoutInSeconds: 10
+      toleratedNumberOfFailures: 3
+    }
+    endpoints: [
+      {
+        name: 'apim-primary'
+        type: 'Microsoft.Network/trafficManagerProfiles/azureEndpoints'
+        properties: {
+          targetResourceId: apimService.id
+          endpointStatus: 'Enabled'
+          ${trafficRoutingConfig ? trafficRoutingConfig : ''}
+        }
+      }
+    ]
+  }
+  tags: {
+    environment: 'production'
+    managedBy: 'azure-wizard'
+  }
+}
+`;
+}
+
+/**
  * Generate parameters file
  */
 function generateParametersBicep(recipe, selectedFeatures, parameters) {
@@ -554,7 +625,7 @@ param location = {
 /**
  * Generate outputs
  */
-function generateOutputsBicep(recipe, selectedFeatures) {
+function generateOutputsBicep(recipe, selectedFeatures, parameters = {}) {
     // Detect recipe type
     const templateId = recipe.deploymentTemplateId || '';
     const resources = recipe.bicepOutline?.resources || [];
@@ -591,6 +662,15 @@ output apiUrl string = 'https://\${apimServiceName}.azure-api.net/llm'
 
     if (selectedFeatures.some(f => f.includes('monitoring') || f.includes('metrics'))) {
         outputs += `output appInsightsInstrumentationKey string = appInsights.properties.InstrumentationKey
+`;
+    }
+
+    // Traffic Manager output (if enabled)
+    if (parameters?.trafficManagerEnabled || 
+        (recipe.configSchema && recipe.configSchema.trafficManagerEnabled && 
+         (recipe.configSchema.trafficManagerEnabled.default === true || parameters?.trafficManagerEnabled))) {
+        outputs += `output trafficManagerUrl string = 'https://\${tmProfile.properties.dnsConfig.fqdn}'
+output trafficManagerProfileName string = tmProfile.name
 `;
     }
 

@@ -204,8 +204,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+/**
+ * Add component to cart and re-render (for use by wizard.js)
+ * @param {string} componentId
+ * @returns {Promise<Object>}
+ */
+async function addComponentAndRender(componentId) {
+    if (!componentBuilder) {
+        await initialize();
+    }
+    
+    const result = await componentBuilder.addComponent(componentId);
+    if (result.success) {
+        await renderBuilder();
+    }
+    return result;
+}
+
 // Export for use by wizard.js
-export { initialize, loadComponentsFromRecipe };
+export { initialize, loadComponentsFromRecipe, addComponentAndRender };
+
+
+
 
 
 

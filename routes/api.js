@@ -198,6 +198,57 @@ router.get('/paths', (req, res) => {
 });
 
 /**
+ * GET /api/recipes - Get all recipes or search recipes
+ */
+router.get('/recipes', (req, res) => {
+    try {
+        const db = getDatabase();
+        const { search } = req.query;
+        
+        let recipes = db.prepare('SELECT * FROM recipes ORDER BY nodeId').all();
+        
+        // Parse JSON fields
+        const parsedRecipes = recipes.map(recipe => ({
+            ...recipe,
+            steps: parseJsonObject(recipe.steps),
+            bicepOutline: parseJsonObject(recipe.bicepOutline),
+            terraformOutline: parseJsonObject(recipe.terraformOutline),
+            links: parseJsonArray(recipe.links),
+            configSchema: parseJsonObject(recipe.configSchema)
+        }));
+        
+        // Filter by search if specified (search in title, nodeId, and configSchema)
+        let filtered = parsedRecipes;
+        if (search) {
+            const searchLower = search.toLowerCase();
+            filtered = parsedRecipes.filter(recipe => {
+                // Search in title
+                if (recipe.title && recipe.title.toLowerCase().includes(searchLower)) {
+                    return true;
+                }
+                // Search in nodeId
+                if (recipe.nodeId && recipe.nodeId.toLowerCase().includes(searchLower)) {
+                    return true;
+                }
+                // Search in configSchema JSON (for Traffic Manager, etc.)
+                if (recipe.configSchema) {
+                    const configStr = JSON.stringify(recipe.configSchema).toLowerCase();
+                    if (configStr.includes(searchLower)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+        
+        res.json(filtered);
+    } catch (error) {
+        console.error('Error getting recipes:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
  * GET /api/recipes/:nodeId - Get recipe for node or all recipes
  */
 router.get('/recipes/:nodeId', (req, res) => {
@@ -267,7 +318,8 @@ router.get('/components', (req, res) => {
             tags: parseJsonArray(comp.tags),
             pros: parseJsonArray(comp.pros),
             cons: parseJsonArray(comp.cons),
-            azObjectives: parseJsonArray(comp.azObjectives)
+            azObjectives: parseJsonArray(comp.azObjectives),
+            recipeNodeId: comp.recipeNodeId || null
         }));
         
         // Filter by search if specified
