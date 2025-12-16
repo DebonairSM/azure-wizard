@@ -1,0 +1,1 @@
+{"version":3,"file":"policy-catalog.d.ts","sourceRoot":"","sources":["policy-catalog.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,OAAO,EACL,kBAAkB,EAClB,cAAc,EAIf,MAAM,YAAY,CAAC;AAEpB;;GAEG;AACH,wBAAgB,cAAc,IAAI,kBAAkB,EAAE,CAUrD;AAED;;GAEG;AACH,wBAAgB,qBAAqB,CAAC,QAAQ,EAAE,cAAc,GAAG,kBAAkB,EAAE,CAEpF;AAED;;GAEG;AACH,wBAAgB,aAAa,CAAC,EAAE,EAAE,MAAM,GAAG,kBAAkB,GAAG,SAAS,CAExE"}

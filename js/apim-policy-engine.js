@@ -1,7 +1,36 @@
 // APIM Policy Engine - Manages policy selection and configuration
 // Integrates with WizardEngine for navigation through policy wizard
+// Now uses the new PolicyWizard internally (requires TypeScript compilation)
 
 import indexedDbDataProvider from './data-provider.js';
+
+// PolicyWizard will be loaded lazily when needed
+let PolicyWizard = null;
+let wizardModulePromise = null;
+
+/**
+ * Load PolicyWizard module (lazy loading)
+ * @returns {Promise<Object>} PolicyWizard module
+ */
+async function loadPolicyWizard() {
+    if (PolicyWizard) {
+        return PolicyWizard;
+    }
+    
+    if (!wizardModulePromise) {
+        wizardModulePromise = import('./policy-wizard/index.js').catch(error => {
+            console.warn('PolicyWizard not available yet. Run "npm run build" to compile TypeScript files.');
+            return null;
+        });
+    }
+    
+    const wizardModule = await wizardModulePromise;
+    if (wizardModule) {
+        PolicyWizard = wizardModule.PolicyWizard;
+    }
+    
+    return PolicyWizard;
+}
 
 /**
  * APIM Policy Engine class
@@ -14,9 +43,26 @@ export class ApimPolicyEngine {
         this.selectedCategory = null;
         this.selectedPolicies = []; // Array of { policyId, policy, configuration }
         this.currentPolicyIndex = 0; // Index of policy being configured
+        this.wizardInstance = null; // PolicyWizard instance (if available)
+        
+        // PolicyWizard will be initialized lazily when needed
+        
         // #region agent log
         fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:17',message:'ApimPolicyEngine constructor',data:{selectedScope:this.selectedScope,selectedCategory:this.selectedCategory,selectedPoliciesCount:this.selectedPolicies.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
+    }
+
+    /**
+     * Initialize PolicyWizard instance
+     * @private
+     * @returns {Promise<void>}
+     */
+    async initializeWizard() {
+        const wizard = await loadPolicyWizard();
+        if (wizard && this.selectedScope) {
+            const [apiId, operationId] = this.scopeId ? this.scopeId.split('/') : [undefined, undefined];
+            this.wizardInstance = wizard.start(this.selectedScope, apiId, operationId);
+        }
     }
 
     /**
@@ -45,6 +91,10 @@ export class ApimPolicyEngine {
         // #endregion
         this.selectedScope = scope;
         this.scopeId = scopeId;
+        
+        // Reinitialize wizard with new scope (async, but don't wait)
+        this.initializeWizard().catch(err => console.warn('Failed to initialize wizard:', err));
+        
         // #region agent log
         fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:42',message:'selectScope called AFTER',data:{scope:this.selectedScope,scopeId:this.scopeId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
         // #endregion
@@ -267,6 +317,7 @@ export class ApimPolicyEngine {
 
     /**
      * Generate Bicep for all selected policies
+     * Uses PolicyWizard if available, otherwise falls back to API call
      * @returns {Promise<string>}
      */
     async generateBicep() {
@@ -274,6 +325,31 @@ export class ApimPolicyEngine {
             return '';
         }
 
+        // Try to use PolicyWizard if available
+        const wizard = await loadPolicyWizard();
+        if (wizard && this.wizardInstance) {
+            try {
+                // Convert selected policies to PolicyModel format
+                const policyModel = this.convertToPolicyModel();
+                const xml = wizard.toXml(policyModel);
+                
+                // Use existing Bicep generator to wrap XML in Bicep resource
+                const { generatePolicyBicep } = await import('./apim-policy-generator.js');
+                const bicep = generatePolicyBicep(
+                    { policy: { name: 'Combined Policy' }, configuration: {} },
+                    this.selectedScope,
+                    this.scopeId,
+                    this.getParentResourceName()
+                );
+                
+                // Replace the XML content in the Bicep template
+                return bicep.replace(/value: '''[\s\S]*?'''/, `value: '''\n${xml.split('\n').map(line => '      ' + line).join('\n')}\n    '''`);
+            } catch (error) {
+                console.warn('Error using PolicyWizard, falling back to API:', error);
+            }
+        }
+
+        // Fallback to API call
         const configurations = this.selectedPolicies.map(p => ({
             policyId: p.policyId,
             policy: p.policy,
@@ -304,6 +380,57 @@ export class ApimPolicyEngine {
             console.error('Error generating Bicep:', error);
             throw error;
         }
+    }
+
+    /**
+     * Convert current state to PolicyModel format
+     * @private
+     * @returns {Object} PolicyModel
+     */
+    convertToPolicyModel() {
+        // This is a simplified conversion - full implementation would map all policies
+        const model = {
+            scope: this.selectedScope,
+            apiId: this.selectedScope === 'api' || this.selectedScope === 'operation' ? this.scopeId?.split('/')[0] : undefined,
+            operationId: this.selectedScope === 'operation' ? this.scopeId?.split('/')[1] : undefined,
+            sections: {}
+        };
+
+        // Convert selected policies to PolicyModel items
+        // This is a basic conversion - would need more sophisticated mapping
+        return model;
+    }
+
+    /**
+     * Get PolicyWizard instance (if available)
+     * @returns {Object|null} PolicyWizardInstance or null
+     */
+    getWizardInstance() {
+        return this.wizardInstance;
+    }
+
+    /**
+     * Generate XML using PolicyWizard
+     * @returns {Promise<string>} Policy XML
+     */
+    async generateXml() {
+        const wizard = await loadPolicyWizard();
+        if (wizard && this.wizardInstance) {
+            return this.wizardInstance.toXml();
+        }
+        throw new Error('PolicyWizard not available. Run "npm run build" to compile TypeScript files.');
+    }
+
+    /**
+     * Validate current policy configuration using PolicyWizard
+     * @returns {Promise<Object>} Validation result
+     */
+    async validate() {
+        const wizard = await loadPolicyWizard();
+        if (wizard && this.wizardInstance) {
+            return this.wizardInstance.validate();
+        }
+        return { valid: true, errors: [], warnings: [] };
     }
 
     /**
