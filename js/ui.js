@@ -553,6 +553,33 @@ export async function renderPolicyWizardNode(node, options, onOptionSelect) {
 }
 
 /**
+ * Handle go back button clicks (event delegation)
+ * @param {Event} e
+ */
+function handleGoBackClick(e) {
+    const button = e.target.closest('.btn-go-back');
+    if (!button) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if there's a specific target node
+    const targetNodeId = button.dataset.targetNode;
+    if (targetNodeId) {
+        // Dispatch event to navigate to specific node
+        window.dispatchEvent(new CustomEvent('wizard:go-to-node', { detail: { nodeId: targetNodeId } }));
+    } else {
+        // Default: try to use the back button or dispatch go-back event
+        const backButton = document.getElementById('backButton');
+        if (backButton && backButton.style.display !== 'none') {
+            backButton.click();
+        } else {
+            window.dispatchEvent(new CustomEvent('wizard:go-back'));
+        }
+    }
+}
+
+/**
  * Set up event handlers for policy wizard UI elements
  * @param {Function} onOptionSelect
  */
@@ -645,6 +672,15 @@ function setupPolicyWizardEventHandlers(onOptionSelect) {
                 alert('Failed to copy Bicep: ' + error.message);
             }
         });
+    }
+
+    // Handle go back button - use event delegation to avoid duplicate listeners
+    const wizardContentEl = document.getElementById('wizardContent');
+    if (wizardContentEl) {
+        // Remove any existing listener to avoid duplicates
+        wizardContentEl.removeEventListener('click', handleGoBackClick);
+        // Add new listener using event delegation
+        wizardContentEl.addEventListener('click', handleGoBackClick);
     }
 }
 

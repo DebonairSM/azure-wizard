@@ -320,7 +320,32 @@ export class WizardEngine {
      * @returns {Promise<Object>}
      */
     async jumpToNode(nodeId) {
-        const node = await this.dataProvider.getNodeById(nodeId);
+        let node = await this.dataProvider.getNodeById(nodeId);
+        
+        // If node not found in IndexedDB, try to load it from API
+        if (!node) {
+            try {
+                console.log(`Node ${nodeId} not found in cache, attempting to load from API...`);
+                const response = await fetch(`/api/nodes/${nodeId}`);
+                if (response.ok) {
+                    node = await response.json();
+                    // Store the node in IndexedDB for future use
+                    const { storeNodes } = await import('./storage.js');
+                    await storeNodes([node]);
+                    // Verify the node is now available
+                    node = await this.dataProvider.getNodeById(nodeId);
+                } else if (response.status === 404) {
+                    throw new Error(`Node ${nodeId} not found in database`);
+                }
+            } catch (apiError) {
+                console.error('Error loading node from API:', apiError);
+                // Re-throw if it's already an Error with a message
+                if (apiError instanceof Error && apiError.message.includes('not found')) {
+                    throw apiError;
+                }
+            }
+        }
+        
         if (!node) {
             throw new Error(`Node ${nodeId} not found`);
         }

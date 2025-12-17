@@ -95,6 +95,12 @@ async function renderCurrentState() {
             return;
         }
 
+        // Ensure wizardContent is visible before rendering breadcrumbs
+        const wizardContentEl = document.getElementById('wizardContent');
+        if (wizardContentEl) {
+            wizardContentEl.style.display = 'block';
+        }
+
         const mode = wizardEngine.getMode();
         const breadcrumbs = await wizardEngine.getBreadcrumbs();
         ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
@@ -172,6 +178,12 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
         hasRecipe: !!recipe
     });
     
+    // Ensure wizardContent is visible before rendering breadcrumbs
+    const wizardContentEl = document.getElementById('wizardContent');
+    if (wizardContentEl) {
+        wizardContentEl.style.display = 'block';
+    }
+    
     ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
     
     const backButton = document.getElementById('backButton');
@@ -190,7 +202,6 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
             await ui.renderPolicyWizardNode(currentNode, optionsArray, handleOptionSelect);
             const recipeDisplayEl = document.getElementById('recipeDisplay');
             const nodeDisplayEl = document.getElementById('nodeDisplay');
-            const wizardContentEl = document.getElementById('wizardContent');
             if (recipeDisplayEl) recipeDisplayEl.style.display = 'none';
             if (nodeDisplayEl) nodeDisplayEl.style.display = 'none';
             if (wizardContentEl) wizardContentEl.style.display = 'block';
@@ -247,6 +258,24 @@ async function handleBack() {
     } catch (error) {
         console.error('Back navigation error:', error);
         ui.showError(`Error going back: ${error.message}`);
+    }
+}
+
+/**
+ * Handle navigation to a specific node
+ * @param {string} nodeId
+ */
+async function handleGoToNode(nodeId) {
+    if (!wizardEngine) {
+        return;
+    }
+
+    try {
+        await wizardEngine.jumpToNode(nodeId);
+        await renderCurrentState();
+    } catch (error) {
+        console.error('Node navigation error:', error);
+        ui.showError(`Error navigating to node: ${error.message}`);
     }
 }
 
@@ -495,7 +524,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Back button
-    document.getElementById('backButton').addEventListener('click', handleBack);
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        backButton.addEventListener('click', handleBack);
+    }
+
+    // Listen for custom go-back events (from policy wizard)
+    window.addEventListener('wizard:go-back', handleBack);
+    
+    // Listen for custom go-to-node events (from policy wizard)
+    window.addEventListener('wizard:go-to-node', (e) => {
+        const nodeId = e.detail?.nodeId;
+        if (nodeId) {
+            handleGoToNode(nodeId);
+        }
+    });
 
     // Export button
     document.getElementById('exportButton').addEventListener('click', handleExport);

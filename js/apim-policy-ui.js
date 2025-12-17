@@ -198,6 +198,11 @@ export async function renderPolicyConfiguration(node, options) {
             <div class="policy-configuration">
                 <h2>No Policies Selected</h2>
                 <p>Please go back and select policies to configure.</p>
+                <div style="margin-top: 20px;">
+                    <button class="btn-go-back" data-target-node="apim-policy-selection" style="padding: 10px 20px; background: #0078d4; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                        ← Go Back to Select Policies
+                    </button>
+                </div>
             </div>
         `;
     }
