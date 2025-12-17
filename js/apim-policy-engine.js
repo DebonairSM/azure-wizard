@@ -140,7 +140,37 @@ export class ApimPolicyEngine {
             return [];
         }
 
-        // Fetch policies from API
+        // Use PolicyWizard catalog if available, otherwise fall back to API
+        try {
+            const wizard = await loadPolicyWizard();
+            if (wizard) {
+                // Import policy catalog
+                const catalogModule = await import('./policy-wizard/policy-catalog.js');
+                let policies = [];
+                
+                if (this.selectedCategory) {
+                    // Get policies by category
+                    policies = catalogModule.getPoliciesByCategory(this.selectedCategory);
+                } else {
+                    // Get all policies
+                    policies = catalogModule.getAllPolicies();
+                }
+                
+                // Filter by supported sections based on scope
+                // For now, return all policies - scope filtering can be added later
+                return policies.map(policy => ({
+                    id: policy.id,
+                    name: policy.name,
+                    description: policy.description,
+                    category: policy.category,
+                    supportedSections: policy.supportedSections || []
+                }));
+            }
+        } catch (error) {
+            console.warn('PolicyWizard catalog not available, falling back to API:', error);
+        }
+
+        // Fallback to API
         try {
             const response = await fetch(`/api/apim-policies?scope=${this.selectedScope}${this.selectedCategory ? `&category=${this.selectedCategory}` : ''}`);
             if (!response.ok) {

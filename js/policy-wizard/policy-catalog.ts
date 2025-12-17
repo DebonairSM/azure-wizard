@@ -22,6 +22,7 @@ export function getAllPolicies(): PolicyCatalogEntry[] {
     ...getObservabilityPolicies(),
     ...getCachingPolicies(),
     ...getSecurityPolicies(),
+    ...getAiGatewayPolicies(),
     ...getAdvancedPolicies()
   ];
 }
@@ -531,6 +532,46 @@ function getAdvancedPolicies(): PolicyCatalogEntry[] {
       supportedSections: ['inbound'],
       parameters: {
         'status-code': { type: 'number', required: true, description: 'HTTP status code' }
+      }
+    }
+  ];
+}
+
+/**
+ * AI Gateway Policies
+ */
+function getAiGatewayPolicies(): PolicyCatalogEntry[] {
+  return [
+    {
+      id: 'ai-gateway-token-limit',
+      name: 'AI Gateway Token Limit',
+      category: 'ai-gateway',
+      description: 'Enforces token limits for AI Gateway requests',
+      supportedSections: ['inbound'],
+      parameters: {
+        'max-tokens': { type: 'number', required: true, description: 'Maximum tokens allowed' },
+        'token-count-variable': { type: 'string', description: 'Variable name to store token count' }
+      }
+    },
+    {
+      id: 'ai-gateway-content-safety',
+      name: 'AI Gateway Content Safety',
+      category: 'ai-gateway',
+      description: 'Validates content safety for AI Gateway requests',
+      supportedSections: ['inbound'],
+      parameters: {
+        'safety-level': { type: 'string', enum: ['low', 'medium', 'high'], default: 'medium', description: 'Content safety level' }
+      }
+    },
+    {
+      id: 'ai-gateway-semantic-cache',
+      name: 'AI Gateway Semantic Cache',
+      category: 'ai-gateway',
+      description: 'Enables semantic caching for AI Gateway requests',
+      supportedSections: ['inbound', 'backend'],
+      parameters: {
+        'cache-key': { type: 'string', description: 'Cache key for semantic matching' },
+        'ttl': { type: 'number', description: 'Time to live in seconds' }
       }
     }
   ];

@@ -6,6 +6,7 @@ import { loadData } from './data-loader.js';
 import * as ui from './ui.js';
 import * as builder from './builder.js';
 import * as research from './research-service.js';
+import * as policyUI from './apim-policy-ui.js';
 
 let wizardEngine = null;
 let currentMode = 'wizard'; // 'wizard' or 'builder'
@@ -100,7 +101,9 @@ async function renderCurrentState() {
 
         // Show/hide back button
         const backButton = document.getElementById('backButton');
-        backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
+        if (backButton) {
+            backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
+        }
 
         // Check if terminal
         if (currentNode.nodeType === 'terminal') {
@@ -131,11 +134,21 @@ async function renderCurrentState() {
         } else {
             // Show node with options
             const options = await wizardEngine.getCurrentOptions();
-            ui.renderNode(currentNode, options, handleOptionSelect, mode);
             
-            // Hide recipe display
-            document.getElementById('recipeDisplay').style.display = 'none';
-            document.getElementById('nodeDisplay').style.display = 'block';
+            // Check if this is a policy wizard node
+            if (policyUI.isPolicyWizardNode(currentNode.id)) {
+                await ui.renderPolicyWizardNode(currentNode, options, handleOptionSelect);
+                const recipeDisplayEl = document.getElementById('recipeDisplay');
+                const nodeDisplayEl = document.getElementById('nodeDisplay');
+                if (recipeDisplayEl) recipeDisplayEl.style.display = 'none';
+                if (nodeDisplayEl) nodeDisplayEl.style.display = 'none';
+            } else {
+                ui.renderNode(currentNode, options, handleOptionSelect, mode);
+                const recipeDisplayEl = document.getElementById('recipeDisplay');
+                const nodeDisplayEl = document.getElementById('nodeDisplay');
+                if (recipeDisplayEl) recipeDisplayEl.style.display = 'none';
+                if (nodeDisplayEl) nodeDisplayEl.style.display = 'block';
+            }
         }
     } catch (error) {
         console.error('Render error:', error);
@@ -162,18 +175,35 @@ async function renderNode(currentNode, options, recipe, isTerminal) {
     ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
     
     const backButton = document.getElementById('backButton');
-    backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
+    if (backButton) {
+        backButton.style.display = breadcrumbs.length > 1 ? 'block' : 'none';
+    }
     
     if (isTerminal && recipe) {
         const explanation = wizardEngine ? await wizardEngine.explainPath() : '';
         ui.renderRecipe(recipe, mode, explanation);
     } else {
-        // Ensure options is an array
-        const optionsArray = Array.isArray(options) ? options : [];
-        console.log('[renderNode] Rendering node with', optionsArray.length, 'options');
-        ui.renderNode(currentNode, optionsArray, handleOptionSelect, mode);
-        document.getElementById('recipeDisplay').style.display = 'none';
-        document.getElementById('nodeDisplay').style.display = 'block';
+        // Check if this is a policy wizard node
+        if (policyUI.isPolicyWizardNode(currentNode.id)) {
+            // Use policy wizard rendering
+            const optionsArray = Array.isArray(options) ? options : [];
+            await ui.renderPolicyWizardNode(currentNode, optionsArray, handleOptionSelect);
+            const recipeDisplayEl = document.getElementById('recipeDisplay');
+            const nodeDisplayEl = document.getElementById('nodeDisplay');
+            const wizardContentEl = document.getElementById('wizardContent');
+            if (recipeDisplayEl) recipeDisplayEl.style.display = 'none';
+            if (nodeDisplayEl) nodeDisplayEl.style.display = 'none';
+            if (wizardContentEl) wizardContentEl.style.display = 'block';
+        } else {
+            // Ensure options is an array
+            const optionsArray = Array.isArray(options) ? options : [];
+            console.log('[renderNode] Rendering node with', optionsArray.length, 'options');
+            ui.renderNode(currentNode, optionsArray, handleOptionSelect, mode);
+            const recipeDisplayEl = document.getElementById('recipeDisplay');
+            const nodeDisplayEl = document.getElementById('nodeDisplay');
+            if (recipeDisplayEl) recipeDisplayEl.style.display = 'none';
+            if (nodeDisplayEl) nodeDisplayEl.style.display = 'block';
+        }
     }
 }
 

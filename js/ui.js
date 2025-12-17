@@ -1,6 +1,8 @@
 // AI: UI rendering functions. These handle the visual presentation of nodes, options, and recipes.
 // Mode-aware rendering is handled here.
 
+import * as policyUI from './apim-policy-ui.js';
+
 /**
  * Render a node (question and options)
  * @param {Object} node
@@ -9,6 +11,12 @@
  * @param {string} mode
  */
 export function renderNode(node, options, onOptionSelect, mode) {
+    // Check if this is a policy wizard node
+    if (policyUI.isPolicyWizardNode(node.id)) {
+        renderPolicyWizardNode(node, options, onOptionSelect);
+        return;
+    }
+
     const questionTextEl = document.getElementById('questionText');
     const descriptionEl = document.getElementById('description');
     const optionsGridEl = document.getElementById('optionsGrid');
@@ -86,6 +94,11 @@ export function renderRecipe(recipe, mode, explanation) {
     const recipeTitleEl = document.getElementById('recipeTitle');
     const recipeStepsEl = document.getElementById('recipeSteps');
     const explainPathEl = document.getElementById('explainPath');
+
+    if (!nodeDisplayEl || !recipeDisplayEl || !recipeTitleEl || !recipeStepsEl) {
+        console.error('Required recipe display elements not found');
+        return;
+    }
 
     // Hide node display, show recipe
     nodeDisplayEl.style.display = 'none';
@@ -186,6 +199,10 @@ export function renderRecipe(recipe, mode, explanation) {
  */
 export function renderBreadcrumbs(breadcrumbs, onBreadcrumbClick) {
     const breadcrumbsEl = document.getElementById('breadcrumbs');
+    if (!breadcrumbsEl) {
+        console.warn('breadcrumbs element not found');
+        return;
+    }
     breadcrumbsEl.innerHTML = '';
 
     breadcrumbs.forEach((crumb, index) => {
@@ -222,17 +239,22 @@ export function renderBreadcrumbs(breadcrumbs, onBreadcrumbClick) {
  * Show loading state
  */
 export function showLoading() {
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('wizardContent').style.display = 'none';
-    document.getElementById('error').style.display = 'none';
+    const loadingEl = document.getElementById('loading');
+    const wizardContentEl = document.getElementById('wizardContent');
+    const errorEl = document.getElementById('error');
+    if (loadingEl) loadingEl.style.display = 'block';
+    if (wizardContentEl) wizardContentEl.style.display = 'none';
+    if (errorEl) errorEl.style.display = 'none';
 }
 
 /**
  * Hide loading state
  */
 export function hideLoading() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('wizardContent').style.display = 'block';
+    const loadingEl = document.getElementById('loading');
+    const wizardContentEl = document.getElementById('wizardContent');
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (wizardContentEl) wizardContentEl.style.display = 'block';
 }
 
 /**
@@ -241,9 +263,12 @@ export function hideLoading() {
  */
 export function showError(message) {
     const errorEl = document.getElementById('error');
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-    document.getElementById('loading').style.display = 'none';
+    const loadingEl = document.getElementById('loading');
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+    }
+    if (loadingEl) loadingEl.style.display = 'none';
 }
 
 /**
@@ -483,6 +508,143 @@ export function setImproveButtonLoading(isLoading) {
         improveButton.disabled = false;
         improveButton.classList.remove('loading');
         improveButton.textContent = 'Improve';
+    }
+}
+
+/**
+ * Render policy wizard node
+ * @param {Object} node
+ * @param {Array} options
+ * @param {Function} onOptionSelect
+ */
+export async function renderPolicyWizardNode(node, options, onOptionSelect) {
+    const wizardContentEl = document.getElementById('wizardContent');
+    if (!wizardContentEl) {
+        console.error('wizardContent element not found');
+        return;
+    }
+
+    try {
+        const html = await policyUI.renderPolicyWizardNode(node, options);
+        if (html) {
+            // Create a container for the policy wizard
+            const container = document.createElement('div');
+            container.innerHTML = html;
+            container.className = 'policy-wizard-container';
+            
+            // Clear existing content
+            const nodeDisplayEl = document.getElementById('nodeDisplay');
+            const recipeDisplayEl = document.getElementById('recipeDisplay');
+            if (nodeDisplayEl) nodeDisplayEl.style.display = 'none';
+            if (recipeDisplayEl) recipeDisplayEl.style.display = 'none';
+            
+            // Inject policy wizard HTML
+            wizardContentEl.innerHTML = '';
+            wizardContentEl.appendChild(container);
+            wizardContentEl.style.display = 'block';
+            
+            // Set up event handlers for policy wizard buttons
+            setupPolicyWizardEventHandlers(onOptionSelect);
+        }
+    } catch (error) {
+        console.error('Error rendering policy wizard node:', error);
+        showError(`Error rendering policy wizard: ${error.message}`);
+    }
+}
+
+/**
+ * Set up event handlers for policy wizard UI elements
+ * @param {Function} onOptionSelect
+ */
+function setupPolicyWizardEventHandlers(onOptionSelect) {
+    // Handle option selection buttons
+    document.querySelectorAll('.btn-select-option').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const optionId = e.target.dataset.optionId || e.target.closest('[data-option-id]')?.dataset.optionId;
+            if (optionId) {
+                await policyUI.handlePolicyWizardOption(optionId, { id: optionId });
+                if (onOptionSelect) {
+                    onOptionSelect(optionId);
+                }
+            }
+        });
+    });
+
+    // Handle policy checkboxes
+    document.querySelectorAll('input[type="checkbox"][data-policy-id]').forEach(checkbox => {
+        checkbox.addEventListener('change', async (e) => {
+            const policyId = e.target.dataset.policyId;
+            const engine = policyUI.initializePolicyEngine();
+            if (e.target.checked) {
+                // Note: addPolicy may need to be implemented in ApimPolicyEngine
+                // For now, we'll just handle the checkbox state
+                console.log('Policy selected:', policyId);
+            } else {
+                console.log('Policy deselected:', policyId);
+            }
+        });
+    });
+
+    // Handle policy configuration form submissions
+    document.querySelectorAll('.policy-params-form').forEach(form => {
+        form.addEventListener('change', async (e) => {
+            const formData = new FormData(form);
+            const policyIndex = form.closest('[data-policy-index]')?.dataset.policyIndex;
+            if (policyIndex !== undefined) {
+                const engine = policyUI.initializePolicyEngine();
+                const selectedPolicies = engine.getSelectedPolicies();
+                const policyItem = selectedPolicies[parseInt(policyIndex)];
+                if (policyItem) {
+                    const config = {};
+                    for (const [key, value] of formData.entries()) {
+                        config[key] = value;
+                    }
+                    // Note: configurePolicy may need to be implemented
+                    console.log('Policy configuration updated:', config);
+                }
+            }
+        });
+    });
+
+    // Handle config tabs
+    document.querySelectorAll('.config-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const index = e.target.dataset.policyIndex;
+            // Hide all forms
+            document.querySelectorAll('.config-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            // Hide all tabs
+            document.querySelectorAll('.config-tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            // Show selected form and tab
+            e.target.classList.add('active');
+            const form = document.querySelector(`.config-form[data-policy-index="${index}"]`);
+            if (form) {
+                form.classList.add('active');
+            }
+        });
+    });
+
+    // Handle copy Bicep button
+    const copyBicepBtn = document.querySelector('.btn-copy-bicep');
+    if (copyBicepBtn) {
+        copyBicepBtn.addEventListener('click', async () => {
+            const engine = policyUI.initializePolicyEngine();
+            try {
+                const bicep = await engine.generateBicep();
+                await navigator.clipboard.writeText(bicep);
+                const originalText = copyBicepBtn.textContent;
+                copyBicepBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBicepBtn.textContent = originalText;
+                }, 2000);
+            } catch (error) {
+                console.error('Error copying Bicep:', error);
+                alert('Failed to copy Bicep: ' + error.message);
+            }
+        });
     }
 }
 

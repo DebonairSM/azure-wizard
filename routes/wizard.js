@@ -37,9 +37,18 @@ function parseJsonObject(text) {
  * Get root node
  */
 function getRootNode(db) {
-    return db.prepare(`
+    const node = db.prepare(`
         SELECT * FROM nodes WHERE nodeType = 'root' LIMIT 1
     `).get();
+    
+    if (!node) return null;
+    
+    // Parse JSON fields
+    node.tags = parseJsonArray(node.tags);
+    node.azObjectives = parseJsonArray(node.azObjectives);
+    node.roleFocus = parseJsonArray(node.roleFocus);
+    
+    return node;
 }
 
 /**

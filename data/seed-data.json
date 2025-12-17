@@ -1466,6 +1466,16 @@
       "whenNotToUse": "For high-volume production requiring SLA or VNET integration"
     },
     {
+      "id": "opt-apim-policy-wizard",
+      "nodeId": "api-management-type",
+      "label": "Configure Policies",
+      "description": "Configure API Management policies for authentication, rate limiting, transformations, and more",
+      "pros": ["Customize API behavior", "Security controls", "Performance optimization"],
+      "cons": ["Requires configuration", "Policy complexity"],
+      "whenToUse": "When you need to customize API behavior, add security, or optimize performance",
+      "whenNotToUse": "When default API behavior is sufficient"
+    },
+    {
       "id": "opt-apim-developer",
       "nodeId": "apim-classic-tiers",
       "label": "Developer Tier",
@@ -2492,6 +2502,7 @@
     { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-classic", "toNodeId": "apim-classic-tiers" },
     { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-v2", "toNodeId": "apim-v2-tiers" },
     { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-consumption", "toNodeId": "apim-consumption-recipe" },
+    { "fromNodeId": "api-management-type", "fromOptionId": "opt-apim-policy-wizard", "toNodeId": "apim-policy-wizard-start" },
     { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-developer", "toNodeId": "apim-developer-recipe" },
     { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-basic", "toNodeId": "apim-basic-recipe" },
     { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-standard", "toNodeId": "apim-standard-recipe" },

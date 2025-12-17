@@ -1828,6 +1828,68 @@ router.get('/apim-policy-configurations/:id', (req, res) => {
 });
 
 /**
+ * POST /api/policy-wizard/start - Start a new policy wizard instance
+ */
+router.post('/policy-wizard/start', async (req, res) => {
+    try {
+        const { PolicyWizard } = await import('../js/policy-wizard/index.js');
+        const { scope, apiId, operationId } = req.body;
+        const wizard = PolicyWizard.start(scope, apiId, operationId);
+        res.json({ 
+            success: true, 
+            state: wizard.getState(),
+            policyModel: wizard.getPolicyModel()
+        });
+    } catch (error) {
+        console.error('Error starting policy wizard:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/policy-wizard/validate - Validate a policy model
+ */
+router.post('/policy-wizard/validate', async (req, res) => {
+    try {
+        const { PolicyWizard } = await import('../js/policy-wizard/index.js');
+        const validation = PolicyWizard.validate(req.body.policyModel);
+        res.json(validation);
+    } catch (error) {
+        console.error('Error validating policy:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/policy-wizard/to-xml - Convert policy model to XML
+ */
+router.post('/policy-wizard/to-xml', async (req, res) => {
+    try {
+        const { PolicyWizard } = await import('../js/policy-wizard/index.js');
+        const xml = PolicyWizard.toXml(req.body.policyModel);
+        res.json({ xml });
+    } catch (error) {
+        console.error('Error generating XML:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * POST /api/policy-wizard/detect - Detect existing policy
+ */
+router.post('/policy-wizard/detect', async (req, res) => {
+    try {
+        const { PolicyWizard } = await import('../js/policy-wizard/index.js');
+        const { scope, apiId, operationId } = req.body;
+        const detection = await PolicyWizard.detectPolicy(scope, apiId, operationId);
+        res.json(detection);
+    } catch (error) {
+        console.error('Error detecting policy:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
  * POST /api/apim-policies/generate-bicep - Generate Bicep template from policy configurations
  */
 router.post('/apim-policies/generate-bicep', async (req, res) => {
