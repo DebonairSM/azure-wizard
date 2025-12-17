@@ -3,6 +3,8 @@ js/api-key-config.js
 
 # Environment variables
 .env
+.env.local
+.env.*.local
 
 # Node modules
 node_modules/
@@ -13,16 +15,31 @@ assets/
 # OS files
 .DS_Store
 Thumbs.db
-
-# Assets and images
-assets/
+desktop.ini
 
 # Temporary files
 temp/
+*.tmp
+*.log
+
+# TypeScript build artifacts
+*.d.ts
+*.d.ts.map
+*.js.map
 
 # Database files (uncomment if you don't want to commit the database)
 # data/wizard.db
 # data/*.db
 
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
 

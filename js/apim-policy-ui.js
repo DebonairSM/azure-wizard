@@ -104,16 +104,35 @@ export function renderPolicyCategory(node, options) {
  */
 export async function renderPolicySelection(node, options) {
     const engine = initializePolicyEngine();
-    const scope = engine.getScope();
-    const category = engine.getCategory();
+    let scope = engine.getScope();
+    let category = engine.getCategory();
+    
+    // If scope is not set, default to 'api' scope
+    if (!scope.scope) {
+        console.warn('Scope not set, defaulting to "api"');
+        engine.selectScope('api');
+        scope = engine.getScope();
+    }
+    
+    // If category is not set but we have options, try to infer from the navigation
+    // This handles the case where user navigates directly to selection
+    if (!category) {
+        console.warn('Category not set, checking if we can infer from context');
+    }
+    
     const selectedPolicies = engine.getSelectedPolicies();
     const selectedPolicyIds = selectedPolicies.map(p => p.policyId);
+    
+    console.log('[renderPolicySelection]', { scope: scope.scope, category, selectedPoliciesCount: selectedPolicies.length });
+    
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:99',message:'renderPolicySelection called',data:{scope:scope.scope,scopeId:scope.scopeId,category,selectedPoliciesCount:selectedPolicies.length,selectedPolicyIds},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
     
     // Fetch available policies
     const policies = await engine.getAvailablePolicies();
+    
+    console.log('[renderPolicySelection] Policies fetched:', policies.length, 'policies for category:', category);
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:105',message:'renderPolicySelection policies fetched',data:{policiesCount:policies.length,policyIds:policies.map(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion
@@ -123,9 +142,17 @@ export async function renderPolicySelection(node, options) {
             <h2>${node.question || 'Select Policies'}</h2>
             <p class="node-description">${node.description || ''}</p>
             <div class="policy-selection-info">
-                <p><strong>Scope:</strong> ${scope.scope}</p>
-                ${category ? `<p><strong>Category:</strong> ${category}</p>` : ''}
+                <p><strong>Scope:</strong> ${scope.scope || 'Not set'}</p>
+                ${category ? `<p><strong>Category:</strong> ${category}</p>` : '<p><strong>Category:</strong> Not set - showing all policies</p>'}
             </div>
+            ${policies.length === 0 ? `
+                <div class="policy-selection-empty" style="padding: 20px; background: #f0f0f0; border-radius: 4px; margin: 20px 0;">
+                    <p><strong>No policies found</strong></p>
+                    <p>Category: ${category || 'Not set'}</p>
+                    <p>Scope: ${scope.scope || 'Not set'}</p>
+                    <p>Please check the browser console for details.</p>
+                </div>
+            ` : ''}
             <div class="policies-list">
                 ${policies.map(policy => {
                     const isChecked = selectedPolicyIds.includes(policy.id);
@@ -376,9 +403,11 @@ export async function handlePolicyWizardOption(optionId, option) {
             'advanced': 'advanced'
         };
         const mappedCategory = categoryMap[category] || category;
+        console.log('[handlePolicyWizardOption] Setting category:', mappedCategory, 'from option:', optionId);
         // #region agent log
         fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-ui.js:355',message:'handlePolicyWizardOption category selection',data:{optionId,category:mappedCategory},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
         // #endregion
         engine.selectCategory(mappedCategory);
+        console.log('[handlePolicyWizardOption] Category set to:', engine.getCategory());
     }
 }

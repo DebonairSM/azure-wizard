@@ -1516,6 +1516,16 @@
       "whenNotToUse": "For small to medium workloads where Standard tier is sufficient"
     },
     {
+      "id": "opt-apim-policy-wizard-classic",
+      "nodeId": "apim-classic-tiers",
+      "label": "Configure Policies",
+      "description": "Configure API Management policies for authentication, rate limiting, transformations, and more",
+      "pros": ["Customize API behavior", "Security controls", "Performance optimization"],
+      "cons": ["Requires configuration", "Policy complexity"],
+      "whenToUse": "When you need to customize API behavior, add security, or optimize performance",
+      "whenNotToUse": "When default API behavior is sufficient"
+    },
+    {
       "id": "opt-apim-v2-basic",
       "nodeId": "apim-v2-tiers",
       "label": "Basic Tier",
@@ -2507,9 +2517,11 @@
     { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-basic", "toNodeId": "apim-basic-recipe" },
     { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-standard", "toNodeId": "apim-standard-recipe" },
     { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-premium", "toNodeId": "apim-premium-recipe" },
+    { "fromNodeId": "apim-classic-tiers", "fromOptionId": "opt-apim-policy-wizard-classic", "toNodeId": "apim-policy-wizard-start" },
     { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-v2-basic", "toNodeId": "apim-v2-basic-recipe" },
     { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-v2-standard", "toNodeId": "apim-v2-standard-recipe" },
     { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-v2-premium", "toNodeId": "apim-v2-premium-recipe" },
+    { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-policy-wizard-v2", "toNodeId": "apim-policy-wizard-start" },
     { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-ai-gateway", "toNodeId": "apim-ai-gateway-features" },
     { "fromNodeId": "apim-ai-gateway-features", "fromOptionId": "feature-selection-submit", "toNodeId": "apim-ai-gateway-recipe" },
     { "fromNodeId": "apim-v2-tiers", "fromOptionId": "opt-apim-mcp", "toNodeId": "apim-mcp-recipe" },

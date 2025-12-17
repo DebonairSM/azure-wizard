@@ -120,7 +120,9 @@ export class ApimPolicyEngine {
      * @param {string} category
      */
     selectCategory(category) {
+        console.log('[ApimPolicyEngine] selectCategory called with:', category);
         this.selectedCategory = category;
+        console.log('[ApimPolicyEngine] Category set to:', this.selectedCategory);
     }
 
     /**
@@ -136,11 +138,8 @@ export class ApimPolicyEngine {
      * @returns {Promise<Array>}
      */
     async getAvailablePolicies() {
-        if (!this.selectedScope) {
-            return [];
-        }
-
         // Use PolicyWizard catalog if available, otherwise fall back to API
+        // Note: We don't require scope to be set - policies can be shown from catalog without scope
         try {
             const wizard = await loadPolicyWizard();
             if (wizard) {
@@ -148,26 +147,39 @@ export class ApimPolicyEngine {
                 const catalogModule = await import('./policy-wizard/policy-catalog.js');
                 let policies = [];
                 
+                console.log('[getAvailablePolicies] Category:', this.selectedCategory, 'Scope:', this.selectedScope);
+                
                 if (this.selectedCategory) {
                     // Get policies by category
                     policies = catalogModule.getPoliciesByCategory(this.selectedCategory);
+                    console.log('[getAvailablePolicies] Found', policies.length, 'policies for category:', this.selectedCategory);
                 } else {
                     // Get all policies
                     policies = catalogModule.getAllPolicies();
+                    console.log('[getAvailablePolicies] Found', policies.length, 'total policies');
                 }
                 
                 // Filter by supported sections based on scope
                 // For now, return all policies - scope filtering can be added later
-                return policies.map(policy => ({
+                const mappedPolicies = policies.map(policy => ({
                     id: policy.id,
                     name: policy.name,
                     description: policy.description,
                     category: policy.category,
                     supportedSections: policy.supportedSections || []
                 }));
+                
+                console.log('[getAvailablePolicies] Returning', mappedPolicies.length, 'policies');
+                return mappedPolicies;
             }
         } catch (error) {
             console.warn('PolicyWizard catalog not available, falling back to API:', error);
+        }
+        
+        // Fallback to API - this requires scope to be set
+        if (!this.selectedScope) {
+            console.warn('[getAvailablePolicies] No scope set and catalog unavailable, returning empty array');
+            return [];
         }
 
         // Fallback to API
