@@ -13,7 +13,6 @@ A decision tree wizard for Azure architecture guidance, AZ-204 exam study, and s
 
 ```bash
 npm install
-npm run migrate  # First time only - creates SQLite database
 ```
 
 ### Running
@@ -22,7 +21,17 @@ npm run migrate  # First time only - creates SQLite database
 npm start
 ```
 
-Open http://localhost:3030
+Open `http://localhost:3030`
+
+### Running V1 (legacy)
+
+If you specifically need the legacy v1 server:
+
+```bash
+npm run start:v1
+```
+
+By default, v1 runs on `http://localhost:3031` to avoid conflicting with v2.
 
 ### OpenAI API Key (Optional)
 
@@ -42,9 +51,8 @@ OPENAI_API_KEY=sk-your-key-here
 
 ## Architecture
 
-- **Storage**: SQLite database (`data/wizard.db`)
-- **Server**: Node.js Express with EJS templates
-- **Client**: Browser app with IndexedDB cache for offline support
+- **V2 (default)**: `azure-wizard-v2/` (TypeScript, tree-based wizard, SQLite at `azure-wizard-v2/data/wizard.db`)
+- **V1 (legacy)**: root app (Express + EJS, SQLite at `data/wizard.db`)
 
 ## Scripts
 

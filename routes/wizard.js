@@ -134,19 +134,23 @@ router.get('/', async (req, res) => {
         // Get options for current node
         const options = getOptionsForNode(db, currentNode.id);
         
+        // Ensure options is always an array
+        const optionsArray = Array.isArray(options) ? options : [];
+        
         // Check if this is a terminal node (has recipe)
         const recipe = getRecipeForNode(db, currentNode.id);
         const isTerminal = currentNode.nodeType === 'terminal' || !!recipe;
         
         // Get version
-        const version = db.prepare('SELECT version FROM version ORDER BY updatedAt DESC LIMIT 1').get();
+        const versionRow = db.prepare('SELECT version FROM version ORDER BY updatedAt DESC LIMIT 1').get();
+        const version = versionRow?.version || '1.0.0';
         
         res.render('index', {
             currentNode,
-            options: options || [],
+            options: optionsArray,
             recipe: recipe || null,
             isTerminal: isTerminal || false,
-            version: version?.version || '1.0.0',
+            version: version,
             nodeId: currentNode.id
         });
     } catch (error) {

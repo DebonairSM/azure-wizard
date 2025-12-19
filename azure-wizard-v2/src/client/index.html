@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Wizard V2</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Azure Configuration Wizard</h1>
+            <div class="wizard-selector">
+                <label for="wizardSelect">Wizard:</label>
+                <select id="wizardSelect">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="tree-sidebar">
+                <div class="tree-container">
+                    <div id="treeView" class="tree-view"></div>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <div id="breadcrumbs" class="breadcrumbs"></div>
+                <div id="nodeDetails" class="node-details">
+                    <p class="placeholder">Select a wizard and navigate the tree to view details</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+

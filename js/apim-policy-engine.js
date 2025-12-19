@@ -231,37 +231,59 @@ export class ApimPolicyEngine {
             };
         }
 
-        // Fetch policy details
+        let policy = null;
+
+        // First try to load from policy catalog
         try {
-            const response = await fetch(`/api/apim-policies/${policyId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch policy');
+            const catalogModule = await import('./policy-wizard/policy-catalog.js');
+            policy = catalogModule.getPolicyById(policyId);
+            
+            if (policy) {
+                console.log('[addPolicy] Found policy in catalog:', policyId);
             }
-            const policy = await response.json();
-
-            // Initialize configuration with defaults
-            const configuration = this.initializeConfiguration(policy);
-
-            this.selectedPolicies.push({
-                policyId: policy.id,
-                policy: policy,
-                configuration: configuration
-            });
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:141',message:'addPolicy called AFTER',data:{policyId,selectedCount:this.selectedPolicies.length,selectedPolicyIds:this.selectedPolicies.map(p=>p.policyId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-            // #endregion
-
-            return {
-                success: true,
-                policy: policy
-            };
         } catch (error) {
-            console.error('Error adding policy:', error);
-            return {
-                success: false,
-                error: error.message
-            };
+            console.warn('[addPolicy] Catalog not available, will try API:', error);
         }
+
+        // If not found in catalog, try API
+        if (!policy) {
+            try {
+                const response = await fetch(`/api/apim-policies/${policyId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch policy');
+                }
+                policy = await response.json();
+                console.log('[addPolicy] Loaded policy from API:', policyId);
+            } catch (error) {
+                console.error('Error fetching policy from API:', error);
+                return {
+                    success: false,
+                    error: `Policy not found: ${error.message}`
+                };
+            }
+        }
+
+        // Ensure policy has required fields
+        if (!policy.id) {
+            policy.id = policyId;
+        }
+
+        // Initialize configuration with defaults
+        const configuration = this.initializeConfiguration(policy);
+
+        this.selectedPolicies.push({
+            policyId: policy.id,
+            policy: policy,
+            configuration: configuration
+        });
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/35d682e6-ea0b-4cff-9182-d29fd3890771',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'apim-policy-engine.js:141',message:'addPolicy called AFTER',data:{policyId,selectedCount:this.selectedPolicies.length,selectedPolicyIds:this.selectedPolicies.map(p=>p.policyId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+
+        return {
+            success: true,
+            policy: policy
+        };
     }
 
     /**

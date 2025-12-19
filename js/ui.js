@@ -22,12 +22,19 @@ export function renderNode(node, options, onOptionSelect, mode) {
     const optionsGridEl = document.getElementById('optionsGrid');
 
     if (!questionTextEl) {
-        console.error('questionText element not found');
-        return;
+        console.error('[renderNode] questionText element not found');
+        throw new Error('questionText element not found in DOM');
+    }
+    
+    if (!optionsGridEl) {
+        console.error('[renderNode] optionsGrid element not found');
+        throw new Error('optionsGrid element not found in DOM');
     }
 
     questionTextEl.textContent = node.question || 'Question';
-    descriptionEl.textContent = node.description || '';
+    if (descriptionEl) {
+        descriptionEl.textContent = node.description || '';
+    }
 
     // Render improve button for question-type nodes
     renderImproveButton(node);
@@ -253,8 +260,16 @@ export function showLoading() {
 export function hideLoading() {
     const loadingEl = document.getElementById('loading');
     const wizardContentEl = document.getElementById('wizardContent');
-    if (loadingEl) loadingEl.style.display = 'none';
-    if (wizardContentEl) wizardContentEl.style.display = 'block';
+    
+    if (loadingEl) {
+        loadingEl.style.display = 'none';
+    }
+    
+    if (wizardContentEl) {
+        wizardContentEl.style.display = 'block';
+    } else {
+        console.warn('[hideLoading] wizardContent element not found');
+    }
 }
 
 /**
@@ -545,6 +560,11 @@ export async function renderPolicyWizardNode(node, options, onOptionSelect) {
             
             // Set up event handlers for policy wizard buttons
             setupPolicyWizardEventHandlers(onOptionSelect);
+            
+            // Initialize selected policies UI if on policy selection page
+            if (node.id === 'apim-policy-selection') {
+                updateSelectedPoliciesUI();
+            }
         }
     } catch (error) {
         console.error('Error rendering policy wizard node:', error);
@@ -580,10 +600,42 @@ function handleGoBackClick(e) {
 }
 
 /**
+ * Update the selected policies summary UI
+ */
+function updateSelectedPoliciesUI() {
+    const engine = policyUI.initializePolicyEngine();
+    const selectedPolicies = engine.getSelectedPolicies();
+    
+    // Update count
+    const countEl = document.getElementById('selected-count');
+    if (countEl) {
+        countEl.textContent = selectedPolicies.length;
+    }
+    
+    // Update list
+    const listEl = document.getElementById('selected-policies-list');
+    if (listEl) {
+        if (selectedPolicies.length === 0) {
+            listEl.innerHTML = '<p style="color: #666; font-style: italic;">No policies selected</p>';
+        } else {
+            listEl.innerHTML = selectedPolicies.map(p => `
+                <div style="padding: 8px; margin: 4px 0; background: #f0f0f0; border-radius: 4px;">
+                    <strong>${p.policy?.name || p.policyId}</strong>
+                    ${p.policy?.description ? `<p style="margin: 4px 0 0 0; font-size: 0.9em; color: #666;">${p.policy.description}</p>` : ''}
+                </div>
+            `).join('');
+        }
+    }
+}
+
+/**
  * Set up event handlers for policy wizard UI elements
  * @param {Function} onOptionSelect
  */
 function setupPolicyWizardEventHandlers(onOptionSelect) {
+    // Get wizardContent element once for reuse
+    const wizardContentEl = document.getElementById('wizardContent');
+    
     // Handle option selection buttons
     document.querySelectorAll('.btn-select-option').forEach(button => {
         button.addEventListener('click', async (e) => {
@@ -597,20 +649,35 @@ function setupPolicyWizardEventHandlers(onOptionSelect) {
         });
     });
 
-    // Handle policy checkboxes
-    document.querySelectorAll('input[type="checkbox"][data-policy-id]').forEach(checkbox => {
-        checkbox.addEventListener('change', async (e) => {
-            const policyId = e.target.dataset.policyId;
-            const engine = policyUI.initializePolicyEngine();
-            if (e.target.checked) {
-                // Note: addPolicy may need to be implemented in ApimPolicyEngine
-                // For now, we'll just handle the checkbox state
-                console.log('Policy selected:', policyId);
-            } else {
-                console.log('Policy deselected:', policyId);
+    // Handle policy checkboxes - use event delegation for dynamically created elements
+    if (wizardContentEl) {
+        wizardContentEl.addEventListener('change', async (e) => {
+            if (e.target.matches('input[type="checkbox"][data-policy-id]')) {
+                const policyId = e.target.dataset.policyId;
+                const engine = policyUI.initializePolicyEngine();
+                
+                try {
+                    if (e.target.checked) {
+                        const result = await engine.addPolicy(policyId);
+                        if (result.success) {
+                            console.log('Policy selected:', policyId);
+                            updateSelectedPoliciesUI();
+                        } else {
+                            console.error('Failed to add policy:', result.error);
+                            e.target.checked = false; // Revert checkbox
+                        }
+                    } else {
+                        engine.removePolicy(policyId);
+                        console.log('Policy deselected:', policyId);
+                        updateSelectedPoliciesUI();
+                    }
+                } catch (error) {
+                    console.error('Error handling policy selection:', error);
+                    e.target.checked = !e.target.checked; // Revert checkbox on error
+                }
             }
         });
-    });
+    }
 
     // Handle policy configuration form submissions
     document.querySelectorAll('.policy-params-form').forEach(form => {
@@ -675,7 +742,6 @@ function setupPolicyWizardEventHandlers(onOptionSelect) {
     }
 
     // Handle go back button - use event delegation to avoid duplicate listeners
-    const wizardContentEl = document.getElementById('wizardContent');
     if (wizardContentEl) {
         // Remove any existing listener to avoid duplicates
         wizardContentEl.removeEventListener('click', handleGoBackClick);

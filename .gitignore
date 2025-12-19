@@ -5,41 +5,82 @@ js/api-key-config.js
 .env
 .env.local
 .env.*.local
+.env.*.backup
 
 # Node modules
 node_modules/
 
-# Assets and images
+# Assets and images (user-specific generated content)
 assets/
 
 # OS files
 .DS_Store
 Thumbs.db
 desktop.ini
+*.lnk
 
 # Temporary files
 temp/
 *.tmp
 *.log
+*.cache
+
+# Database files (contains potentially sensitive data)
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+azure-wizard-v2/data/*.db
+azure-wizard-v2/data/*.sqlite
+azure-wizard-v2/data/*.sqlite3
 
 # TypeScript build artifacts
-*.d.ts
+dist/
+build/
+*.tsbuildinfo
 *.d.ts.map
 *.js.map
 
-# Database files (uncomment if you don't want to commit the database)
-# data/wizard.db
-# data/*.db
+# Test results and reports
+playwright-report/
+test-results/
+coverage/
+*.lcov
 
 # IDE and editor files
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
 
-# Build outputs
-dist/
-build/
-*.tsbuildinfo
+# Package manager lock files (keep package-lock.json, ignore others)
+yarn.lock
+pnpm-lock.yaml
+
+# Runtime and process files
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
 

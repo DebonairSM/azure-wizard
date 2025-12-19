@@ -20,16 +20,30 @@ async function initialize() {
 
         // Check if we have server-rendered data
         if (window.SERVER_DATA) {
+            // Validate SERVER_DATA structure
+            if (!window.SERVER_DATA.currentNode) {
+                throw new Error('SERVER_DATA.currentNode is missing');
+            }
+            
             // Use server-rendered data directly
             const currentNode = window.SERVER_DATA.currentNode;
-            let options = window.SERVER_DATA.options || [];
-            const recipe = window.SERVER_DATA.recipe;
-            const isTerminal = window.SERVER_DATA.isTerminal;
+            
+            // Ensure currentNode has required properties
+            if (!currentNode.id) {
+                throw new Error('currentNode.id is missing from SERVER_DATA');
+            }
+            
+            // Ensure options is always an array
+            let options = Array.isArray(window.SERVER_DATA.options) 
+                ? window.SERVER_DATA.options 
+                : [];
+            const recipe = window.SERVER_DATA.recipe || null;
+            const isTerminal = Boolean(window.SERVER_DATA.isTerminal);
             
             // Debug logging
             console.log('[Wizard Init] Server data:', {
-                nodeId: currentNode?.id,
-                question: currentNode?.question,
+                nodeId: currentNode.id,
+                question: currentNode.question,
                 optionsCount: options.length,
                 options: options.slice(0, 3).map(o => ({ id: o.id, label: o.label }))
             });
@@ -39,7 +53,7 @@ async function initialize() {
             wizardEngine.currentNodeId = currentNode.id;
             
             // If no options from server, try loading from IndexedDB or API
-            if (options.length === 0 && currentNode?.id) {
+            if (options.length === 0 && currentNode.id) {
                 console.log('[Wizard Init] No options from server, trying fallback...');
                 try {
                     // First try IndexedDB
@@ -61,7 +75,12 @@ async function initialize() {
             }
             
             // Render with server data
-            await renderNode(currentNode, options, recipe, isTerminal);
+            try {
+                await renderNode(currentNode, options, recipe, isTerminal);
+            } catch (renderError) {
+                console.error('[Wizard Init] Error rendering node:', renderError);
+                throw new Error(`Failed to render node: ${renderError.message}`);
+            }
         } else {
             // Load data (will use cache if version matches)
             await loadData();
@@ -71,13 +90,19 @@ async function initialize() {
             await wizardEngine.initialize();
 
             // Render initial state
-            await renderCurrentState();
+            try {
+                await renderCurrentState();
+            } catch (renderError) {
+                console.error('[Wizard Init] Error rendering current state:', renderError);
+                throw new Error(`Failed to render current state: ${renderError.message}`);
+            }
         }
 
         ui.hideLoading();
     } catch (error) {
         console.error('Initialization error:', error);
         ui.showError(`Failed to initialize wizard: ${error.message}`);
+        ui.hideLoading(); // Ensure loading is hidden even on error
     }
 }
 
@@ -166,23 +191,36 @@ async function renderCurrentState() {
  * Render node with server-rendered data
  */
 async function renderNode(currentNode, options, recipe, isTerminal) {
+    // Validate inputs
+    if (!currentNode) {
+        throw new Error('currentNode is required for renderNode');
+    }
+    if (!currentNode.id) {
+        throw new Error('currentNode.id is required for renderNode');
+    }
+    
+    // Ensure options is always an array
+    const optionsArray = Array.isArray(options) ? options : [];
+    
     const mode = wizardEngine ? wizardEngine.getMode() : 'design';
     const breadcrumbs = wizardEngine ? await wizardEngine.getBreadcrumbs() : [];
     
     // Debug logging
     console.log('[renderNode] Called with:', {
-        nodeId: currentNode?.id,
-        question: currentNode?.question,
-        optionsCount: options?.length || 0,
+        nodeId: currentNode.id,
+        question: currentNode.question,
+        optionsCount: optionsArray.length,
         isTerminal,
         hasRecipe: !!recipe
     });
     
     // Ensure wizardContent is visible before rendering breadcrumbs
     const wizardContentEl = document.getElementById('wizardContent');
-    if (wizardContentEl) {
-        wizardContentEl.style.display = 'block';
+    if (!wizardContentEl) {
+        console.error('[renderNode] wizardContent element not found');
+        throw new Error('wizardContent element not found in DOM');
     }
+    wizardContentEl.style.display = 'block';
     
     ui.renderBreadcrumbs(breadcrumbs, handleBreadcrumbClick);
     

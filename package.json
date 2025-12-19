@@ -4,12 +4,15 @@
   "description": "Azure Recipe Wizard",
   "type": "module",
   "scripts": {
-    "prestart": "node scripts/load-env.js",
-    "start": "node server.js",
+    "postinstall": "npm --prefix azure-wizard-v2 install",
+    "start": "npm --prefix azure-wizard-v2 run build && npm --prefix azure-wizard-v2 start",
+    "start:v1": "node scripts/start-v1.js",
+    "start:v2": "npm --prefix azure-wizard-v2 run build && npm --prefix azure-wizard-v2 start",
     "preserve": "node scripts/load-env.js",
     "serve": "node server.js",
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "build:v2": "npm --prefix azure-wizard-v2 run build",
     "migrate": "node scripts/db-manager.js migrate-json",
     "populate-apim": "node scripts/db-manager.js populate-apim",
     "populate-apim-policies": "node scripts/populate-apim-policies.js",
@@ -21,20 +24,25 @@
     "discover-azure-resources": "node scripts/azure-resource-discovery.js",
     "discover-functions": "node scripts/azure-resource-discovery.js --service Functions",
     "discover-appservice": "node scripts/azure-resource-discovery.js --service AppService",
-    "discover-dry-run": "node scripts/azure-resource-discovery.js --dry-run"
+    "discover-dry-run": "node scripts/azure-resource-discovery.js --dry-run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
     "better-sqlite3": "^12.4.1",
     "ejs": "^3.1.9",
+    "express": "^4.18.2",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
+    "@playwright/test": "^1.57.0",
     "@types/node": "^20.10.6",
-    "@types/xml2js": "^0.4.14"
+    "@types/xml2js": "^0.4.14",
+    "playwright": "^1.57.0",
+    "typescript": "^5.3.3"
   }
 }

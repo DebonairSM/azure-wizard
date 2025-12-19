@@ -901,116 +901,335 @@
       "name": "llm-token-limit",
       "category": "ai-gateway",
       "scope": ["api", "operation"],
-      "description": "Limits the number of tokens that can be sent to an LLM backend per time period",
+      "description": "Limits the number of tokens that can be sent to an LLM backend per time period. Supports multiple time windows (minute, hour, day, week, month, year) and pre-calculation of prompt tokens.",
       "parameters": {
         "tokens-per-minute": {
           "type": "number",
-          "required": true,
+          "required": false,
           "label": "Tokens Per Minute",
           "description": "Maximum tokens allowed per minute",
           "default": 10000
+        },
+        "tokens-per-hour": {
+          "type": "number",
+          "required": false,
+          "label": "Tokens Per Hour",
+          "description": "Maximum tokens allowed per hour"
         },
         "tokens-per-day": {
           "type": "number",
           "required": false,
           "label": "Tokens Per Day",
           "description": "Maximum tokens allowed per day"
+        },
+        "tokens-per-week": {
+          "type": "number",
+          "required": false,
+          "label": "Tokens Per Week",
+          "description": "Maximum tokens allowed per week (Premium v2 only)"
+        },
+        "tokens-per-month": {
+          "type": "number",
+          "required": false,
+          "label": "Tokens Per Month",
+          "description": "Maximum tokens allowed per month (Premium v2 only)"
+        },
+        "counter-key": {
+          "type": "string",
+          "required": false,
+          "label": "Counter Key",
+          "description": "Expression to use as rate limit key (default: subscription key). Examples: @(context.Request.IpAddress), @(context.User.Id)"
+        },
+        "estimate-prompt-tokens": {
+          "type": "boolean",
+          "required": false,
+          "label": "Estimate Prompt Tokens",
+          "description": "Pre-calculate prompt tokens before sending to backend",
+          "default": false
+        },
+        "remaining-tokens-variable-name": {
+          "type": "string",
+          "required": false,
+          "label": "Remaining Tokens Variable",
+          "description": "Variable name to store remaining tokens after limit check"
         }
       },
       "xmlTemplate": {
-        "inbound": "<llm-token-limit tokens-per-minute=\"{{tokens-per-minute}}\" tokens-per-day=\"{{tokens-per-day}}\" />"
+        "inbound": "<llm-token-limit tokens-per-minute=\"{{tokens-per-minute}}\" tokens-per-hour=\"{{tokens-per-hour}}\" tokens-per-day=\"{{tokens-per-day}}\" counter-key=\"{{counter-key}}\" estimate-prompt-tokens=\"{{estimate-prompt-tokens}}\" remaining-tokens-variable-name=\"{{remaining-tokens-variable-name}}\" />"
       },
       "documentation": "https://learn.microsoft.com/azure/api-management/llm-token-limit-policy",
       "compatibility": {
         "apimVersions": ["v2"],
-        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
-      }
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"],
+        "notes": {
+          "PremiumV2": "Full support: all time windows, per-consumer limits, pre-calculation",
+          "StandardV2": "Basic support: minute/hour/day limits, pre-calculation",
+          "BasicV2": "Basic support: minute/hour/day limits"
+        }
+      },
+      "examples": [
+        {
+          "name": "Basic per-minute limit",
+          "config": {
+            "tokens-per-minute": 10000
+          }
+        },
+        {
+          "name": "Multiple time windows",
+          "config": {
+            "tokens-per-minute": 10000,
+            "tokens-per-hour": 500000,
+            "tokens-per-day": 10000000
+          }
+        },
+        {
+          "name": "Per-IP rate limiting",
+          "config": {
+            "tokens-per-minute": 5000,
+            "counter-key": "@(context.Request.IpAddress)"
+          }
+        },
+        {
+          "name": "With token pre-calculation",
+          "config": {
+            "tokens-per-minute": 10000,
+            "estimate-prompt-tokens": true,
+            "remaining-tokens-variable-name": "remainingTokens"
+          }
+        }
+      ],
+      "relatedPolicies": ["llm-emit-token-metric", "azure-openai-token-limit"]
     },
     {
       "id": "llm-content-safety",
       "name": "llm-content-safety",
       "category": "ai-gateway",
       "scope": ["api", "operation"],
-      "description": "Validates content using Azure AI Content Safety before sending to LLM backend",
+      "description": "Validates content using Azure AI Content Safety before sending to LLM backend. Supports prompt moderation, response filtering, and content classification.",
       "parameters": {
         "content-safety-resource-id": {
           "type": "string",
           "required": true,
           "label": "Content Safety Resource ID",
-          "description": "Resource ID of Azure AI Content Safety resource"
+          "description": "Resource ID of Azure AI Content Safety resource. Format: /subscriptions/{sub-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}"
         },
         "severity-level": {
           "type": "string",
           "required": false,
           "label": "Severity Level",
-          "description": "Content safety severity level",
+          "description": "Content safety severity level threshold",
           "enum": ["low", "medium", "high"],
           "default": "medium"
+        },
+        "moderate-prompt": {
+          "type": "boolean",
+          "required": false,
+          "label": "Moderate Prompt",
+          "description": "Enable prompt content moderation",
+          "default": true
+        },
+        "moderate-response": {
+          "type": "boolean",
+          "required": false,
+          "label": "Moderate Response",
+          "description": "Enable response content moderation",
+          "default": true
+        },
+        "on-violation": {
+          "type": "string",
+          "required": false,
+          "label": "On Violation Action",
+          "description": "Action to take when content safety violation detected",
+          "enum": ["block", "flag", "log"],
+          "default": "block"
         }
       },
       "xmlTemplate": {
-        "inbound": "<llm-content-safety content-safety-resource-id=\"{{content-safety-resource-id}}\" severity-level=\"{{severity-level}}\" />"
+        "inbound": "<llm-content-safety content-safety-resource-id=\"{{content-safety-resource-id}}\" severity-level=\"{{severity-level}}\" moderate-prompt=\"{{moderate-prompt}}\" moderate-response=\"{{moderate-response}}\" on-violation=\"{{on-violation}}\" />"
       },
       "documentation": "https://learn.microsoft.com/azure/api-management/llm-content-safety-policy",
       "compatibility": {
         "apimVersions": ["v2"],
-        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
-      }
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"],
+        "notes": {
+          "PremiumV2": "Full support: prompt/response moderation, content classification, custom actions",
+          "StandardV2": "Basic support: prompt/response moderation",
+          "BasicV2": "Basic support: prompt/response moderation"
+        }
+      },
+      "examples": [
+        {
+          "name": "Basic content safety",
+          "config": {
+            "content-safety-resource-id": "/subscriptions/{subscription-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}",
+            "severity-level": "medium"
+          }
+        },
+        {
+          "name": "Prompt-only moderation",
+          "config": {
+            "content-safety-resource-id": "/subscriptions/{subscription-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}",
+            "moderate-prompt": true,
+            "moderate-response": false,
+            "on-violation": "block"
+          }
+        },
+        {
+          "name": "Flag violations instead of blocking",
+          "config": {
+            "content-safety-resource-id": "/subscriptions/{subscription-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}",
+            "severity-level": "high",
+            "on-violation": "flag"
+          }
+        }
+      ],
+      "relatedPolicies": ["azure-openai-emit-token-metric"]
     },
     {
       "id": "llm-semantic-cache-lookup",
       "name": "llm-semantic-cache-lookup",
       "category": "ai-gateway",
       "scope": ["api", "operation"],
-      "description": "Looks up semantically similar requests in cache",
+      "description": "Looks up semantically similar requests in cache using vector embeddings. Requires Azure Cache for Redis with RediSearch module.",
       "parameters": {
         "cache-provider-id": {
           "type": "string",
           "required": true,
           "label": "Cache Provider ID",
-          "description": "ID of the cache provider (e.g., Redis connection string)"
+          "description": "ID of the cache provider. Can be Redis connection string or named value reference"
         },
         "similarity-threshold": {
           "type": "number",
           "required": true,
           "label": "Similarity Threshold",
-          "description": "Similarity threshold (0.0 to 1.0)",
+          "description": "Similarity threshold (0.0 to 1.0). Higher values require more exact matches",
           "default": 0.8,
           "min": 0,
           "max": 1
+        },
+        "embeddings-api": {
+          "type": "string",
+          "required": false,
+          "label": "Embeddings API",
+          "description": "API endpoint for generating embeddings (default: Azure OpenAI embeddings)"
+        },
+        "cache-key-prefix": {
+          "type": "string",
+          "required": false,
+          "label": "Cache Key Prefix",
+          "description": "Prefix for cache keys to namespace different APIs"
         }
       },
       "xmlTemplate": {
-        "inbound": "<llm-semantic-cache-lookup cache-provider-id=\"{{cache-provider-id}}\" similarity-threshold=\"{{similarity-threshold}}\" />"
+        "inbound": "<llm-semantic-cache-lookup cache-provider-id=\"{{cache-provider-id}}\" similarity-threshold=\"{{similarity-threshold}}\" embeddings-api=\"{{embeddings-api}}\" cache-key-prefix=\"{{cache-key-prefix}}\" />"
       },
       "documentation": "https://learn.microsoft.com/azure/api-management/llm-semantic-cache-lookup-policy",
       "compatibility": {
         "apimVersions": ["v2"],
-        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
-      }
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"],
+        "requirements": ["Azure Cache for Redis with RediSearch module"],
+        "notes": {
+          "PremiumV2": "Full support: custom embeddings API, cache invalidation",
+          "StandardV2": "Basic support: Azure OpenAI embeddings only",
+          "BasicV2": "Basic support: Azure OpenAI embeddings only"
+        }
+      },
+      "examples": [
+        {
+          "name": "Basic semantic cache lookup",
+          "config": {
+            "cache-provider-id": "redis-connection-string",
+            "similarity-threshold": 0.8
+          }
+        },
+        {
+          "name": "Strict similarity matching",
+          "config": {
+            "cache-provider-id": "redis-connection-string",
+            "similarity-threshold": 0.95
+          }
+        },
+        {
+          "name": "With custom embeddings API",
+          "config": {
+            "cache-provider-id": "redis-connection-string",
+            "similarity-threshold": 0.85,
+            "embeddings-api": "https://api.example.com/embeddings"
+          }
+        }
+      ],
+      "relatedPolicies": ["llm-semantic-cache-store"]
     },
     {
       "id": "llm-semantic-cache-store",
       "name": "llm-semantic-cache-store",
       "category": "ai-gateway",
       "scope": ["api", "operation"],
-      "description": "Stores LLM request/response in semantic cache",
+      "description": "Stores LLM request/response in semantic cache with vector embeddings for similarity matching. Must be used with llm-semantic-cache-lookup.",
       "parameters": {
         "cache-provider-id": {
           "type": "string",
           "required": true,
           "label": "Cache Provider ID",
-          "description": "ID of the cache provider"
+          "description": "ID of the cache provider. Must match the provider used in llm-semantic-cache-lookup"
+        },
+        "ttl": {
+          "type": "number",
+          "required": false,
+          "label": "Time To Live (seconds)",
+          "description": "Cache entry expiration time in seconds"
+        },
+        "embeddings-api": {
+          "type": "string",
+          "required": false,
+          "label": "Embeddings API",
+          "description": "API endpoint for generating embeddings (must match lookup policy)"
+        },
+        "cache-key-prefix": {
+          "type": "string",
+          "required": false,
+          "label": "Cache Key Prefix",
+          "description": "Prefix for cache keys (must match lookup policy)"
         }
       },
       "xmlTemplate": {
-        "outbound": "<llm-semantic-cache-store cache-provider-id=\"{{cache-provider-id}}\" />"
+        "outbound": "<llm-semantic-cache-store cache-provider-id=\"{{cache-provider-id}}\" ttl=\"{{ttl}}\" embeddings-api=\"{{embeddings-api}}\" cache-key-prefix=\"{{cache-key-prefix}}\" />"
       },
       "documentation": "https://learn.microsoft.com/azure/api-management/llm-semantic-cache-store-policy",
       "compatibility": {
         "apimVersions": ["v2"],
-        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
-      }
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"],
+        "requirements": ["Azure Cache for Redis with RediSearch module"],
+        "notes": {
+          "PremiumV2": "Full support: custom TTL, cache invalidation",
+          "StandardV2": "Basic support: default TTL",
+          "BasicV2": "Basic support: default TTL"
+        }
+      },
+      "examples": [
+        {
+          "name": "Basic cache store",
+          "config": {
+            "cache-provider-id": "redis-connection-string"
+          }
+        },
+        {
+          "name": "With TTL",
+          "config": {
+            "cache-provider-id": "redis-connection-string",
+            "ttl": 3600
+          }
+        },
+        {
+          "name": "Matching lookup configuration",
+          "config": {
+            "cache-provider-id": "redis-connection-string",
+            "embeddings-api": "https://api.example.com/embeddings",
+            "cache-key-prefix": "my-api-v1"
+          }
+        }
+      ],
+      "relatedPolicies": ["llm-semantic-cache-lookup"]
     },
     {
       "id": "llm-emit-token-metric",
@@ -1034,7 +1253,258 @@
       "compatibility": {
         "apimVersions": ["v2"],
         "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
-      }
+      },
+      "examples": [
+        {
+          "name": "Default namespace",
+          "config": {
+            "namespace": "apim-llm"
+          }
+        },
+        {
+          "name": "Custom namespace",
+          "config": {
+            "namespace": "my-llm-metrics"
+          }
+        }
+      ]
+    },
+    {
+      "id": "azure-openai-emit-token-metric",
+      "name": "azure-openai-emit-token-metric",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Emits Azure OpenAI specific token usage metrics to Application Insights",
+      "parameters": {
+        "namespace": {
+          "type": "string",
+          "required": false,
+          "label": "Namespace",
+          "description": "Metric namespace for Azure OpenAI metrics",
+          "default": "apim-azure-openai"
+        },
+        "dimensions": {
+          "type": "object",
+          "required": false,
+          "label": "Custom Dimensions",
+          "description": "Additional dimensions to include in metrics"
+        }
+      },
+      "xmlTemplate": {
+        "outbound": "<azure-openai-emit-token-metric namespace=\"{{namespace}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/azure-openai-emit-token-metric-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2"]
+      },
+      "examples": [
+        {
+          "name": "Basic Azure OpenAI metrics",
+          "config": {
+            "namespace": "apim-azure-openai"
+          }
+        }
+      ]
+    },
+    {
+      "id": "azure-openai-token-limit",
+      "name": "azure-openai-token-limit",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Limits tokens for Azure OpenAI endpoints with enhanced Azure OpenAI specific features",
+      "parameters": {
+        "tokens-per-minute": {
+          "type": "number",
+          "required": true,
+          "label": "Tokens Per Minute",
+          "description": "Maximum tokens allowed per minute",
+          "default": 10000
+        },
+        "tokens-per-hour": {
+          "type": "number",
+          "required": false,
+          "label": "Tokens Per Hour",
+          "description": "Maximum tokens allowed per hour"
+        },
+        "tokens-per-day": {
+          "type": "number",
+          "required": false,
+          "label": "Tokens Per Day",
+          "description": "Maximum tokens allowed per day"
+        },
+        "counter-key": {
+          "type": "string",
+          "required": false,
+          "label": "Counter Key",
+          "description": "Expression to use as rate limit key (default: subscription key)"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<azure-openai-token-limit tokens-per-minute=\"{{tokens-per-minute}}\" tokens-per-hour=\"{{tokens-per-hour}}\" tokens-per-day=\"{{tokens-per-day}}\" counter-key=\"{{counter-key}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/azure-openai-token-limit-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2"]
+      },
+      "examples": [
+        {
+          "name": "Per minute limit",
+          "config": {
+            "tokens-per-minute": 50000
+          }
+        },
+        {
+          "name": "Multiple time windows",
+          "config": {
+            "tokens-per-minute": 10000,
+            "tokens-per-hour": 500000,
+            "tokens-per-day": 10000000
+          }
+        }
+      ]
+    },
+    {
+      "id": "llm-backend-pool",
+      "name": "llm-backend-pool",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Configures backend pool for LLM load balancing with session-aware routing and PTU optimization",
+      "parameters": {
+        "backend-pool-id": {
+          "type": "string",
+          "required": true,
+          "label": "Backend Pool ID",
+          "description": "ID of the backend pool configured in APIM"
+        },
+        "load-balancing-strategy": {
+          "type": "string",
+          "required": false,
+          "label": "Load Balancing Strategy",
+          "description": "Strategy for load balancing",
+          "enum": ["round-robin", "weighted", "priority-based", "session-aware"],
+          "default": "round-robin"
+        },
+        "session-key": {
+          "type": "string",
+          "required": false,
+          "label": "Session Key",
+          "description": "Expression to use as session key for session-aware routing"
+        }
+      },
+      "xmlTemplate": {
+        "backend": "<set-backend-service backend-pool-id=\"{{backend-pool-id}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/backends",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2"]
+      },
+      "examples": [
+        {
+          "name": "Basic backend pool",
+          "config": {
+            "backend-pool-id": "llm-backend-pool-1"
+          }
+        },
+        {
+          "name": "Session-aware routing",
+          "config": {
+            "backend-pool-id": "llm-backend-pool-1",
+            "load-balancing-strategy": "session-aware",
+            "session-key": "@(context.Request.Headers.GetValueOrDefault(\"X-Session-Id\", \"default\"))"
+          }
+        }
+      ]
+    },
+    {
+      "id": "get-authorization-context",
+      "name": "get-authorization-context",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Retrieves OAuth authorization context for backend authentication",
+      "parameters": {
+        "authorization-provider-id": {
+          "type": "string",
+          "required": true,
+          "label": "Authorization Provider ID",
+          "description": "ID of the OAuth authorization provider"
+        },
+        "context-variable-name": {
+          "type": "string",
+          "required": false,
+          "label": "Context Variable Name",
+          "description": "Variable name to store authorization context",
+          "default": "authContext"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<get-authorization-context provider-id=\"{{authorization-provider-id}}\" context-variable-name=\"{{context-variable-name}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/authorization-context",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2"]
+      },
+      "examples": [
+        {
+          "name": "Get OAuth token",
+          "config": {
+            "authorization-provider-id": "azure-openai-oauth",
+            "context-variable-name": "openaiToken"
+          }
+        }
+      ]
+    },
+    {
+      "id": "validate-content",
+      "name": "validate-content",
+      "category": "ai-gateway",
+      "scope": ["api", "operation"],
+      "description": "Validates request/response content structure and format for LLM APIs",
+      "parameters": {
+        "content-type": {
+          "type": "string",
+          "required": false,
+          "label": "Content Type",
+          "description": "Expected content type",
+          "enum": ["application/json", "text/plain", "application/xml"],
+          "default": "application/json"
+        },
+        "schema": {
+          "type": "string",
+          "required": false,
+          "label": "JSON Schema",
+          "description": "JSON schema for validation (as string or reference)"
+        },
+        "on-error": {
+          "type": "string",
+          "required": false,
+          "label": "On Error Action",
+          "description": "Action to take on validation error",
+          "enum": ["reject", "log", "transform"],
+          "default": "reject"
+        }
+      },
+      "xmlTemplate": {
+        "inbound": "<validate-content content-type=\"{{content-type}}\" schema=\"{{schema}}\" />",
+        "outbound": "<validate-content content-type=\"{{content-type}}\" schema=\"{{schema}}\" />"
+      },
+      "documentation": "https://learn.microsoft.com/azure/api-management/validate-content-policy",
+      "compatibility": {
+        "apimVersions": ["v2"],
+        "skuTiers": ["PremiumV2", "StandardV2", "BasicV2"]
+      },
+      "examples": [
+        {
+          "name": "Validate JSON",
+          "config": {
+            "content-type": "application/json",
+            "on-error": "reject"
+          }
+        }
+      ]
     },
     {
       "id": "choose",
