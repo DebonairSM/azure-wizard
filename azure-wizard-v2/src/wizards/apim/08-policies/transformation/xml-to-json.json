@@ -1,0 +1,44 @@
+{
+  "id": "xml-to-json",
+  "name": "xml-to-json",
+  "category": "transformation",
+  "description": "Converts request or response body from XML to JSON",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "apply": {
+      "type": "string",
+      "required": false,
+      "label": "Apply",
+      "description": "When to apply: always, content-type-xml",
+      "default": "always",
+      "enum": [
+        "always",
+        "content-type-xml"
+      ]
+    },
+    "consider-accept-header": {
+      "type": "boolean",
+      "required": false,
+      "label": "Consider Accept Header",
+      "description": "Check Accept header before conversion",
+      "default": false
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<xml-to-json apply=\"{{apply}}\" consider-accept-header=\"{{consider-accept-header}}\" />",
+    "outbound": "<xml-to-json apply=\"{{apply}}\" consider-accept-header=\"{{consider-accept-header}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/xml-to-json-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

@@ -1,0 +1,23 @@
+{
+  "id": "what-is-apim",
+  "name": "What is API Management",
+  "description": "Azure API Management (APIM) is a managed service for publishing and governing APIs via an API gateway, a management plane, and a developer portal.",
+  "summary": [
+    "Primary roles: gateway (runtime), management plane (configuration), developer portal (consumer onboarding).",
+    "Common outcomes: consistent auth, traffic shaping, observability, versioning, and API lifecycle controls.",
+    "Typical placement: in front of HTTP APIs hosted on Azure or elsewhere."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Review APIM core components and terminology.",
+    "Decide connectivity model (public, private, hybrid with self-hosted gateway).",
+    "Pick a SKU and align it with required capabilities (VNet, multi-region, self-hosted gateway, AI gateway)."
+  ]
+}
+
+

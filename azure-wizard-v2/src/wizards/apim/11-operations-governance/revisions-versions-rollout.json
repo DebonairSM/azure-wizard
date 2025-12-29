@@ -1,0 +1,39 @@
+{
+  "id": "revisions-versions-rollout",
+  "name": "Revisions/versions rollout model (portal-first)",
+  "description": "A practical rollout model for APIM changes that reduces risk for client environments.",
+  "decision": "How will you ship changes (policies, APIs, products) without breaking consumers and without editing production in-place?",
+  "whyItMatters": [
+    "A defined rollout model reduces incidents caused by unreviewed policy changes.",
+    "Revisions help you validate before making changes effective for all traffic.",
+    "Clients often require change control evidence and rollback steps."
+  ],
+  "portalSteps": [
+    "Define environments (dev/test/prod) and avoid applying untested changes directly in prod.",
+    "Use API revisions to stage changes and validate with test traffic before release.",
+    "Document what constitutes a breaking change that requires a version change.",
+    "For policy updates, test in lower environments and validate failure modes before promotion."
+  ],
+  "validation": [
+    "Run regression tests for key APIs after each policy change (auth, throttling, routing, logging).",
+    "Verify rollback steps are documented and executable within the change window.",
+    "Confirm monitoring detects regressions quickly after release."
+  ],
+  "pitfalls": [
+    "Editing production policies directly without staged validation.",
+    "No rollback plan for policy changes that block traffic.",
+    "Inconsistent versioning conventions across APIs."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Use the guided flow to generate a baseline pack and then stage changes via revisions.",
+    "Create a standard change checklist for client engagements."
+  ]
+}
+
+

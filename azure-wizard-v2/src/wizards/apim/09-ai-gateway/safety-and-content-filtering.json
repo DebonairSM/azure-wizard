@@ -1,0 +1,38 @@
+{
+  "id": "safety-and-content-filtering",
+  "name": "AI gateway: safety and content filtering",
+  "description": "How to think about adding safety controls for LLM APIs at the gateway.",
+  "decision": "Will you enforce content safety checks at APIM, and what is your escalation path when content is blocked?",
+  "whyItMatters": [
+    "Safety policies can reduce risk for client-facing AI APIs, but require clear governance and monitoring.",
+    "False positives and false negatives have business impact; you need a documented response strategy.",
+    "Safety controls can add latency; measure and set expectations."
+  ],
+  "portalSteps": [
+    "Decide which AI APIs require safety checks and at which scope (product/API/operation).",
+    "Apply AI gateway safety policies from the policy library and parameterize thresholds with named values where possible.",
+    "Define response behavior for blocked content (error format, guidance, logging)."
+  ],
+  "validation": [
+    "Test representative prompts that should pass and prompts that should be blocked.",
+    "Verify logs/metrics capture safety events without logging sensitive prompt data when not allowed.",
+    "Measure added latency and confirm it is acceptable."
+  ],
+  "pitfalls": [
+    "No defined escalation path for blocked content (support tickets increase).",
+    "Logging prompts/responses without a clear data policy.",
+    "Using safety controls without monitoring (silent failures)."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (GenAI + APIM section)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → ai-gateway → llm-content-safety policy templates.",
+    "Add token governance and caching pages to complete the AI gateway baseline."
+  ]
+}
+
+

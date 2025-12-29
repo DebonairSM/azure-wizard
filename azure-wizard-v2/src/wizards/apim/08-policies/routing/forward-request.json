@@ -1,0 +1,42 @@
+{
+  "id": "forward-request",
+  "name": "forward-request",
+  "category": "routing",
+  "description": "Forwards the incoming request to the backend service",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "timeout": {
+      "type": "number",
+      "required": false,
+      "label": "Timeout (seconds)",
+      "description": "Request timeout in seconds"
+    },
+    "follow-redirects": {
+      "type": "string",
+      "required": false,
+      "label": "Follow Redirects",
+      "description": "How to handle redirects: none, false, true",
+      "enum": [
+        "none",
+        "false",
+        "true"
+      ]
+    }
+  },
+  "xmlTemplate": {
+    "backend": "<forward-request timeout=\"{{timeout}}\" follow-redirects=\"{{follow-redirects}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/forward-request-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

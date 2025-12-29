@@ -1,0 +1,58 @@
+{
+  "id": "send-request",
+  "name": "send-request",
+  "category": "advanced",
+  "description": "Sends a request to the specified URL",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "mode": {
+      "type": "string",
+      "required": false,
+      "label": "Mode",
+      "description": "Request mode: new, copy",
+      "enum": [
+        "new",
+        "copy"
+      ],
+      "default": "new"
+    },
+    "response-variable-name": {
+      "type": "string",
+      "required": false,
+      "label": "Response Variable Name",
+      "description": "Variable name to store response"
+    },
+    "timeout": {
+      "type": "number",
+      "required": false,
+      "label": "Timeout (seconds)",
+      "description": "Request timeout"
+    },
+    "ignore-error": {
+      "type": "boolean",
+      "required": false,
+      "label": "Ignore Error",
+      "description": "Continue execution if request fails",
+      "default": false
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>",
+    "outbound": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>",
+    "backend": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>",
+    "on-error": "<send-request mode=\"{{mode}}\" response-variable-name=\"{{response-variable-name}}\" timeout=\"{{timeout}}\" ignore-error=\"{{ignore-error}}\"><set-url>{{url}}</set-url><set-method>{{method}}</set-method></send-request>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/send-request-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

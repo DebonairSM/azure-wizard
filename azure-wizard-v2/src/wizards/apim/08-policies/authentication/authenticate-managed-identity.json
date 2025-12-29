@@ -1,0 +1,39 @@
+{
+  "id": "authenticate-managed-identity",
+  "name": "authenticate-managed-identity",
+  "category": "authentication",
+  "description": "Authenticate with a backend service using a managed identity",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "identity": {
+      "type": "string",
+      "required": false,
+      "label": "Managed Identity",
+      "description": "Managed identity to use (default: system-assigned)",
+      "default": "managed-identity"
+    },
+    "ignore-error": {
+      "type": "boolean",
+      "required": false,
+      "label": "Ignore Error",
+      "description": "Continue execution if authentication fails",
+      "default": false
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<authenticate-managed-identity identity=\"{{identity}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/authenticate-managed-identity-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

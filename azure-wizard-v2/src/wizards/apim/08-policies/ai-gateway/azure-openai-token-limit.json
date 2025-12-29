@@ -1,0 +1,66 @@
+{
+  "id": "azure-openai-token-limit",
+  "name": "azure-openai-token-limit",
+  "category": "ai-gateway",
+  "description": "Limits tokens for Azure OpenAI endpoints with enhanced Azure OpenAI specific features",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "tokens-per-minute": {
+      "type": "number",
+      "required": true,
+      "label": "Tokens Per Minute",
+      "description": "Maximum tokens allowed per minute",
+      "default": 10000
+    },
+    "tokens-per-hour": {
+      "type": "number",
+      "required": false,
+      "label": "Tokens Per Hour",
+      "description": "Maximum tokens allowed per hour"
+    },
+    "tokens-per-day": {
+      "type": "number",
+      "required": false,
+      "label": "Tokens Per Day",
+      "description": "Maximum tokens allowed per day"
+    },
+    "counter-key": {
+      "type": "string",
+      "required": false,
+      "label": "Counter Key",
+      "description": "Expression to use as rate limit key (default: subscription key)"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<azure-openai-token-limit tokens-per-minute=\"{{tokens-per-minute}}\" tokens-per-hour=\"{{tokens-per-hour}}\" tokens-per-day=\"{{tokens-per-day}}\" counter-key=\"{{counter-key}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/azure-openai-token-limit-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Per minute limit",
+      "config": {
+        "tokens-per-minute": 50000
+      }
+    },
+    {
+      "name": "Multiple time windows",
+      "config": {
+        "tokens-per-minute": 10000,
+        "tokens-per-hour": 500000,
+        "tokens-per-day": 10000000
+      }
+    }
+  ]
+}

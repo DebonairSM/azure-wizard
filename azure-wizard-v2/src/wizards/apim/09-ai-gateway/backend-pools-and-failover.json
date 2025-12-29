@@ -1,0 +1,38 @@
+{
+  "id": "backend-pools-and-failover",
+  "name": "AI gateway: backend pools and failover",
+  "description": "How to design backend pools and failover behavior for LLM endpoints.",
+  "decision": "Will you use multiple LLM endpoints (regions/providers) and how will you route/fail over when one endpoint is throttled or down?",
+  "whyItMatters": [
+    "LLM endpoints can throttle; without routing strategy you will see client-visible failures.",
+    "Failover logic impacts cost and response consistency (different models may behave differently).",
+    "You need clear telemetry to prove that failover and throttling controls work."
+  ],
+  "portalSteps": [
+    "List candidate LLM endpoints (regions/models) and decide selection order and constraints.",
+    "Apply backend pool policies and configure failover/circuit breaker behavior intentionally.",
+    "Document when to retry, when to fail fast, and what response codes clients should expect."
+  ],
+  "validation": [
+    "Simulate throttling and verify pool selection and failover behavior.",
+    "Verify that failover does not break prompt/response expectations (model differences).",
+    "Confirm metrics show which backend was used and why."
+  ],
+  "pitfalls": [
+    "Retries that amplify throttling and increase cost.",
+    "Failover to a model that changes output characteristics without notifying clients.",
+    "No governance for backend pool membership (ad-hoc changes)."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (GenAI + APIM section)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → ai-gateway → llm-backend-pool and related templates.",
+    "Pair with token controls and token metric emission."
+  ]
+}
+
+

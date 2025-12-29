@@ -1,0 +1,22 @@
+{
+  "id": "ai-gateway-overview",
+  "name": "AI gateway overview",
+  "description": "APIM can act as an AI gateway to standardize controls for LLM APIs (token limits, safety, caching, routing).",
+  "topics": [
+    "Centralize consumer onboarding and keys/tokens for AI APIs.",
+    "Enforce token limits and publish token usage metrics.",
+    "Add safety checks and semantic caching to reduce cost and improve latency."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (GenAI + APIM section)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Review AI gateway policy templates under Policies → ai-gateway.",
+    "Decide where to enforce limits: per subscription, per consumer, per API/operation."
+  ]
+}
+
+

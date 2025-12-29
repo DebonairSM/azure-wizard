@@ -1,8 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { getDatabase } from '../../database/db.js';
 import { AzureService, AzureServiceAttribute } from '../../shared/models/AzureService.js';
+import { apimFlowRoutes } from './apim-flow.js';
 
 const router = Router();
+
+// APIM guided flow
+router.use('/apim', apimFlowRoutes);
 
 /**
  * GET /api/azure-services

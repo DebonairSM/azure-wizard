@@ -1,0 +1,16 @@
+{
+  "id": "monitoring-and-tracing",
+  "name": "Monitoring and tracing",
+  "description": "Make APIM traffic observable via consistent logging, metrics, and correlation.",
+  "topics": [
+    "Define correlation strategy (request IDs, traceparent) and propagate to backends.",
+    "Capture gateway-level latency and backend latency separately where possible.",
+    "Use policies to emit custom metrics/events when needed."
+  ],
+  "nextSteps": [
+    "Pick where logs/metrics go (Application Insights, Log Analytics, Event Hub).",
+    "Apply logging policies consistently and avoid logging sensitive data."
+  ]
+}
+
+

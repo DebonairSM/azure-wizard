@@ -1,0 +1,38 @@
+{
+  "id": "rewrite-uri",
+  "name": "rewrite-uri",
+  "category": "routing",
+  "description": "Converts a request URL from its public form to the form expected by the web service",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "template": {
+      "type": "string",
+      "required": true,
+      "label": "URI Template",
+      "description": "URI template for rewriting"
+    },
+    "copy-unmatched-params": {
+      "type": "boolean",
+      "required": false,
+      "label": "Copy Unmatched Params",
+      "description": "Copy query parameters not in template",
+      "default": true
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<rewrite-uri template=\"{{template}}\" copy-unmatched-params=\"{{copy-unmatched-params}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/rewrite-uri-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

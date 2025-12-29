@@ -1,0 +1,31 @@
+{
+  "id": "cache-store",
+  "name": "cache-store",
+  "category": "caching",
+  "description": "Cache response according to the specified cache settings",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "duration": {
+      "type": "number",
+      "required": true,
+      "label": "Duration (seconds)",
+      "description": "Cache duration in seconds"
+    }
+  },
+  "xmlTemplate": {
+    "outbound": "<cache-store duration=\"{{duration}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/cache-store-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

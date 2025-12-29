@@ -1,0 +1,39 @@
+{
+  "id": "mtls-and-cert-strategy",
+  "name": "mTLS and certificate strategy",
+  "description": "What to decide about certificates for custom domains, client authentication, and backend TLS.",
+  "decision": "Will you require client certificates (mTLS) at the gateway, and how will you manage certificate issuance and rotation for clients and custom domains?",
+  "whyItMatters": [
+    "Certificate ownership and rotation is an operational commitment; unclear ownership leads to outages.",
+    "mTLS improves client authentication in some scenarios but increases onboarding complexity.",
+    "Backend TLS validation affects security posture and debugging effort during cutovers."
+  ],
+  "portalSteps": [
+    "Define certificate ownership and renewal process (team, automation, timeline, alerts).",
+    "If using custom domains, ensure certificates cover all required hostnames (SANs) and are deployed before cutover.",
+    "If using client cert auth, define onboarding workflow (how clients obtain certs, how you revoke them).",
+    "Document backend TLS requirements and how to validate backend certificates from the gateway path."
+  ],
+  "validation": [
+    "Test certificate renewal/rotation path in non-production (simulate expiry within a controlled window).",
+    "Test a client call without a certificate (expected rejection when required).",
+    "Validate backend TLS handshakes and hostname verification."
+  ],
+  "pitfalls": [
+    "No alerting/ownership for certificate expiry.",
+    "Using mTLS without a clear client provisioning and revocation plan.",
+    "Cutover delayed by missing SAN coverage or incorrect DNS/cert pairing."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Align certificate strategy with DNS and custom domain decisions.",
+    "Use policy templates for auth patterns where applicable."
+  ]
+}
+
+

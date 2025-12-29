@@ -1,0 +1,11 @@
+{
+  "id": "private-backend",
+  "name": "Private backend baseline",
+  "description": "Common policies for routing to controlled/private backends.",
+  "policies": [
+    { "id": "set-backend-service", "category": "routing", "defaults": {} },
+    { "id": "forward-request", "category": "routing", "defaults": {} }
+  ]
+}
+
+

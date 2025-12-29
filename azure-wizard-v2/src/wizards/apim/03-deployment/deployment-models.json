@@ -1,0 +1,28 @@
+{
+  "id": "deployment-models",
+  "name": "Deployment models",
+  "description": "Common APIM deployment patterns and what they optimize for.",
+  "models": [
+    {
+      "name": "Public gateway, public backends",
+      "when": "Fastest path for internet-facing APIs.",
+      "tradeoffs": "Relies on perimeter controls and backend hardening."
+    },
+    {
+      "name": "Public gateway, private backends",
+      "when": "Backends are isolated; APIM mediates controlled access.",
+      "tradeoffs": "Requires network and DNS integration."
+    },
+    {
+      "name": "Hybrid with self-hosted gateway",
+      "when": "Backends are in private networks, on-prem, or other clouds, and you want local ingress/egress.",
+      "tradeoffs": "Operational responsibility for the gateway runtime in your environment."
+    }
+  ],
+  "nextSteps": [
+    "Pick a model that matches backend placement and org network constraints.",
+    "If hybrid is required, plan self-hosted gateway lifecycle (deployment, updates, monitoring)."
+  ]
+}
+
+

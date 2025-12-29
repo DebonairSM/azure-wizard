@@ -1,0 +1,17 @@
+{
+  "id": "sku-requirements",
+  "name": "APIM SKU requirement mapping",
+  "description": "Data used by the guided flow to interpret requirements into SKU eligibility checks and deployment model selection.",
+  "requirements": [
+    { "id": "requireVnet", "label": "Requires VNet support", "capabilityField": "vnetSupport" },
+    { "id": "requireMultiRegion", "label": "Requires multi-region", "capabilityField": "multiRegion" },
+    { "id": "requireSelfHostedGateway", "label": "Requires self-hosted gateway", "capabilityField": "selfHostedGateway" },
+    { "id": "requireAiGateway", "label": "Requires AI gateway capabilities", "capabilityField": "aiGateway" }
+  ],
+  "notes": [
+    "The actual SKU capability values are loaded from the SKU JSON under 06-skus.",
+    "This file provides stable requirement labels and the capability field mapping."
+  ]
+}
+
+

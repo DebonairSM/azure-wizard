@@ -1,0 +1,17 @@
+{
+  "id": "community-and-learning",
+  "name": "Community and learning resources",
+  "description": "Entry points for learning content and community resources around APIM.",
+  "links": [
+    {
+      "title": "APIM resources hub (learning paths, modules, and community resources)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Use a lab or reference sample to validate your target deployment model.",
+    "Capture your org-specific standards as wizard content pages."
+  ]
+}
+
+

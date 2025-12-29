@@ -23,6 +23,10 @@ interface Node {
 
 export class NodeDetails {
   private container: HTMLElement;
+  private flowState: {
+    answers: Record<string, any>;
+    lastResult: any | null;
+  } = { answers: {}, lastResult: null };
 
   constructor() {
     const container = document.getElementById('nodeDetails');
@@ -30,6 +34,16 @@ export class NodeDetails {
       throw new Error('Node details container not found');
     }
     this.container = container;
+
+    // Best-effort restore of guided-flow state
+    try {
+      const storedAnswers = localStorage.getItem('apimFlow.answers');
+      const storedResult = localStorage.getItem('apimFlow.lastResult');
+      if (storedAnswers) this.flowState.answers = JSON.parse(storedAnswers);
+      if (storedResult) this.flowState.lastResult = JSON.parse(storedResult);
+    } catch {
+      // ignore
+    }
   }
 
   displayNode(nodeData: NodeData, children: Node[]): void {
@@ -118,6 +132,128 @@ export class NodeDetails {
   private createDataSection(data: any): HTMLElement {
     const section = document.createElement('div');
     section.className = 'node-data-section';
+
+    // Guided flow steps (interactive)
+    if (data.type === 'flow-step') {
+      const title = document.createElement('h3');
+      title.textContent = 'Guided flow';
+      section.appendChild(title);
+
+      const step = String(data.step || '');
+
+      if (step === 'requirements') {
+        const form = document.createElement('form');
+        form.className = 'flow-form';
+
+        const questions = Array.isArray(data.questions) ? data.questions : [];
+        questions.forEach((q: any) => {
+          const qId = String(q.id || '');
+          if (!qId) return;
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'flow-question';
+
+          const label = document.createElement('label');
+          label.textContent = String(q.label || qId);
+          label.style.display = 'block';
+          label.style.fontWeight = '600';
+          wrapper.appendChild(label);
+
+          const current =
+            this.flowState.answers[qId] !== undefined ? this.flowState.answers[qId] : q.default;
+
+          if (q.type === 'boolean') {
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = Boolean(current);
+            input.addEventListener('change', () => {
+              this.flowState.answers[qId] = input.checked;
+              this.persistFlowState();
+            });
+            wrapper.appendChild(input);
+          } else if (q.type === 'select' && Array.isArray(q.options)) {
+            const select = document.createElement('select');
+            select.value = String(current ?? q.default ?? '');
+            q.options.forEach((opt: any) => {
+              const option = document.createElement('option');
+              option.value = String(opt.value);
+              option.textContent = String(opt.label ?? opt.value);
+              select.appendChild(option);
+            });
+            select.addEventListener('change', () => {
+              this.flowState.answers[qId] = select.value;
+              this.persistFlowState();
+            });
+            wrapper.appendChild(select);
+          }
+
+          form.appendChild(wrapper);
+        });
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = 'Generate recommendation';
+        button.addEventListener('click', async () => {
+          button.disabled = true;
+          const prev = button.textContent;
+          button.textContent = 'Generating...';
+          try {
+            const result = await this.evaluateApimFlow(this.flowState.answers);
+            this.flowState.lastResult = result;
+            this.persistFlowState();
+            this.renderFlowResult(section, result);
+          } finally {
+            button.disabled = false;
+            button.textContent = prev || 'Generate recommendation';
+          }
+        });
+        form.appendChild(button);
+
+        const reset = document.createElement('button');
+        reset.type = 'button';
+        reset.textContent = 'Reset';
+        reset.style.marginLeft = '8px';
+        reset.addEventListener('click', () => {
+          this.flowState.answers = {};
+          this.flowState.lastResult = null;
+          this.persistFlowState();
+          this.displayNode(
+            {
+              id: 'flow-requirements',
+              wizardId: 'apim',
+              name: 'Guided flow: requirements',
+              description: data.description,
+              nodeType: 'item',
+              wizardData: data
+            },
+            []
+          );
+        });
+        form.appendChild(reset);
+
+        section.appendChild(form);
+
+        if (this.flowState.lastResult) {
+          this.renderFlowResult(section, this.flowState.lastResult);
+        }
+
+        return section;
+      }
+
+      // recommendation/export: show last result if present
+      if (step === 'recommendation' || step === 'export') {
+        if (this.flowState.lastResult) {
+          this.renderFlowResult(section, this.flowState.lastResult);
+        } else {
+          const p = document.createElement('p');
+          p.textContent = 'No generated output yet. Use the Requirements step to generate a recommendation.';
+          section.appendChild(p);
+        }
+        return section;
+      }
+
+      return section;
+    }
 
     // Handle special cases for better display
     if (data.items && Array.isArray(data.items)) {
@@ -229,6 +365,136 @@ export class NodeDetails {
       return section;
     }
 
+    // Handle common informational page structures (links, next steps, checklists)
+    const hasLinks = Array.isArray(data.links) && data.links.length > 0;
+    const hasNextSteps = Array.isArray(data.nextSteps) && data.nextSteps.length > 0;
+    const hasSummary = Array.isArray(data.summary) && data.summary.length > 0;
+    const hasChecklist = Array.isArray(data.checklist) && data.checklist.length > 0;
+    const hasTerms = Array.isArray(data.terms) && data.terms.length > 0;
+    const hasSections = Array.isArray(data.sections) && data.sections.length > 0;
+
+    if (hasSummary || hasChecklist || hasTerms || hasLinks || hasNextSteps || hasSections) {
+      const title = document.createElement('h3');
+      title.textContent = 'Details';
+      section.appendChild(title);
+
+      if (hasSummary) {
+        const summaryTitle = document.createElement('h4');
+        summaryTitle.textContent = 'Summary';
+        section.appendChild(summaryTitle);
+
+        const ul = document.createElement('ul');
+        ul.className = 'bullet-list';
+        data.summary.forEach((line: string) => {
+          const li = document.createElement('li');
+          li.textContent = String(line);
+          ul.appendChild(li);
+        });
+        section.appendChild(ul);
+      }
+
+      if (hasChecklist) {
+        const checklistTitle = document.createElement('h4');
+        checklistTitle.textContent = 'Checklist';
+        section.appendChild(checklistTitle);
+
+        const ul = document.createElement('ul');
+        ul.className = 'bullet-list';
+        data.checklist.forEach((line: string) => {
+          const li = document.createElement('li');
+          li.textContent = String(line);
+          ul.appendChild(li);
+        });
+        section.appendChild(ul);
+      }
+
+      if (hasTerms) {
+        const termsTitle = document.createElement('h4');
+        termsTitle.textContent = 'Terms';
+        section.appendChild(termsTitle);
+
+        const dl = document.createElement('dl');
+        dl.className = 'data-list';
+        data.terms.forEach((t: any) => {
+          const dt = document.createElement('dt');
+          dt.textContent = String(t.term ?? '');
+          const dd = document.createElement('dd');
+          dd.textContent = String(t.definition ?? '');
+          dl.appendChild(dt);
+          dl.appendChild(dd);
+        });
+        section.appendChild(dl);
+      }
+
+      if (hasSections) {
+        const sectionsTitle = document.createElement('h4');
+        sectionsTitle.textContent = 'Sections';
+        section.appendChild(sectionsTitle);
+
+        data.sections.forEach((s: any) => {
+          const sTitle = document.createElement('div');
+          sTitle.style.fontWeight = '600';
+          sTitle.textContent = String(s.name ?? '');
+          section.appendChild(sTitle);
+
+          if (Array.isArray(s.links) && s.links.length > 0) {
+            const ul = document.createElement('ul');
+            ul.className = 'links-list';
+            s.links.forEach((l: any) => {
+              const li = document.createElement('li');
+              const a = document.createElement('a');
+              a.href = String(l.url ?? '');
+              a.target = '_blank';
+              a.rel = 'noreferrer';
+              a.textContent = String(l.title ?? l.url ?? 'Link');
+              li.appendChild(a);
+              ul.appendChild(li);
+            });
+            section.appendChild(ul);
+          }
+        });
+      }
+
+      if (hasLinks) {
+        const linksTitle = document.createElement('h4');
+        linksTitle.textContent = 'Links';
+        section.appendChild(linksTitle);
+
+        const ul = document.createElement('ul');
+        ul.className = 'links-list';
+
+        data.links.forEach((l: any) => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = String(l.url ?? '');
+          a.target = '_blank';
+          a.rel = 'noreferrer';
+          a.textContent = String(l.title ?? l.url ?? 'Link');
+          li.appendChild(a);
+          ul.appendChild(li);
+        });
+
+        section.appendChild(ul);
+      }
+
+      if (hasNextSteps) {
+        const nextTitle = document.createElement('h4');
+        nextTitle.textContent = 'Next steps';
+        section.appendChild(nextTitle);
+
+        const ul = document.createElement('ul');
+        ul.className = 'bullet-list';
+        data.nextSteps.forEach((line: string) => {
+          const li = document.createElement('li');
+          li.textContent = String(line);
+          ul.appendChild(li);
+        });
+        section.appendChild(ul);
+      }
+
+      return section;
+    }
+
     // Default: show all data as key-value pairs
     const title = document.createElement('h3');
     title.textContent = 'Details';
@@ -262,6 +528,127 @@ export class NodeDetails {
 
     section.appendChild(dataList);
     return section;
+  }
+
+  private persistFlowState(): void {
+    try {
+      localStorage.setItem('apimFlow.answers', JSON.stringify(this.flowState.answers));
+      localStorage.setItem('apimFlow.lastResult', JSON.stringify(this.flowState.lastResult));
+    } catch {
+      // ignore
+    }
+  }
+
+  private async evaluateApimFlow(answers: Record<string, any>): Promise<any> {
+    const response = await fetch('/api/apim/flow/evaluate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(answers)
+    });
+    return await response.json();
+  }
+
+  private renderFlowResult(container: HTMLElement, result: any): void {
+    const existing = container.querySelector('.flow-result');
+    if (existing && existing.parentElement) existing.parentElement.removeChild(existing);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'flow-result';
+
+    const title = document.createElement('h4');
+    title.textContent = 'Generated output';
+    wrap.appendChild(title);
+
+    const model = result?.deploymentModel ? String(result.deploymentModel) : 'N/A';
+    const sku = result?.recommendedSku?.name ? String(result.recommendedSku.name) : 'No eligible SKU';
+    const summary = document.createElement('div');
+    summary.className = 'flow-summary';
+    summary.textContent = `Deployment model: ${model} | Recommended SKU: ${sku}`;
+    wrap.appendChild(summary);
+
+    // Export helpers (copy + download)
+    const buttons = document.createElement('div');
+    buttons.className = 'flow-buttons';
+    buttons.style.display = 'flex';
+    buttons.style.gap = '8px';
+    buttons.style.flexWrap = 'wrap';
+
+    const copyJson = document.createElement('button');
+    copyJson.type = 'button';
+    copyJson.textContent = 'Copy JSON';
+    copyJson.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(result, null, 2));
+      } catch {
+        // ignore
+      }
+    });
+    buttons.appendChild(copyJson);
+
+    const dlJson = document.createElement('button');
+    dlJson.type = 'button';
+    dlJson.textContent = 'Download JSON';
+    dlJson.addEventListener('click', () => {
+      this.downloadText('apim-flow-output.json', JSON.stringify(result, null, 2), 'application/json');
+    });
+    buttons.appendChild(dlJson);
+
+    const policyXml = result?.exports?.policyXml;
+    if (typeof policyXml === 'string' && policyXml.length > 0) {
+      const dlXml = document.createElement('button');
+      dlXml.type = 'button';
+      dlXml.textContent = 'Download policy XML';
+      dlXml.addEventListener('click', () => {
+        this.downloadText('apim-policies.xml', policyXml, 'application/xml');
+      });
+      buttons.appendChild(dlXml);
+    }
+
+    const checklistMd = result?.exports?.checklistMarkdown;
+    if (typeof checklistMd === 'string' && checklistMd.length > 0) {
+      const dlMd = document.createElement('button');
+      dlMd.type = 'button';
+      dlMd.textContent = 'Download checklist (MD)';
+      dlMd.addEventListener('click', () => {
+        this.downloadText('apim-checklist.md', checklistMd, 'text/markdown');
+      });
+      buttons.appendChild(dlMd);
+    }
+
+    wrap.appendChild(buttons);
+
+    if (Array.isArray(result?.warnings) && result.warnings.length > 0) {
+      const warnTitle = document.createElement('h4');
+      warnTitle.textContent = 'Warnings';
+      wrap.appendChild(warnTitle);
+      const ul = document.createElement('ul');
+      ul.className = 'bullet-list';
+      result.warnings.forEach((w: any) => {
+        const li = document.createElement('li');
+        li.textContent = String(w);
+        ul.appendChild(li);
+      });
+      wrap.appendChild(ul);
+    }
+
+    const pre = document.createElement('pre');
+    pre.className = 'flow-json';
+    pre.textContent = JSON.stringify(result, null, 2);
+    wrap.appendChild(pre);
+
+    container.appendChild(wrap);
+  }
+
+  private downloadText(filename: string, content: string, contentType: string): void {
+    const blob = new Blob([content], { type: contentType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   showError(message: string): void {

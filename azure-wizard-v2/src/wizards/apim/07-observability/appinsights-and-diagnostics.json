@@ -1,0 +1,39 @@
+{
+  "id": "appinsights-and-diagnostics",
+  "name": "Application Insights and diagnostics",
+  "description": "Portal-first guidance for configuring diagnostics and deciding what telemetry is collected.",
+  "decision": "Where will APIM logs and metrics go, and what data is allowed to be captured (PII, tokens, request bodies)?",
+  "whyItMatters": [
+    "Telemetry is essential for troubleshooting and proving SLA, but can create compliance risk if misconfigured.",
+    "A clear data handling policy avoids accidental credential/PII leakage into logs.",
+    "Diagnostics choices affect cost and access control."
+  ],
+  "portalSteps": [
+    "Decide your telemetry targets (Application Insights, Log Analytics, Event Hub) per environment.",
+    "Configure diagnostics and sampling to balance signal vs cost.",
+    "Standardize correlation headers and ensure they are propagated to backends.",
+    "Use logging policies (trace, emit-metric, log-to-eventhub) only with agreed data constraints."
+  ],
+  "validation": [
+    "Generate test traffic and verify logs appear in the expected target.",
+    "Confirm sampling settings behave as expected under load.",
+    "Verify sensitive headers and bodies are not logged."
+  ],
+  "pitfalls": [
+    "Logging tokens, secrets, or request/response bodies without a clear data policy.",
+    "Sampling too aggressively (no signal during incidents).",
+    "No consistent correlation strategy across gateway and backends."
+  ],
+  "links": [
+    {
+      "title": "Well-Architected service guide for APIM (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-api-management"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → logging policies to implement consistent telemetry patterns.",
+    "Define an operational runbook for common incident types (backend down, auth failure, throttling)."
+  ]
+}
+
+

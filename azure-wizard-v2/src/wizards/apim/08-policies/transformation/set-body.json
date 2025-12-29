@@ -1,0 +1,44 @@
+{
+  "id": "set-body",
+  "name": "set-body",
+  "category": "transformation",
+  "description": "Sets the message body for incoming and outgoing requests",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "body": {
+      "type": "string",
+      "required": true,
+      "label": "Body Content",
+      "description": "Body content (can be expression or template)"
+    },
+    "mode": {
+      "type": "string",
+      "required": false,
+      "label": "Mode",
+      "description": "How to set body: raw, template, liquid",
+      "default": "raw",
+      "enum": [
+        "raw",
+        "template",
+        "liquid"
+      ]
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<set-body mode=\"{{mode}}\">{{body}}</set-body>",
+    "outbound": "<set-body mode=\"{{mode}}\">{{body}}</set-body>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/set-body-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

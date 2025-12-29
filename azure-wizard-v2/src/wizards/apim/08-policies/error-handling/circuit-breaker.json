@@ -1,0 +1,45 @@
+{
+  "id": "circuit-breaker",
+  "name": "circuit-breaker",
+  "category": "error-handling",
+  "description": "Prevents an API from being overwhelmed when part of the backend is experiencing issues",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "failure-threshold": {
+      "type": "number",
+      "required": true,
+      "label": "Failure Threshold",
+      "description": "Number of failures before opening circuit",
+      "default": 5
+    },
+    "half-open-after": {
+      "type": "number",
+      "required": true,
+      "label": "Half Open After (seconds)",
+      "description": "Time in seconds before attempting half-open",
+      "default": 60
+    },
+    "timeout": {
+      "type": "number",
+      "required": false,
+      "label": "Timeout (seconds)",
+      "description": "Request timeout"
+    }
+  },
+  "xmlTemplate": {
+    "backend": "<circuit-breaker failure-threshold=\"{{failure-threshold}}\" half-open-after=\"{{half-open-after}}\" timeout=\"{{timeout}}\"><forward-request /></circuit-breaker>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/circuit-breaker-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

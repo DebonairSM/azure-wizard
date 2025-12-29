@@ -1,0 +1,13 @@
+{
+  "id": "flow-export",
+  "name": "Guided flow: export",
+  "description": "This page displays exportable artifacts for the latest generated recommendation (policy packs and deployment checklist).",
+  "type": "flow-step",
+  "step": "export",
+  "nextSteps": [
+    "Copy the generated JSON outputs into your repo or IaC pipeline.",
+    "Use Policies to review each policy template and adjust parameters."
+  ]
+}
+
+

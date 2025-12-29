@@ -1,0 +1,46 @@
+{
+  "id": "policy-placement-guide",
+  "name": "Policy placement guide (baseline conventions)",
+  "description": "A practical baseline for where to place policies and how to keep them maintainable across many APIs.",
+  "decision": "What goes at global scope vs product vs API vs operation, and what conventions prevent duplication and drift?",
+  "whyItMatters": [
+    "A stable placement model enables predictable behavior and easier audits.",
+    "Scope conventions prevent double application of throttles, headers, and auth rules.",
+    "Clear conventions improve onboarding for new engineers and reduce incident risk."
+  ],
+  "sections": [
+    {
+      "name": "Suggested baseline",
+      "links": []
+    }
+  ],
+  "checklist": [
+    "Global: minimal defaults only (base, correlation headers if safe, shared logging guardrails).",
+    "Product: usage governance and consumer controls (quota/rate-limit), consistent across a consumer tier.",
+    "API: API-specific auth requirements, routing conventions, backend mapping.",
+    "Operation: exceptional cases only (rare overrides, operation-specific validation).",
+    "Use named values for environment-specific configuration and avoid hardcoding secrets in policy XML."
+  ],
+  "validation": [
+    "Pick one API and verify which scopes contain which policies (document the standard).",
+    "Confirm no duplicate throttles or duplicate auth validation across scopes.",
+    "Confirm policies are testable and changes have rollback steps."
+  ],
+  "pitfalls": [
+    "Global policies become a dumping ground (hard to test and audit).",
+    "Operation-level policies become widespread (too much divergence).",
+    "Policy changes in production without a staging revision or targeted validation."
+  ],
+  "links": [
+    {
+      "title": "Set or edit policies (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/set-edit-policies"
+    }
+  ],
+  "nextSteps": [
+    "Use 12-policy-guides → composition-patterns for bundling policies safely.",
+    "Use 08-policies to apply templates, and parameterize via named values."
+  ]
+}
+
+

@@ -26,6 +26,8 @@ export interface WizardCategory {
   subcategories?: WizardCategory[];
 }
 
+type OrderedName = { order: number | null; clean: string; raw: string };
+
 /**
  * Load wizard metadata from _index.json
  */
@@ -97,7 +99,7 @@ export function getWizardCategories(wizardId: string): string[] {
     }
   }
 
-  return categories.sort();
+  return categories.sort(compareByOrderThenName);
 }
 
 /**
@@ -257,7 +259,36 @@ function getSubcategories(dirPath: string): string[] {
     }
   }
   
-  return subcategories.sort();
+  return subcategories.sort(compareByOrderThenName);
+}
+
+function parseOrderedName(name: string): OrderedName {
+  const match = /^(\d+)[-_](.+)$/.exec(name);
+  if (!match) {
+    return { order: null, clean: name, raw: name };
+  }
+  const order = Number.parseInt(match[1], 10);
+  return {
+    order: Number.isFinite(order) ? order : null,
+    clean: match[2],
+    raw: name
+  };
+}
+
+function compareByOrderThenName(a: string, b: string): number {
+  const aa = parseOrderedName(a);
+  const bb = parseOrderedName(b);
+
+  const aOrder = aa.order;
+  const bOrder = bb.order;
+
+  if (aOrder !== null && bOrder !== null && aOrder !== bOrder) {
+    return aOrder - bOrder;
+  }
+  if (aOrder !== null && bOrder === null) return -1;
+  if (aOrder === null && bOrder !== null) return 1;
+
+  return aa.clean.localeCompare(bb.clean);
 }
 
 /**
@@ -274,7 +305,8 @@ function formatWizardName(id: string): string {
  * Helper: Format category name
  */
 function formatCategoryName(name: string): string {
-  return name
+  const { clean } = parseOrderedName(name);
+  return clean
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
@@ -290,5 +322,8 @@ function formatItemName(filename: string): string {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
+
+
+
 
 

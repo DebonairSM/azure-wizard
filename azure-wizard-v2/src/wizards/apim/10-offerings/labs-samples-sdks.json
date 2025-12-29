@@ -1,0 +1,21 @@
+{
+  "id": "labs-samples-sdks",
+  "name": "Labs, samples, and SDK entry points",
+  "description": "Use these to validate your APIM configuration approach in a representative environment.",
+  "links": [
+    {
+      "title": "APIM resources hub (hands-on labs and samples)",
+      "url": "https://azure.github.io/api-management-resources/"
+    },
+    {
+      "title": "APIM resources hub (SDK resources)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Run a lab/sandbox deployment and validate policies end-to-end with test traffic.",
+    "Decide how you will manage policy artifacts (templates, parameters, environment overrides)."
+  ]
+}
+
+

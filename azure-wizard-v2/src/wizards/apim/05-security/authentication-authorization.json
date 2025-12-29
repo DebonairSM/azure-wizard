@@ -1,0 +1,27 @@
+{
+  "id": "authentication-authorization",
+  "name": "Authentication and authorization",
+  "description": "Common patterns for securing APIs through APIM policies and backend enforcement.",
+  "patterns": [
+    {
+      "name": "Subscription keys + JWT",
+      "notes": [
+        "Use subscription keys for consumer access control and request attribution.",
+        "Use JWT validation for user/workload identity and claims-based authorization."
+      ]
+    },
+    {
+      "name": "Managed identity to backend",
+      "notes": [
+        "Use managed identity where possible to reduce secret distribution.",
+        "Combine with policy-based token acquisition and backend validation."
+      ]
+    }
+  ],
+  "nextSteps": [
+    "Use the policy library under Policies → security/authentication for concrete templates.",
+    "Decide which checks are done at gateway vs backend (defense in depth)."
+  ]
+}
+
+

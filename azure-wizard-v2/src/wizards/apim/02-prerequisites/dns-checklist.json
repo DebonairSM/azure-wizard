@@ -1,0 +1,35 @@
+{
+  "id": "dns-checklist",
+  "name": "DNS and name resolution checklist",
+  "description": "DNS is a frequent source of deployment failure in APIM projects. Use this checklist to prevent avoidable delays.",
+  "checklist": [
+    "Identify all gateway hostnames and required custom domains.",
+    "Identify all backend hostnames APIM must reach (including internal/private names).",
+    "Decide where DNS zones live (public DNS, private DNS) and who owns changes.",
+    "Define how name resolution works from the APIM gateway path to private backends.",
+    "Validate name resolution from representative networks before cutover.",
+    "Document rollback steps for DNS changes during cutover."
+  ],
+  "validation": [
+    "Resolve gateway and backend hostnames from the same network locations your clients and gateways use.",
+    "Confirm certificate matches hostname (SAN) for every TLS endpoint.",
+    "Confirm no split-brain DNS conflicts between public and private records."
+  ],
+  "pitfalls": [
+    "Custom domain certificates not covering all required hostnames.",
+    "Private DNS changes not aligned with routing changes.",
+    "Cutover windows consumed by DNS propagation and cache issues."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Finalize the connectivity model and confirm it aligns with SKU capabilities.",
+    "Run the guided flow and ensure networking answers match your design."
+  ]
+}
+
+

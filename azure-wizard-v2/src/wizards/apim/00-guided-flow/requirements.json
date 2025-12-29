@@ -1,0 +1,56 @@
+{
+  "id": "flow-requirements",
+  "name": "Guided flow: requirements",
+  "description": "Provide requirements to drive SKU and deployment model recommendations.",
+  "type": "flow-step",
+  "step": "requirements",
+  "questions": [
+    {
+      "id": "environment",
+      "label": "Environment",
+      "type": "select",
+      "options": [
+        { "value": "dev", "label": "dev" },
+        { "value": "test", "label": "test" },
+        { "value": "prod", "label": "prod" }
+      ],
+      "default": "dev"
+    },
+    {
+      "id": "requireVnet",
+      "label": "Require VNet/private connectivity scenarios",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "id": "requireMultiRegion",
+      "label": "Require multi-region deployment",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "id": "requireSelfHostedGateway",
+      "label": "Require self-hosted gateway (hybrid/on-prem/other cloud)",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "id": "requireAiGateway",
+      "label": "Require AI gateway capabilities (LLM governance policies)",
+      "type": "boolean",
+      "default": false
+    },
+    {
+      "id": "requireSla",
+      "label": "Require published SLA (prod focus)",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "nextSteps": [
+    "Generate the recommendation and review eligible SKUs.",
+    "Review selected policy packs and the deployment checklist."
+  ]
+}
+
+

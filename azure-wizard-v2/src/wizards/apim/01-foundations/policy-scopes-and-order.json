@@ -1,0 +1,42 @@
+{
+  "id": "policy-scopes-and-order",
+  "name": "Policy scopes and evaluation order",
+  "description": "How APIM policy scope affects behavior and how to reason about where to apply a policy.",
+  "decision": "Where should a policy be applied (global, product, API, operation), and how do you avoid conflicts and duplication?",
+  "whyItMatters": [
+    "Policy scope determines blast radius: global changes can break multiple APIs if not validated.",
+    "Scope choice impacts maintainability: duplicated policies across APIs are harder to keep consistent.",
+    "Scope affects troubleshooting: consistent placement simplifies debugging and change review."
+  ],
+  "portalSteps": [
+    "In APIM, open the policy editor for the relevant scope (global, product, API, operation).",
+    "Start with a minimal baseline set at broader scopes, then add API/operation-specific policies where required.",
+    "Use named values for configuration so policy logic stays stable across environments."
+  ],
+  "validation": [
+    "Verify policy behavior at each scope using a test request (success path and failure path).",
+    "Confirm changes did not impact other APIs/products unexpectedly when modifying higher scopes.",
+    "Review logs/trace outputs to validate which policies executed."
+  ],
+  "pitfalls": [
+    "Mixing policy responsibilities across scopes without conventions (hard to audit).",
+    "Applying the same policy multiple times at different scopes (double rate limiting, duplicate headers).",
+    "Embedding secrets directly into policy XML instead of using named values."
+  ],
+  "links": [
+    {
+      "title": "Set or edit policies (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/set-edit-policies"
+    },
+    {
+      "title": "Policy expressions (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-policy-expressions"
+    }
+  ],
+  "nextSteps": [
+    "Use 12-policy-guides → policy-placement-guide for a concrete baseline scope model.",
+    "Use 08-policies to apply templates with parameters and defaults."
+  ]
+}
+
+

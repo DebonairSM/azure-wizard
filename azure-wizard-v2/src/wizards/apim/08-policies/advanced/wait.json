@@ -1,0 +1,26 @@
+{
+  "id": "wait",
+  "name": "wait",
+  "category": "advanced",
+  "description": "Waits for enclosed send-request policies to complete before proceeding",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {},
+  "xmlTemplate": {
+    "inbound": "<wait><send-request><!-- request 1 --></send-request><send-request><!-- request 2 --></send-request></wait>",
+    "outbound": "<wait><send-request><!-- request 1 --></send-request><send-request><!-- request 2 --></send-request></wait>",
+    "backend": "<wait><send-request><!-- request 1 --></send-request><send-request><!-- request 2 --></send-request></wait>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/wait-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

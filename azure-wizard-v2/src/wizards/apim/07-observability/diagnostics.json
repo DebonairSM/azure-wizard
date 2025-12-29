@@ -1,0 +1,16 @@
+{
+  "id": "diagnostics",
+  "name": "Diagnostics and logging targets",
+  "description": "Decide what to log, where it goes, and how it is accessed.",
+  "considerations": [
+    "Data minimization: avoid logging credentials, tokens, and PII.",
+    "Retention and access: define retention by environment and access controls for logs.",
+    "Sampling: apply sampling to control cost and volume."
+  ],
+  "nextSteps": [
+    "Use Policies → logging for templates (trace, emit-metric, log-to-eventhub).",
+    "Validate logging in a lower environment with realistic traffic before enabling broadly."
+  ]
+}
+
+

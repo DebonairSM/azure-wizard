@@ -1,0 +1,39 @@
+{
+  "id": "api-import-and-lifecycle",
+  "name": "APIs: import, structure, and lifecycle",
+  "description": "Portal-first workflow for importing APIs and managing changes without breaking consumers.",
+  "decision": "Will you manage APIs OpenAPI-first (import and update from spec) or portal-first (manual operations), and how will you handle breaking changes?",
+  "whyItMatters": [
+    "API lifecycle choices affect consumer stability and your ability to apply changes safely.",
+    "A consistent import/update model reduces drift between spec, APIM configuration, and backend implementation.",
+    "Change strategy determines how you communicate and enforce versions and deprecation."
+  ],
+  "portalSteps": [
+    "Import an API (OpenAPI where possible) and review operations, request/response shapes, and backend mapping.",
+    "Decide a versioning strategy (path, header, or query) and keep it consistent across the API program.",
+    "Use revisions to stage non-breaking changes and validate before releasing broadly.",
+    "Document which changes require a new API version vs a revision."
+  ],
+  "validation": [
+    "Validate imported operations match backend routing and authentication.",
+    "Test old and new versions/revisions in parallel if consumers are already integrated.",
+    "Confirm policy behavior after import/update (especially at API/operation scope)."
+  ],
+  "pitfalls": [
+    "Importing a spec but then manually editing operations (drift over time).",
+    "No standard for breaking changes (clients get surprised).",
+    "Applying policies at multiple scopes without conventions."
+  ],
+  "links": [
+    {
+      "title": "Set or edit policies (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/set-edit-policies"
+    }
+  ],
+  "nextSteps": [
+    "Use 11-operations-governance → revisions-versions-rollout for a safer rollout model.",
+    "Use 12-policy-guides → policy-placement-guide to standardize where policies live."
+  ]
+}
+
+

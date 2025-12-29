@@ -1,0 +1,16 @@
+{
+  "id": "token-controls-and-metrics",
+  "name": "Token controls and token metrics",
+  "description": "Implement usage governance for LLM APIs using token limits and token usage metrics.",
+  "recommendations": [
+    "Define standard limits by consumer tier (internal apps vs partners vs external developers).",
+    "Emit token metrics to a central monitoring target to support chargeback or capacity planning.",
+    "Document fallback behavior and retries when upstream LLM endpoints are throttled."
+  ],
+  "nextSteps": [
+    "Apply token-limit policies from Policies → ai-gateway (Azure OpenAI and generic LLM variants).",
+    "Apply token metric emission policies from Policies → ai-gateway and validate dashboards."
+  ]
+}
+
+

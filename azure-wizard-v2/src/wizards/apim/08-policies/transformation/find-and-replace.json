@@ -1,0 +1,38 @@
+{
+  "id": "find-and-replace",
+  "name": "find-and-replace",
+  "category": "transformation",
+  "description": "Finds a request or response substring and replaces it with another substring",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "from": {
+      "type": "string",
+      "required": true,
+      "label": "Find",
+      "description": "String or regex pattern to find"
+    },
+    "to": {
+      "type": "string",
+      "required": true,
+      "label": "Replace",
+      "description": "Replacement string"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<find-and-replace from=\"{{from}}\" to=\"{{to}}\" />",
+    "outbound": "<find-and-replace from=\"{{from}}\" to=\"{{to}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/find-and-replace-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

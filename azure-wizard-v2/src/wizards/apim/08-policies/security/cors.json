@@ -1,0 +1,69 @@
+{
+  "id": "cors",
+  "name": "cors",
+  "category": "security",
+  "description": "Adds cross-origin resource sharing (CORS) support to an operation or an API",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "allow-credentials": {
+      "type": "boolean",
+      "required": false,
+      "label": "Allow Credentials",
+      "description": "Allow credentials in CORS requests",
+      "default": false
+    },
+    "allowed-origins": {
+      "type": "array",
+      "required": true,
+      "label": "Allowed Origins",
+      "description": "List of allowed origins"
+    },
+    "allowed-methods": {
+      "type": "array",
+      "required": false,
+      "label": "Allowed Methods",
+      "description": "List of allowed HTTP methods",
+      "default": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS"
+      ]
+    },
+    "allowed-headers": {
+      "type": "array",
+      "required": false,
+      "label": "Allowed Headers",
+      "description": "List of allowed headers"
+    },
+    "exposed-headers": {
+      "type": "array",
+      "required": false,
+      "label": "Exposed Headers",
+      "description": "List of exposed headers"
+    },
+    "max-age": {
+      "type": "number",
+      "required": false,
+      "label": "Max Age (seconds)",
+      "description": "Maximum age for preflight requests"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<cors allow-credentials=\"{{allow-credentials}}\"><allowed-origins>{{#each allowed-origins}}<origin>{{this}}</origin>{{/each}}</allowed-origins><allowed-methods>{{#each allowed-methods}}<method>{{this}}</method>{{/each}}</allowed-methods><allowed-headers>{{#each allowed-headers}}<header>{{this}}</header>{{/each}}</allowed-headers><exposed-headers>{{#each exposed-headers}}<header>{{this}}</header>{{/each}}</exposed-headers><max-age>{{max-age}}</max-age></cors>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/cors-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

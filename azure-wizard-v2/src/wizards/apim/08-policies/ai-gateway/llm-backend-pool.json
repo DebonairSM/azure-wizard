@@ -1,0 +1,66 @@
+{
+  "id": "llm-backend-pool",
+  "name": "llm-backend-pool",
+  "category": "ai-gateway",
+  "description": "Configures backend pool for LLM load balancing with session-aware routing and PTU optimization",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "backend-pool-id": {
+      "type": "string",
+      "required": true,
+      "label": "Backend Pool ID",
+      "description": "ID of the backend pool configured in APIM"
+    },
+    "load-balancing-strategy": {
+      "type": "string",
+      "required": false,
+      "label": "Load Balancing Strategy",
+      "description": "Strategy for load balancing",
+      "enum": [
+        "round-robin",
+        "weighted",
+        "priority-based",
+        "session-aware"
+      ],
+      "default": "round-robin"
+    },
+    "session-key": {
+      "type": "string",
+      "required": false,
+      "label": "Session Key",
+      "description": "Expression to use as session key for session-aware routing"
+    }
+  },
+  "xmlTemplate": {
+    "backend": "<set-backend-service backend-pool-id=\"{{backend-pool-id}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/backends",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Basic backend pool",
+      "config": {
+        "backend-pool-id": "llm-backend-pool-1"
+      }
+    },
+    {
+      "name": "Session-aware routing",
+      "config": {
+        "backend-pool-id": "llm-backend-pool-1",
+        "load-balancing-strategy": "session-aware",
+        "session-key": "@(context.Request.Headers.GetValueOrDefault(\"X-Session-Id\", \"default\"))"
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "azure-openai-emit-token-metric",
+  "name": "azure-openai-emit-token-metric",
+  "category": "ai-gateway",
+  "description": "Emits Azure OpenAI specific token usage metrics to Application Insights",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "namespace": {
+      "type": "string",
+      "required": false,
+      "label": "Namespace",
+      "description": "Metric namespace for Azure OpenAI metrics",
+      "default": "apim-azure-openai"
+    },
+    "dimensions": {
+      "type": "object",
+      "required": false,
+      "label": "Custom Dimensions",
+      "description": "Additional dimensions to include in metrics"
+    }
+  },
+  "xmlTemplate": {
+    "outbound": "<azure-openai-emit-token-metric namespace=\"{{namespace}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/azure-openai-emit-token-metric-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Basic Azure OpenAI metrics",
+      "config": {
+        "namespace": "apim-azure-openai"
+      }
+    }
+  ]
+}

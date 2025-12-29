@@ -1,0 +1,39 @@
+{
+  "id": "ai-gateway-baseline",
+  "name": "AI gateway baseline",
+  "description": "Starter pack for governing LLM APIs through APIM.",
+  "policies": [
+    {
+      "id": "azure-openai-token-limit",
+      "category": "ai-gateway",
+      "defaults": { "tokens-per-minute": 10000 }
+    },
+    {
+      "id": "azure-openai-emit-token-metric",
+      "category": "ai-gateway",
+      "defaults": {}
+    },
+    {
+      "id": "llm-backend-pool",
+      "category": "ai-gateway",
+      "defaults": {}
+    },
+    {
+      "id": "llm-content-safety",
+      "category": "ai-gateway",
+      "defaults": {}
+    },
+    {
+      "id": "llm-semantic-cache-lookup",
+      "category": "ai-gateway",
+      "defaults": {}
+    },
+    {
+      "id": "llm-semantic-cache-store",
+      "category": "ai-gateway",
+      "defaults": {}
+    }
+  ]
+}
+
+

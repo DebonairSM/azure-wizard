@@ -1,0 +1,38 @@
+{
+  "id": "standard",
+  "name": "Standard",
+  "skus": [
+    {
+      "name": "Standard",
+      "tier": "Standard",
+      "version": "v2",
+      "category": "standard",
+      "description": "For production workloads with standard features",
+      "pricingModel": "fixed-monthly",
+      "sla": "99.95%",
+      "features": [
+        "Multi-region",
+        "VNet support",
+        "Self-hosted gateway"
+      ],
+      "capabilities": [
+        "API Gateway",
+        "Developer Portal",
+        "Analytics",
+        "VNet Integration"
+      ],
+      "limitations": [],
+      "vnetSupport": true,
+      "multiRegion": true,
+      "selfHostedGateway": true,
+      "developerPortal": true,
+      "analytics": true,
+      "aiGateway": false,
+      "productionReady": true,
+      "metadata": {
+        "maxScaleUnits": 2,
+        "cachePerUnit": "1 GB"
+      }
+    }
+  ]
+}

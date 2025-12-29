@@ -1,0 +1,11 @@
+{
+  "id": "baseline-observability",
+  "name": "Baseline observability",
+  "description": "Starter logging/metrics policies for validation and troubleshooting.",
+  "policies": [
+    { "id": "trace", "category": "logging", "defaults": {} },
+    { "id": "emit-metric", "category": "logging", "defaults": {} }
+  ]
+}
+
+

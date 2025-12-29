@@ -1,0 +1,50 @@
+{
+  "id": "cache-lookup",
+  "name": "cache-lookup",
+  "category": "caching",
+  "description": "Perform cache lookup and return a valid cached response when available",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "vary-by-developer": {
+      "type": "boolean",
+      "required": false,
+      "label": "Vary by Developer",
+      "description": "Cache varies by developer ID",
+      "default": false
+    },
+    "vary-by-developer-groups": {
+      "type": "boolean",
+      "required": false,
+      "label": "Vary by Developer Groups",
+      "description": "Cache varies by developer groups",
+      "default": false
+    },
+    "downstream-caching-type": {
+      "type": "string",
+      "required": false,
+      "label": "Downstream Caching Type",
+      "description": "Type of downstream caching: none, private, public",
+      "enum": [
+        "none",
+        "private",
+        "public"
+      ]
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<cache-lookup vary-by-developer=\"{{vary-by-developer}}\" vary-by-developer-groups=\"{{vary-by-developer-groups}}\" downstream-caching-type=\"{{downstream-caching-type}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/cache-lookup-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

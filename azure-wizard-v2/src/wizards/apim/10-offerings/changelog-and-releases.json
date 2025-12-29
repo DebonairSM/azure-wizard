@@ -1,0 +1,17 @@
+{
+  "id": "changelog-and-releases",
+  "name": "Changelog and release notes",
+  "description": "Track APIM service updates and developer portal changes.",
+  "links": [
+    {
+      "title": "APIM resources hub (what's new, changelog, portal release notes)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Review recent changes before adopting new policies/features in production.",
+    "Align upgrades with your change management process."
+  ]
+}
+
+

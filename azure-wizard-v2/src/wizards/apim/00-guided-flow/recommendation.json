@@ -1,0 +1,14 @@
+{
+  "id": "flow-recommendation",
+  "name": "Guided flow: recommendation",
+  "description": "This page displays the latest generated recommendation and eligibility analysis.",
+  "type": "flow-step",
+  "step": "recommendation",
+  "nextSteps": [
+    "Review the recommended deployment model and SKU.",
+    "Inspect ineligible SKUs and the gaps that caused exclusion.",
+    "Proceed to Export to capture a policy pack and checklist."
+  ]
+}
+
+

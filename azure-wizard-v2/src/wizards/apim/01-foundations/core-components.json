@@ -1,0 +1,51 @@
+{
+  "id": "core-components",
+  "name": "Core components and terms",
+  "description": "Key APIM concepts you will use throughout the wizard.",
+  "terms": [
+    {
+      "term": "Gateway",
+      "definition": "The runtime component that receives requests, applies policies, and forwards to backends."
+    },
+    {
+      "term": "Management plane",
+      "definition": "Configuration surface (portal, ARM, APIs) for APIs, products, policies, users, and diagnostics."
+    },
+    {
+      "term": "Developer portal",
+      "definition": "API consumer experience for discovering APIs, requesting access, and getting keys/tokens."
+    },
+    {
+      "term": "API",
+      "definition": "A set of operations (paths/methods). APIs can be imported (OpenAPI) or created manually."
+    },
+    {
+      "term": "Product",
+      "definition": "A packaging unit that bundles APIs and defines access rules (subscriptions, approval, visibility)."
+    },
+    {
+      "term": "Subscription",
+      "definition": "A consumer access entity that typically issues subscription keys and controls quotas/rate limits."
+    },
+    {
+      "term": "Named values",
+      "definition": "Key/value configuration used in policies (often backed by Key Vault)."
+    },
+    {
+      "term": "Policy",
+      "definition": "XML-based traffic policy executed in inbound/outbound/on-error sections."
+    }
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Map your API consumers to products and subscriptions.",
+    "Identify which concerns are best implemented with policies (auth, routing, rate limiting, logging)."
+  ]
+}
+
+

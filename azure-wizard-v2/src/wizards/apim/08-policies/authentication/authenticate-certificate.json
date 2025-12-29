@@ -1,0 +1,37 @@
+{
+  "id": "authenticate-certificate",
+  "name": "authenticate-certificate",
+  "category": "authentication",
+  "description": "Authenticate with a backend service using a client certificate",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "thumbprint": {
+      "type": "string",
+      "required": true,
+      "label": "Certificate Thumbprint",
+      "description": "Thumbprint of the certificate stored in API Management"
+    },
+    "certificateId": {
+      "type": "string",
+      "required": false,
+      "label": "Certificate ID",
+      "description": "ID of the certificate (alternative to thumbprint)"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<authenticate-certificate thumbprint=\"{{thumbprint}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/authenticate-certificate-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

@@ -1,0 +1,52 @@
+{
+  "id": "set-header",
+  "name": "set-header",
+  "category": "transformation",
+  "description": "Assigns a value to an existing response and/or request header or adds a new response and/or request header",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "label": "Header Name",
+      "description": "Name of the header to set"
+    },
+    "value": {
+      "type": "string",
+      "required": true,
+      "label": "Header Value",
+      "description": "Value to set for the header (can be expression)"
+    },
+    "exists-action": {
+      "type": "string",
+      "required": false,
+      "label": "Exists Action",
+      "description": "Action when header exists: override, skip, append",
+      "default": "override",
+      "enum": [
+        "override",
+        "skip",
+        "append"
+      ]
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<set-header name=\"{{name}}\" exists-action=\"{{exists-action}}\" value=\"{{value}}\" />",
+    "outbound": "<set-header name=\"{{name}}\" exists-action=\"{{exists-action}}\" value=\"{{value}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/set-header-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

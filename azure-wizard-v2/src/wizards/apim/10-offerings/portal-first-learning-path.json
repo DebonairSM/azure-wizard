@@ -1,0 +1,44 @@
+{
+  "id": "portal-first-learning-path",
+  "name": "Portal-first learning path (practical sequence)",
+  "description": "A practical sequence of wizard sections to follow when learning APIM configuration for client delivery.",
+  "sections": [
+    {
+      "name": "Step 1: Foundations",
+      "links": [
+        { "title": "What is API Management", "url": "https://azure.github.io/api-management-resources/" }
+      ]
+    },
+    {
+      "name": "Step 2: Networking and prerequisites",
+      "links": [
+        { "title": "APIM resources hub (deployment and networking resources)", "url": "https://azure.github.io/api-management-resources/" }
+      ]
+    },
+    {
+      "name": "Step 3: Core configuration",
+      "links": [
+        { "title": "Set or edit policies (Microsoft Learn)", "url": "https://learn.microsoft.com/en-us/azure/api-management/set-edit-policies" }
+      ]
+    },
+    {
+      "name": "Step 4: Policies and observability",
+      "links": [
+        { "title": "Policy expressions (Microsoft Learn)", "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-policy-expressions" },
+        { "title": "Well-Architected service guide for APIM (Microsoft Learn)", "url": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-api-management" }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Run the guided flow to generate a baseline recommendation and export artifacts.",
+    "Use the policy library to apply baseline controls and refine parameters."
+  ]
+}
+
+

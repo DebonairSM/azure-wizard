@@ -1,0 +1,40 @@
+{
+  "id": "emit-metric",
+  "name": "emit-metric",
+  "category": "logging",
+  "description": "Emits a custom metric to Application Insights",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "label": "Metric Name",
+      "description": "Name of the custom metric"
+    },
+    "value": {
+      "type": "string",
+      "required": true,
+      "label": "Value",
+      "description": "Metric value (can be expression)"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<emit-metric name=\"{{name}}\" value=\"{{value}}\" />",
+    "outbound": "<emit-metric name=\"{{name}}\" value=\"{{value}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/emit-metric-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

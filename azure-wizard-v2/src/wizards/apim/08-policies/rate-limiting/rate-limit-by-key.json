@@ -1,0 +1,45 @@
+{
+  "id": "rate-limit-by-key",
+  "name": "rate-limit-by-key",
+  "category": "rate-limiting",
+  "description": "Prevents API usage spikes by limiting the call rate per key",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "calls": {
+      "type": "number",
+      "required": true,
+      "label": "Calls",
+      "description": "Maximum number of calls allowed"
+    },
+    "renewal-period": {
+      "type": "number",
+      "required": true,
+      "label": "Renewal Period (seconds)",
+      "description": "Time window in seconds"
+    },
+    "counter-key": {
+      "type": "string",
+      "required": true,
+      "label": "Counter Key Expression",
+      "description": "Expression to use as rate limit key"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<rate-limit-by-key calls=\"{{calls}}\" renewal-period=\"{{renewal-period}}\" counter-key=\"{{counter-key}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/rate-limit-by-key-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

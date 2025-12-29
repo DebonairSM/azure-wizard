@@ -1,0 +1,66 @@
+{
+  "id": "content-page-schema",
+  "name": "Content page schema (reference)",
+  "description": "Structure used by APIM content pages in this wizard. Use it to add consistent, client-ready guidance.",
+  "summary": [
+    "Keep pages decision-oriented: what to choose, why it matters, how to configure in the portal, how to validate, and common pitfalls.",
+    "Use links to primary documentation and connect to relevant policy templates in the policy library.",
+    "Prefer concise checklists and validation steps that can be reused during client engagements."
+  ],
+  "sections": [
+    {
+      "name": "Recommended fields",
+      "links": []
+    }
+  ],
+  "terms": [
+    {
+      "term": "decision",
+      "definition": "What choice the reader must make (example: public vs private access, subscription keys vs JWT)."
+    },
+    {
+      "term": "whyItMatters",
+      "definition": "How the choice impacts security, reliability, operations, cost, and developer experience."
+    },
+    {
+      "term": "portalSteps",
+      "definition": "Concrete portal-first steps to implement the configuration."
+    },
+    {
+      "term": "validation",
+      "definition": "How to verify configuration works (tests, logs, traffic checks, failure-mode tests)."
+    },
+    {
+      "term": "pitfalls",
+      "definition": "Common mistakes, edge cases, and operational hazards."
+    },
+    {
+      "term": "links",
+      "definition": "Primary sources (Microsoft Learn and the APIM resources hub)."
+    }
+  ],
+  "exampleSkeleton": {
+    "id": "example",
+    "name": "Example page title",
+    "description": "One-sentence purpose of this page",
+    "decision": "Describe the decision in one sentence",
+    "whyItMatters": ["reason 1", "reason 2"],
+    "portalSteps": ["step 1", "step 2"],
+    "validation": ["check 1", "check 2"],
+    "pitfalls": ["pitfall 1", "pitfall 2"],
+    "links": [{ "title": "Primary doc", "url": "https://example" }],
+    "nextSteps": ["next step 1", "next step 2"]
+  },
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "When adding new pages, follow this schema and keep checklists actionable.",
+    "Always include at least one validation step that can be executed during a client rollout."
+  ]
+}
+
+

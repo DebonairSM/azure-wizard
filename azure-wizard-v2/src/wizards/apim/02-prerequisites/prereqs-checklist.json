@@ -1,0 +1,18 @@
+{
+  "id": "prereqs-checklist",
+  "name": "Prerequisites checklist",
+  "description": "Inputs to settle before provisioning APIM and onboarding APIs.",
+  "checklist": [
+    "Identity model: Azure AD (users/groups), managed identity usage, certificate strategy.",
+    "Connectivity: public vs private endpoints, VNet integration needs, DNS plan, inbound/outbound paths.",
+    "Observability: Application Insights and/or Log Analytics targets, retention and access requirements.",
+    "Automation: IaC baseline (Bicep/Terraform), CI/CD approach for APIs and policies.",
+    "Governance: naming, tagging, environment strategy (dev/test/prod), and RBAC roles."
+  ],
+  "nextSteps": [
+    "Decide which parts of APIM configuration are authored as code (APIs, products, policies, named values).",
+    "If private connectivity is required, define the DNS + network prerequisites before choosing SKU."
+  ]
+}
+
+

@@ -1,0 +1,40 @@
+{
+  "id": "consumption",
+  "name": "Consumption",
+  "skus": [
+    {
+      "name": "Consumption",
+      "tier": "Consumption",
+      "version": "v2",
+      "category": "consumption",
+      "description": "Pay-per-use pricing model, no infrastructure management",
+      "pricingModel": "pay-per-use",
+      "sla": "99.95%",
+      "features": [
+        "Serverless",
+        "Auto-scaling",
+        "Global distribution"
+      ],
+      "capabilities": [
+        "API Gateway",
+        "Developer Portal",
+        "Analytics"
+      ],
+      "limitations": [
+        "No VNet support",
+        "No self-hosted gateway"
+      ],
+      "vnetSupport": false,
+      "multiRegion": false,
+      "selfHostedGateway": false,
+      "developerPortal": true,
+      "analytics": true,
+      "aiGateway": true,
+      "productionReady": true,
+      "metadata": {
+        "maxScaleUnits": null,
+        "cachePerUnit": null
+      }
+    }
+  ]
+}

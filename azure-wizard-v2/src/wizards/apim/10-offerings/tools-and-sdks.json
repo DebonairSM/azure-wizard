@@ -1,0 +1,17 @@
+{
+  "id": "tools-and-sdks",
+  "name": "Tools and SDK entry points",
+  "description": "Starting points for tooling and SDKs used with APIM (authoring, deployment, gateway options).",
+  "links": [
+    {
+      "title": "APIM resources hub (development tools and SDK resources)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Standardize a policy authoring and validation workflow.",
+    "Decide how configuration is promoted across environments (dev/test/prod)."
+  ]
+}
+
+

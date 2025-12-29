@@ -1,0 +1,40 @@
+{
+  "id": "log-to-eventhub",
+  "name": "log-to-eventhub",
+  "category": "logging",
+  "description": "Sends messages in the specified format to an Event Hub defined by a Logger entity",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "logger-id": {
+      "type": "string",
+      "required": true,
+      "label": "Logger ID",
+      "description": "ID of the Event Hub logger"
+    },
+    "partition-key": {
+      "type": "string",
+      "required": false,
+      "label": "Partition Key",
+      "description": "Partition key for Event Hub (can be expression)"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<log-to-eventhub logger-id=\"{{logger-id}}\" partition-key=\"{{partition-key}}\"><@(context.Request.Body.As<string>(preserveContent: true))></log-to-eventhub>",
+    "outbound": "<log-to-eventhub logger-id=\"{{logger-id}}\" partition-key=\"{{partition-key}}\"><@(context.Response.Body.As<string>(preserveContent: true))></log-to-eventhub>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/log-to-eventhub-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

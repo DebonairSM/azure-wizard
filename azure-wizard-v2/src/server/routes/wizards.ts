@@ -170,7 +170,8 @@ router.get('/:id/nodes/:nodeId/children', (req: Request, res: Response) => {
  * Helper: Format category name
  */
 function formatCategoryName(name: string): string {
-  return name
+  const clean = name.replace(/^(\d+)[-_]/, '');
+  return clean
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');

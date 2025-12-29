@@ -1,0 +1,38 @@
+{
+  "id": "correlation-and-tracing",
+  "name": "Correlation and distributed tracing",
+  "description": "How to make a request traceable across APIM and backends.",
+  "decision": "What correlation headers will you standardize on, and will you enforce propagation at the gateway?",
+  "whyItMatters": [
+    "Without consistent correlation, incident triage becomes slower and more expensive.",
+    "Correlation enables linking gateway latency to backend latency.",
+    "A standard approach reduces per-API customization."
+  ],
+  "portalSteps": [
+    "Define a standard request ID and/or W3C trace context strategy for your API program.",
+    "Ensure APIM forwards correlation headers to backends consistently.",
+    "Use trace/logging policies when needed to capture key decision points (routing, auth failures, throttles)."
+  ],
+  "validation": [
+    "Send a request with a known correlation ID and confirm it appears in gateway logs and backend logs.",
+    "Confirm that correlation is preserved across retries (if configured).",
+    "Validate that correlation headers do not leak internal details to external clients if that is a concern."
+  ],
+  "pitfalls": [
+    "Using multiple correlation IDs without a standard (confusing logs).",
+    "Not propagating correlation to the backend.",
+    "Logging sensitive claims or tokens as part of correlation debugging."
+  ],
+  "links": [
+    {
+      "title": "Policy expressions (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-policy-expressions"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → logging → trace and emit-metric templates to implement your standard.",
+    "Create a short runbook that shows how to trace a request end-to-end."
+  ]
+}
+
+

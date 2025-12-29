@@ -1,0 +1,39 @@
+{
+  "id": "developer",
+  "name": "Developer",
+  "skus": [
+    {
+      "name": "Developer",
+      "tier": "Developer",
+      "version": "v2",
+      "category": "standard",
+      "description": "For development and testing, single region",
+      "pricingModel": "fixed-monthly",
+      "sla": "None",
+      "features": [
+        "Single region",
+        "Basic features"
+      ],
+      "capabilities": [
+        "API Gateway",
+        "Developer Portal"
+      ],
+      "limitations": [
+        "No SLA",
+        "No production use",
+        "No VNet support"
+      ],
+      "vnetSupport": false,
+      "multiRegion": false,
+      "selfHostedGateway": false,
+      "developerPortal": true,
+      "analytics": false,
+      "aiGateway": false,
+      "productionReady": false,
+      "metadata": {
+        "maxScaleUnits": 1,
+        "cachePerUnit": "0 MB"
+      }
+    }
+  ]
+}

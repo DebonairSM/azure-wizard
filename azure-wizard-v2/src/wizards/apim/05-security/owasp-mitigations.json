@@ -1,0 +1,47 @@
+{
+  "id": "owasp-mitigations",
+  "name": "OWASP API risk mitigations (APIM controls)",
+  "description": "Translate common API security risks into concrete APIM controls and validations.",
+  "decision": "Which gateway-level controls do you enforce in APIM vs leaving solely to backend services?",
+  "whyItMatters": [
+    "APIM can reduce risk by enforcing consistent baseline controls at the edge of your API program.",
+    "Gateway controls improve visibility and standardization, but backend controls are still required for defense in depth.",
+    "Client requirements often include rate limiting, auth enforcement, and logging constraints."
+  ],
+  "sections": [
+    {
+      "name": "Common controls",
+      "links": []
+    }
+  ],
+  "checklist": [
+    "Rate limiting and quotas for public or partner APIs (protect backends).",
+    "JWT validation for token-based auth where identity is required.",
+    "CORS configuration aligned with allowed origins (avoid permissive defaults).",
+    "Request/response transformations only when required; keep policy complexity bounded.",
+    "Logging with data minimization (avoid credentials, tokens, and PII)."
+  ],
+  "validation": [
+    "Verify throttling behavior under load (429 responses and retry guidance).",
+    "Verify JWT validation rejects invalid issuer/audience/signature configurations.",
+    "Verify CORS does not allow unintended origins.",
+    "Verify logs do not contain sensitive data."
+  ],
+  "pitfalls": [
+    "Over-reliance on gateway checks (backend still needs authorization enforcement).",
+    "Overly complex policies that are hard to reason about and test.",
+    "Misconfigured CORS (either too permissive or blocks legitimate clients)."
+  ],
+  "links": [
+    {
+      "title": "Mitigate OWASP API threats (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/mitigate-owasp-api-threats"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → rate-limiting and security templates to implement baseline controls.",
+    "Create a client-specific security checklist and validate it during acceptance testing."
+  ]
+}
+
+

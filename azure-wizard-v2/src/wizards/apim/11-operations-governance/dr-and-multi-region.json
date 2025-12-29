@@ -1,0 +1,39 @@
+{
+  "id": "dr-and-multi-region",
+  "name": "DR and multi-region considerations",
+  "description": "How to reason about availability, multi-region design, and disaster recovery in APIM v2 projects.",
+  "decision": "Do you need multi-region deployment, and what is the client’s target for failover behavior and recovery time?",
+  "whyItMatters": [
+    "Multi-region increases reliability but adds operational complexity and cost.",
+    "Failover affects DNS, client behavior, and backend readiness across regions.",
+    "A DR plan requires validation; assumptions often fail during real incidents."
+  ],
+  "portalSteps": [
+    "Clarify availability requirements (SLA/SLO) and define which failure scenarios are in scope.",
+    "If multi-region is required, align SKU choice and backend readiness across regions.",
+    "Define DNS and routing behavior during failover and what clients must do (if anything).",
+    "Document and test the failover runbook in a non-production environment if possible."
+  ],
+  "validation": [
+    "Perform a planned failover test and verify traffic moves as expected.",
+    "Verify that observability and logging still function during failover.",
+    "Validate that rate limiting and auth behavior remain consistent after failover."
+  ],
+  "pitfalls": [
+    "Declaring multi-region without validating DNS and client behavior under failover.",
+    "Backends not deployed or not equivalent across regions.",
+    "No documented runbook or drills."
+  ],
+  "links": [
+    {
+      "title": "Well-Architected service guide for APIM (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-api-management"
+    }
+  ],
+  "nextSteps": [
+    "Align networking and DNS requirements with the DR model.",
+    "Update the guided flow answers to reflect the target availability requirements."
+  ]
+}
+
+

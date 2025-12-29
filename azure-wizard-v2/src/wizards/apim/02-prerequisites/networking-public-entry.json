@@ -1,0 +1,39 @@
+{
+  "id": "networking-public-entry",
+  "name": "Networking: public entry patterns",
+  "description": "Portal-first guidance for public APIM entry patterns and what to validate before production use.",
+  "decision": "Will clients call APIM directly over a public endpoint, or will you front it with another edge component (WAF/CDN) for additional controls?",
+  "whyItMatters": [
+    "Public entry affects threat model, DDoS/WAF requirements, and certificate/domain strategy.",
+    "Your edge choice impacts routing, headers, client IP propagation, and debugging.",
+    "Operational responsibilities differ (APIM-only vs APIM + edge stack)."
+  ],
+  "portalSteps": [
+    "Provision APIM (v2 SKU) and confirm gateway hostname is reachable from expected client networks.",
+    "Configure custom domain and TLS certificate handling (ownership and renewal) if using a branded domain.",
+    "Apply baseline security policies at appropriate scope (CORS, JWT validation where needed, rate limit/quota for public APIs).",
+    "Document allowed inbound origins/clients and how to revoke access (keys, JWT issuer changes, IP restrictions if used)."
+  ],
+  "validation": [
+    "Validate TLS from a client environment (handshake, cipher policy constraints, SNI with custom domain).",
+    "Run a small load test to confirm rate limits and quotas trigger expected responses.",
+    "Verify headers and correlation IDs propagate as expected to backends."
+  ],
+  "pitfalls": [
+    "Relying only on subscription keys for authentication when JWT/claims are required.",
+    "No defined rollback path for policy changes at higher scopes.",
+    "Logging sensitive data (tokens, PII) in traces."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (general resources and best practices)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "See Networking: private backend access patterns if backends are not public.",
+    "Use 08-policies → rate-limiting and security policies to implement baseline controls."
+  ]
+}
+
+

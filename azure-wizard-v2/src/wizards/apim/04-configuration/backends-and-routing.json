@@ -1,0 +1,38 @@
+{
+  "id": "backends-and-routing",
+  "name": "Backends and routing",
+  "description": "How to route requests to backends reliably and consistently using APIM routing policies and backend configuration.",
+  "decision": "Will routing be static (single backend per API) or dynamic (multiple backends, environment routing, or failover pools)?",
+  "whyItMatters": [
+    "Routing determines availability characteristics and failure modes.",
+    "A consistent routing approach reduces per-API divergence and simplifies troubleshooting.",
+    "Dynamic routing increases complexity; it must be validated under failure conditions."
+  ],
+  "portalSteps": [
+    "Define backend endpoints and standardize how backends are represented (hostnames, paths, protocols).",
+    "Use routing policies (set-backend-service, rewrite-uri, forward-request) to normalize backend forwarding behavior.",
+    "If using pools/failover, document selection criteria and define timeouts/retries intentionally."
+  ],
+  "validation": [
+    "Confirm requests route to the correct backend for each API/operation.",
+    "Test timeout and retry behavior with a controlled backend failure.",
+    "Validate headers and identity propagation to the backend."
+  ],
+  "pitfalls": [
+    "Retry policies that amplify load during backend incidents.",
+    "Ad-hoc routing logic per API without standard patterns.",
+    "Backend TLS/certificate issues discovered at cutover."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → routing policies as templates (set-backend-service, forward-request).",
+    "If LLM routing is needed, see 09-ai-gateway and AI backend pool policies."
+  ]
+}
+
+

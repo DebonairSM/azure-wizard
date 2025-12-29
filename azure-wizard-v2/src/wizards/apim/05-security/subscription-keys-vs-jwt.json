@@ -1,0 +1,43 @@
+{
+  "id": "subscription-keys-vs-jwt",
+  "name": "Subscription keys vs JWT (when to use each)",
+  "description": "How to choose access control patterns for APIM and how to combine them safely.",
+  "decision": "Will you use subscription keys, JWT validation, or both? What is the source of identity and what do you authorize on?",
+  "whyItMatters": [
+    "Subscription keys are primarily a consumer access and attribution mechanism; they are not user identity.",
+    "JWT provides user/workload identity claims and supports stronger authorization models.",
+    "The combination affects onboarding (developer portal), incident response, and auditing."
+  ],
+  "portalSteps": [
+    "Model consumers using products/subscriptions for access and usage governance.",
+    "Use validate-jwt policies to enforce token presence and required claims where identity is required.",
+    "Where both are required, document the contract: subscription key for app access + JWT for user/workload identity.",
+    "Apply rate limit and quota at the product scope when consistent across a consumer tier."
+  ],
+  "validation": [
+    "Test a request with no subscription key (expected denial if required).",
+    "Test a request with a missing/invalid JWT (expected denial when validate-jwt is applied).",
+    "Test that allowed tokens with correct claims are accepted and claims propagate to backend as needed."
+  ],
+  "pitfalls": [
+    "Treating subscription keys as authentication for user identity.",
+    "Inconsistent requirements across operations (some require JWT, some do not) without documentation.",
+    "Validating JWT but not validating authorization at backend (no defense in depth)."
+  ],
+  "links": [
+    {
+      "title": "Policy expressions (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-policy-expressions"
+    },
+    {
+      "title": "Set or edit policies (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/set-edit-policies"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → security → validate-jwt template.",
+    "Use 08-policies → rate-limiting templates to enforce usage controls."
+  ]
+}
+
+

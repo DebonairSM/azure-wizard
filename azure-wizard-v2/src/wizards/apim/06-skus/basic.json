@@ -1,0 +1,40 @@
+{
+  "id": "basic",
+  "name": "Basic",
+  "skus": [
+    {
+      "name": "Basic",
+      "tier": "Basic",
+      "version": "v2",
+      "category": "standard",
+      "description": "For small-scale production workloads",
+      "pricingModel": "fixed-monthly",
+      "sla": "99.95%",
+      "features": [
+        "Single region",
+        "Basic features",
+        "SLA"
+      ],
+      "capabilities": [
+        "API Gateway",
+        "Developer Portal",
+        "Analytics"
+      ],
+      "limitations": [
+        "No VNet support",
+        "No multi-region"
+      ],
+      "vnetSupport": false,
+      "multiRegion": false,
+      "selfHostedGateway": false,
+      "developerPortal": true,
+      "analytics": true,
+      "aiGateway": false,
+      "productionReady": true,
+      "metadata": {
+        "maxScaleUnits": 1,
+        "cachePerUnit": "50 MB"
+      }
+    }
+  ]
+}

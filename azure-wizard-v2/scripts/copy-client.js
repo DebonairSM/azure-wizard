@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, readdirSync, statSync, existsSync } from 'fs';
+import { copyFileSync, mkdirSync, readdirSync, statSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -47,27 +47,14 @@ if (existsSync(srcDatabase)) {
   console.log('Database files copied to dist/database');
 }
 
-// Copy wizard schema files (like apim-schema.sql)
+// Copy wizard content (JSON, SQL, etc.) into dist so the runtime can load it
 if (existsSync(srcWizards)) {
-  const wizards = readdirSync(srcWizards);
-  for (const wizard of wizards) {
-    const wizardPath = join(srcWizards, wizard);
-    if (statSync(wizardPath).isDirectory()) {
-      const wizardFiles = readdirSync(wizardPath);
-      for (const file of wizardFiles) {
-        if (file.endsWith('.sql')) {
-          const srcFile = join(wizardPath, file);
-          const distWizardPath = join(distWizards, wizard);
-          if (!existsSync(distWizardPath)) {
-            mkdirSync(distWizardPath, { recursive: true });
-          }
-          const dstFile = join(distWizardPath, file);
-          copyFileSync(srcFile, dstFile);
-        }
-      }
-    }
+  // Remove any previous wizard artifacts so renames (e.g., numeric prefixes) don't leave duplicates behind
+  if (existsSync(distWizards)) {
+    rmSync(distWizards, { recursive: true, force: true });
   }
-  console.log('Wizard schema files copied');
+  copyRecursive(srcWizards, distWizards);
+  console.log('Wizard content copied to dist/wizards');
 }
 
 

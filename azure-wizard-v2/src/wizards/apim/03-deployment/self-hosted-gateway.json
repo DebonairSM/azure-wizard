@@ -1,0 +1,22 @@
+{
+  "id": "self-hosted-gateway",
+  "name": "Self-hosted gateway",
+  "description": "Use a self-hosted gateway when you need APIM policy execution close to backends that are not reachable from the managed gateway path.",
+  "considerations": [
+    "Placement: deploy near backends (on-prem, Kubernetes, VMs).",
+    "Connectivity: define how gateway reaches the APIM management plane and how clients reach the gateway.",
+    "Operations: patching and upgrades, scaling, logging, and certificate rotation."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (tools and deployment resources)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Confirm which policies must run at the self-hosted gateway.",
+    "Define a rollout strategy (blue/green or phased) for gateway upgrades."
+  ]
+}
+
+

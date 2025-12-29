@@ -1,0 +1,57 @@
+{
+  "id": "validate-jwt",
+  "name": "validate-jwt",
+  "category": "security",
+  "description": "Enforces existence and validity of a JWT extracted from either a specified HTTP header or a specified query parameter",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "header-name": {
+      "type": "string",
+      "required": false,
+      "label": "Header Name",
+      "description": "HTTP header containing the JWT"
+    },
+    "query-parameter-name": {
+      "type": "string",
+      "required": false,
+      "label": "Query Parameter Name",
+      "description": "Query parameter containing the JWT"
+    },
+    "require-expiration-time": {
+      "type": "boolean",
+      "required": false,
+      "label": "Require Expiration Time",
+      "description": "Require expiration time claim",
+      "default": true
+    },
+    "require-scheme": {
+      "type": "string",
+      "required": false,
+      "label": "Require Scheme",
+      "description": "Required token scheme (e.g., Bearer)"
+    },
+    "require-signed-tokens": {
+      "type": "boolean",
+      "required": false,
+      "label": "Require Signed Tokens",
+      "description": "Require tokens to be signed",
+      "default": true
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<validate-jwt header-name=\"{{header-name}}\" require-expiration-time=\"{{require-expiration-time}}\" require-signed-tokens=\"{{require-signed-tokens}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/validate-jwt-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

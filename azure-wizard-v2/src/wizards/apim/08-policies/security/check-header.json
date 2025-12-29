@@ -1,0 +1,51 @@
+{
+  "id": "check-header",
+  "name": "check-header",
+  "category": "security",
+  "description": "Enforces that a request has a specified HTTP header and/or that it has a specified value",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "label": "Header Name",
+      "description": "Name of the HTTP header to check"
+    },
+    "failed-check-httpcode": {
+      "type": "number",
+      "required": false,
+      "label": "Failed Check HTTP Code",
+      "description": "HTTP status code to return if check fails",
+      "default": 401
+    },
+    "failed-check-error-message": {
+      "type": "string",
+      "required": false,
+      "label": "Failed Check Error Message",
+      "description": "Error message to return if check fails"
+    },
+    "ignore-case": {
+      "type": "boolean",
+      "required": false,
+      "label": "Ignore Case",
+      "description": "Ignore case when comparing values",
+      "default": true
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<check-header name=\"{{name}}\" failed-check-httpcode=\"{{failed-check-httpcode}}\" failed-check-error-message=\"{{failed-check-error-message}}\" ignore-case=\"{{ignore-case}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/check-header-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

@@ -1,0 +1,47 @@
+{
+  "id": "get-authorization-context",
+  "name": "get-authorization-context",
+  "category": "ai-gateway",
+  "description": "Retrieves OAuth authorization context for backend authentication",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "authorization-provider-id": {
+      "type": "string",
+      "required": true,
+      "label": "Authorization Provider ID",
+      "description": "ID of the OAuth authorization provider"
+    },
+    "context-variable-name": {
+      "type": "string",
+      "required": false,
+      "label": "Context Variable Name",
+      "description": "Variable name to store authorization context",
+      "default": "authContext"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<get-authorization-context provider-id=\"{{authorization-provider-id}}\" context-variable-name=\"{{context-variable-name}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/authorization-context",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Get OAuth token",
+      "config": {
+        "authorization-provider-id": "azure-openai-oauth",
+        "context-variable-name": "openaiToken"
+      }
+    }
+  ]
+}

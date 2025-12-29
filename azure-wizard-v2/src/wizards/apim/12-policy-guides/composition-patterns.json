@@ -1,0 +1,50 @@
+{
+  "id": "composition-patterns",
+  "name": "Policy composition patterns",
+  "description": "How to combine policies safely without creating hard-to-debug behavior.",
+  "decision": "What policies are safe to compose, and when should logic move to the backend instead of the gateway?",
+  "whyItMatters": [
+    "Policies execute on every request; complexity increases latency and troubleshooting effort.",
+    "Composing retries, caching, and routing can create unexpected behavior under failures.",
+    "Standard bundles reduce drift and make reviews faster."
+  ],
+  "sections": [
+    {
+      "name": "Common bundles",
+      "links": [
+        {
+          "title": "Policy snippets (GitHub)",
+          "url": "https://github.com/Azure/api-management-policy-snippets"
+        }
+      ]
+    }
+  ],
+  "checklist": [
+    "Security baseline bundle: validate-jwt + CORS (if applicable) + header checks.",
+    "Public API bundle: rate-limit + quota + consistent error handling.",
+    "Private backend bundle: set-backend-service + forward-request + conservative retries.",
+    "Observability bundle: trace/emit-metric with data minimization rules."
+  ],
+  "validation": [
+    "Test each bundle with success + failure paths (backend down, auth failure, throttling).",
+    "Measure added latency for composed policies and keep it within target SLO.",
+    "Ensure bundles do not log sensitive data."
+  ],
+  "pitfalls": [
+    "Retry + circuit breaker misconfiguration that amplifies traffic.",
+    "Caching without clear cache key strategy and invalidation plan.",
+    "Policy expressions that become application logic (hard to test and maintain)."
+  ],
+  "links": [
+    {
+      "title": "Policy expressions (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-policy-expressions"
+    }
+  ],
+  "nextSteps": [
+    "Use the guided flow to generate a baseline policy pack and export XML.",
+    "Use 08-policies to refine each policy’s parameters."
+  ]
+}
+
+

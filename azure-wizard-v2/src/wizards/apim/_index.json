@@ -1,0 +1,8 @@
+{
+  "id": "apim",
+  "name": "API Management",
+  "description": "End-to-end guidance for Azure API Management, including prerequisites, deployment options, configuration patterns, and APIM policies.",
+  "version": "2.0.0"
+}
+
+

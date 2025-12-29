@@ -1,0 +1,37 @@
+{
+  "id": "set-backend-service",
+  "name": "set-backend-service",
+  "category": "routing",
+  "description": "Changes the backend service for an incoming request",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "base-url": {
+      "type": "string",
+      "required": false,
+      "label": "Base URL",
+      "description": "Backend service base URL"
+    },
+    "backend-id": {
+      "type": "string",
+      "required": false,
+      "label": "Backend ID",
+      "description": "ID of the backend service"
+    }
+  },
+  "xmlTemplate": {
+    "backend": "<set-backend-service base-url=\"{{base-url}}\" backend-id=\"{{backend-id}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/set-backend-service-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

@@ -1,0 +1,40 @@
+{
+  "id": "return-response",
+  "name": "return-response",
+  "category": "error-handling",
+  "description": "Aborts pipeline execution and returns either a default or custom response to the caller",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "status-code": {
+      "type": "number",
+      "required": false,
+      "label": "Status Code",
+      "description": "HTTP status code",
+      "default": 200
+    },
+    "reason-phrase": {
+      "type": "string",
+      "required": false,
+      "label": "Reason Phrase",
+      "description": "HTTP reason phrase"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<return-response status-code=\"{{status-code}}\" reason-phrase=\"{{reason-phrase}}\" />",
+    "outbound": "<return-response status-code=\"{{status-code}}\" reason-phrase=\"{{reason-phrase}}\" />",
+    "on-error": "<return-response status-code=\"{{status-code}}\" reason-phrase=\"{{reason-phrase}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/return-response-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

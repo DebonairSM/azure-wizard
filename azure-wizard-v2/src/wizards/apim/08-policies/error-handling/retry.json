@@ -1,0 +1,64 @@
+{
+  "id": "retry",
+  "name": "retry",
+  "category": "error-handling",
+  "description": "Retries execution of the enclosed policy statements, if and until the condition is met",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "condition": {
+      "type": "string",
+      "required": false,
+      "label": "Condition",
+      "description": "Condition expression for retry"
+    },
+    "count": {
+      "type": "number",
+      "required": true,
+      "label": "Retry Count",
+      "description": "Maximum number of retry attempts",
+      "default": 3
+    },
+    "interval": {
+      "type": "number",
+      "required": false,
+      "label": "Interval (seconds)",
+      "description": "Wait interval between retries in seconds",
+      "default": 1
+    },
+    "max-interval": {
+      "type": "number",
+      "required": false,
+      "label": "Max Interval (seconds)",
+      "description": "Maximum wait interval"
+    },
+    "delta": {
+      "type": "number",
+      "required": false,
+      "label": "Delta (seconds)",
+      "description": "Interval increment for exponential backoff"
+    },
+    "first-fast-retry": {
+      "type": "boolean",
+      "required": false,
+      "label": "First Fast Retry",
+      "description": "Skip wait for first retry",
+      "default": false
+    }
+  },
+  "xmlTemplate": {
+    "backend": "<retry condition=\"{{condition}}\" count=\"{{count}}\" interval=\"{{interval}}\" max-interval=\"{{max-interval}}\" delta=\"{{delta}}\" first-fast-retry=\"{{first-fast-retry}}\"><forward-request /></retry>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/retry-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

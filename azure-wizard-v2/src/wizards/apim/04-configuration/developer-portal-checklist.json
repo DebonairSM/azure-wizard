@@ -1,0 +1,35 @@
+{
+  "id": "developer-portal-checklist",
+  "name": "Developer portal checklist",
+  "description": "Portal-first checklist for configuring the developer portal so consumers can onboard and succeed.",
+  "checklist": [
+    "Define products and which APIs are included for each consumer type (internal, partner, external).",
+    "Define subscription approval process (auto-approve vs manual).",
+    "Confirm onboarding: account creation, terms, and any identity integration expectations.",
+    "Publish API documentation quality bar (OpenAPI completeness, examples, error models).",
+    "Provide getting-started guides and sample requests.",
+    "Define support and incident communication expectations."
+  ],
+  "validation": [
+    "Create a test developer account and complete onboarding end-to-end.",
+    "Request a subscription, obtain keys/tokens, and make a successful call via the gateway.",
+    "Validate that docs are current and match gateway behavior (headers, auth, throttles)."
+  ],
+  "pitfalls": [
+    "Publishing APIs without clear onboarding docs or examples.",
+    "No defined subscription approval workflow (delays partner onboarding).",
+    "Portal content drift vs actual gateway behavior."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (developer portal updates and resources)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Align products/subscriptions with security and rate limiting requirements.",
+    "Use policies to enforce consistent behavior across products."
+  ]
+}
+
+

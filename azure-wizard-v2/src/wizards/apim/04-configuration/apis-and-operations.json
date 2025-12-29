@@ -1,0 +1,16 @@
+{
+  "id": "apis-and-operations",
+  "name": "APIs and operations",
+  "description": "Model your API surface in APIM and decide how it is onboarded and versioned.",
+  "topics": [
+    "Import from OpenAPI where possible to reduce drift between gateway config and API spec.",
+    "Decide API versioning approach (path, header, or query) and how products map to versions.",
+    "Standardize backend addressing and use policies for routing and transformation when needed."
+  ],
+  "nextSteps": [
+    "Define an OpenAPI-first workflow and publish artifacts through CI/CD.",
+    "Decide where policies are applied: global, product, API, or operation scope."
+  ]
+}
+
+

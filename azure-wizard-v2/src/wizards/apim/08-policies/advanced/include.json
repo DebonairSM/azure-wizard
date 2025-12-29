@@ -1,0 +1,36 @@
+{
+  "id": "include",
+  "name": "include",
+  "category": "advanced",
+  "description": "Includes policy statements from a specified policy",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "fragment-id": {
+      "type": "string",
+      "required": true,
+      "label": "Fragment ID",
+      "description": "ID of the policy fragment to include"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<include fragment-id=\"{{fragment-id}}\" />",
+    "outbound": "<include fragment-id=\"{{fragment-id}}\" />",
+    "backend": "<include fragment-id=\"{{fragment-id}}\" />",
+    "on-error": "<include fragment-id=\"{{fragment-id}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/include-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

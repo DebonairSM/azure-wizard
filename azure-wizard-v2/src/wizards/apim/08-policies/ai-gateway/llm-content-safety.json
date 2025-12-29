@@ -1,0 +1,104 @@
+{
+  "id": "llm-content-safety",
+  "name": "llm-content-safety",
+  "category": "ai-gateway",
+  "description": "Validates content using Azure AI Content Safety before sending to LLM backend. Supports prompt moderation, response filtering, and content classification.",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "content-safety-resource-id": {
+      "type": "string",
+      "required": true,
+      "label": "Content Safety Resource ID",
+      "description": "Resource ID of Azure AI Content Safety resource. Format: /subscriptions/{sub-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}"
+    },
+    "severity-level": {
+      "type": "string",
+      "required": false,
+      "label": "Severity Level",
+      "description": "Content safety severity level threshold",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "moderate-prompt": {
+      "type": "boolean",
+      "required": false,
+      "label": "Moderate Prompt",
+      "description": "Enable prompt content moderation",
+      "default": true
+    },
+    "moderate-response": {
+      "type": "boolean",
+      "required": false,
+      "label": "Moderate Response",
+      "description": "Enable response content moderation",
+      "default": true
+    },
+    "on-violation": {
+      "type": "string",
+      "required": false,
+      "label": "On Violation Action",
+      "description": "Action to take when content safety violation detected",
+      "enum": [
+        "block",
+        "flag",
+        "log"
+      ],
+      "default": "block"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<llm-content-safety content-safety-resource-id=\"{{content-safety-resource-id}}\" severity-level=\"{{severity-level}}\" moderate-prompt=\"{{moderate-prompt}}\" moderate-response=\"{{moderate-response}}\" on-violation=\"{{on-violation}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/llm-content-safety-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2",
+      "BasicV2"
+    ],
+    "notes": {
+      "PremiumV2": "Full support: prompt/response moderation, content classification, custom actions",
+      "StandardV2": "Basic support: prompt/response moderation",
+      "BasicV2": "Basic support: prompt/response moderation"
+    }
+  },
+  "examples": [
+    {
+      "name": "Basic content safety",
+      "config": {
+        "content-safety-resource-id": "/subscriptions/{subscription-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}",
+        "severity-level": "medium"
+      }
+    },
+    {
+      "name": "Prompt-only moderation",
+      "config": {
+        "content-safety-resource-id": "/subscriptions/{subscription-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}",
+        "moderate-prompt": true,
+        "moderate-response": false,
+        "on-violation": "block"
+      }
+    },
+    {
+      "name": "Flag violations instead of blocking",
+      "config": {
+        "content-safety-resource-id": "/subscriptions/{subscription-id}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{account-name}",
+        "severity-level": "high",
+        "on-violation": "flag"
+      }
+    }
+  ],
+  "relatedPolicies": [
+    "azure-openai-emit-token-metric"
+  ]
+}

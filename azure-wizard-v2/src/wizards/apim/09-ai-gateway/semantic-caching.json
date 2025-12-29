@@ -1,0 +1,38 @@
+{
+  "id": "semantic-caching",
+  "name": "AI gateway: semantic caching",
+  "description": "How to decide whether to use semantic caching and how to validate its impact.",
+  "decision": "Will you use semantic caching for LLM requests, and what is the acceptable staleness and privacy boundary for cached outputs?",
+  "whyItMatters": [
+    "Caching can reduce cost and latency, but can return stale or undesired responses if not designed carefully.",
+    "Cache boundaries must align with tenant/user separation and data sensitivity.",
+    "Operationally, you need visibility into cache hit rates and failure modes."
+  ],
+  "portalSteps": [
+    "Decide cache scope boundaries (per subscription, per consumer tier, per API).",
+    "Apply semantic cache lookup/store policies and parameterize cache settings using named values.",
+    "Define cache invalidation expectations (if any) and document limitations."
+  ],
+  "validation": [
+    "Test cache hit behavior with repeated prompts that should match semantically.",
+    "Verify caching does not leak data across tenants/subscriptions.",
+    "Measure token savings and latency improvement; validate against expectations."
+  ],
+  "pitfalls": [
+    "Caching responses that should not be reused across users or tenants.",
+    "No cache observability (cannot prove value or troubleshoot).",
+    "Over-caching that hides backend failures until cache expires."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (GenAI + APIM section)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Use 08-policies → ai-gateway → llm-semantic-cache-lookup and llm-semantic-cache-store.",
+    "Add token metric emission to monitor impact."
+  ]
+}
+
+

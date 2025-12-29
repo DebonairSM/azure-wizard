@@ -1,0 +1,27 @@
+{
+  "id": "networking-connectivity",
+  "name": "Networking and connectivity",
+  "description": "Choose how clients reach APIM and how APIM reaches backends.",
+  "topics": [
+    {
+      "name": "Inbound",
+      "notes": [
+        "Public endpoint: simplest, can be protected with auth + IP filtering + WAF in front if required.",
+        "Private access: requires network and DNS planning; validate how consumers will connect."
+      ]
+    },
+    {
+      "name": "Outbound to backends",
+      "notes": [
+        "Confirm backend is reachable from the gateway path (public internet, private network, or self-hosted gateway).",
+        "If using private backends, define routing and name resolution early."
+      ]
+    }
+  ],
+  "nextSteps": [
+    "Document inbound/outbound paths and DNS requirements.",
+    "Select a SKU that supports required networking capabilities (for example, VNet-related requirements)."
+  ]
+}
+
+

@@ -1,0 +1,44 @@
+{
+  "id": "quota",
+  "name": "quota",
+  "category": "rate-limiting",
+  "description": "Enforces a renewable or lifetime call volume and/or bandwidth quota per subscription",
+  "scope": [
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "calls": {
+      "type": "number",
+      "required": false,
+      "label": "Calls",
+      "description": "Maximum number of calls allowed"
+    },
+    "bandwidth": {
+      "type": "number",
+      "required": false,
+      "label": "Bandwidth (KB)",
+      "description": "Maximum bandwidth in kilobytes"
+    },
+    "renewal-period": {
+      "type": "number",
+      "required": false,
+      "label": "Renewal Period (seconds)",
+      "description": "Time window for quota renewal (0 for lifetime quota)"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<quota calls=\"{{calls}}\" bandwidth=\"{{bandwidth}}\" renewal-period=\"{{renewal-period}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/quota-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

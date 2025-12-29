@@ -1,0 +1,29 @@
+{
+  "id": "choose",
+  "name": "choose",
+  "category": "advanced",
+  "description": "Conditionally applies policy statements based on the evaluation of Boolean expressions",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {},
+  "xmlTemplate": {
+    "inbound": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>",
+    "outbound": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>",
+    "backend": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>",
+    "on-error": "<choose><when condition=\"{{condition}}\"><!-- policies --></when><otherwise><!-- policies --></otherwise></choose>"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/choose-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

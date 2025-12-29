@@ -1,0 +1,46 @@
+{
+  "id": "resource-map",
+  "name": "APIM resource map",
+  "description": "Curated entry points for APIM product documentation, learning resources, and tooling.",
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "sections": [
+    {
+      "name": "Product and documentation",
+      "links": [
+        {
+          "title": "APIM resources hub (product page and documentation entry points)",
+          "url": "https://azure.github.io/api-management-resources/"
+        }
+      ]
+    },
+    {
+      "name": "Samples and labs",
+      "links": [
+        {
+          "title": "APIM resources hub (hands-on labs and samples)",
+          "url": "https://azure.github.io/api-management-resources/"
+        }
+      ]
+    },
+    {
+      "name": "SDKs and tools",
+      "links": [
+        {
+          "title": "APIM resources hub (SDK resources and tooling)",
+          "url": "https://azure.github.io/api-management-resources/"
+        }
+      ]
+    }
+  ],
+  "nextSteps": [
+    "Pick the learning path or lab that matches your deployment model and required policies.",
+    "Standardize on a policy authoring workflow and version control approach."
+  ]
+}
+
+

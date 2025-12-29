@@ -1,0 +1,46 @@
+{
+  "id": "authenticate-basic",
+  "name": "authenticate-basic",
+  "category": "authentication",
+  "description": "Authenticate with a backend service using Basic authentication",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "username": {
+      "type": "string",
+      "required": true,
+      "label": "Username",
+      "description": "Username for Basic authentication"
+    },
+    "password": {
+      "type": "string",
+      "required": true,
+      "label": "Password",
+      "description": "Password for Basic authentication",
+      "secret": true
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<authenticate-basic username=\"{{username}}\" password=\"{{password}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/authenticate-basic-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Basic Auth",
+      "config": {
+        "username": "myuser",
+        "password": "mypassword"
+      }
+    }
+  ]
+}

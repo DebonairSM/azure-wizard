@@ -1,0 +1,29 @@
+{
+  "id": "policy-authoring-resources",
+  "name": "Policy authoring resources",
+  "description": "Primary references for writing and maintaining APIM policies.",
+  "links": [
+    {
+      "title": "Set or edit policies (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/set-edit-policies"
+    },
+    {
+      "title": "Policy expressions (Microsoft Learn)",
+      "url": "https://learn.microsoft.com/en-us/azure/api-management/api-management-policy-expressions"
+    },
+    {
+      "title": "Policy snippets (GitHub)",
+      "url": "https://github.com/Azure/api-management-policy-snippets"
+    },
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Use 12-policy-guides to decide where to apply policies and how to compose them.",
+    "Use the guided flow export to generate policy XML from selected policy packs."
+  ]
+}
+
+

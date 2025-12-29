@@ -1,0 +1,84 @@
+{
+  "id": "llm-semantic-cache-store",
+  "name": "llm-semantic-cache-store",
+  "category": "ai-gateway",
+  "description": "Stores LLM request/response in semantic cache with vector embeddings for similarity matching. Must be used with llm-semantic-cache-lookup.",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "cache-provider-id": {
+      "type": "string",
+      "required": true,
+      "label": "Cache Provider ID",
+      "description": "ID of the cache provider. Must match the provider used in llm-semantic-cache-lookup"
+    },
+    "ttl": {
+      "type": "number",
+      "required": false,
+      "label": "Time To Live (seconds)",
+      "description": "Cache entry expiration time in seconds"
+    },
+    "embeddings-api": {
+      "type": "string",
+      "required": false,
+      "label": "Embeddings API",
+      "description": "API endpoint for generating embeddings (must match lookup policy)"
+    },
+    "cache-key-prefix": {
+      "type": "string",
+      "required": false,
+      "label": "Cache Key Prefix",
+      "description": "Prefix for cache keys (must match lookup policy)"
+    }
+  },
+  "xmlTemplate": {
+    "outbound": "<llm-semantic-cache-store cache-provider-id=\"{{cache-provider-id}}\" ttl=\"{{ttl}}\" embeddings-api=\"{{embeddings-api}}\" cache-key-prefix=\"{{cache-key-prefix}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/llm-semantic-cache-store-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2",
+      "BasicV2"
+    ],
+    "requirements": [
+      "Azure Cache for Redis with RediSearch module"
+    ],
+    "notes": {
+      "PremiumV2": "Full support: custom TTL, cache invalidation",
+      "StandardV2": "Basic support: default TTL",
+      "BasicV2": "Basic support: default TTL"
+    }
+  },
+  "examples": [
+    {
+      "name": "Basic cache store",
+      "config": {
+        "cache-provider-id": "redis-connection-string"
+      }
+    },
+    {
+      "name": "With TTL",
+      "config": {
+        "cache-provider-id": "redis-connection-string",
+        "ttl": 3600
+      }
+    },
+    {
+      "name": "Matching lookup configuration",
+      "config": {
+        "cache-provider-id": "redis-connection-string",
+        "embeddings-api": "https://api.example.com/embeddings",
+        "cache-key-prefix": "my-api-v1"
+      }
+    }
+  ],
+  "relatedPolicies": [
+    "llm-semantic-cache-lookup"
+  ]
+}

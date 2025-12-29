@@ -1,0 +1,16 @@
+{
+  "id": "products-and-subscriptions",
+  "name": "Products and subscriptions",
+  "description": "Control consumer access and enforce consistent usage rules using products, subscriptions, and groups.",
+  "topics": [
+    "Products bundle APIs and define visibility and subscription requirements.",
+    "Subscriptions provide keys (and a unit of usage tracking) for quotas and rate limits.",
+    "Groups map to access control and approvals (often aligned with Azure AD groups)."
+  ],
+  "nextSteps": [
+    "Model products per consumer type (internal, partner, external) and align approval workflow.",
+    "Apply rate limit/quota policies at the product scope when consistent across APIs."
+  ]
+}
+
+

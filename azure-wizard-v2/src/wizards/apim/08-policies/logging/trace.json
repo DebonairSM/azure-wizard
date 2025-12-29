@@ -1,0 +1,49 @@
+{
+  "id": "trace",
+  "name": "trace",
+  "category": "logging",
+  "description": "Adds a custom trace into the API Inspector output, Application Insights telemetries, and/or Diagnostic Logs",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "message": {
+      "type": "string",
+      "required": true,
+      "label": "Message",
+      "description": "Trace message (can be expression)"
+    },
+    "severity": {
+      "type": "string",
+      "required": false,
+      "label": "Severity",
+      "description": "Trace severity level",
+      "enum": [
+        "verbose",
+        "information",
+        "warning",
+        "error"
+      ],
+      "default": "information"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />",
+    "outbound": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />",
+    "backend": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />",
+    "on-error": "<trace message=\"{{message}}\" severity=\"{{severity}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/trace-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": []
+}

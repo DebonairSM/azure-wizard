@@ -1,0 +1,11 @@
+{
+  "id": "baseline-security",
+  "name": "Baseline security",
+  "description": "A minimal security baseline for most API programs.",
+  "policies": [
+    { "id": "validate-jwt", "category": "security", "defaults": {} },
+    { "id": "cors", "category": "security", "defaults": {} }
+  ]
+}
+
+

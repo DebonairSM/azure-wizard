@@ -1,0 +1,47 @@
+{
+  "id": "llm-emit-token-metric",
+  "name": "llm-emit-token-metric",
+  "category": "ai-gateway",
+  "description": "Emits token usage metrics to Application Insights",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "namespace": {
+      "type": "string",
+      "required": false,
+      "label": "Namespace",
+      "description": "Metric namespace",
+      "default": "apim-llm"
+    }
+  },
+  "xmlTemplate": {
+    "outbound": "<llm-emit-token-metric namespace=\"{{namespace}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/llm-emit-token-metric-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2",
+      "BasicV2"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Default namespace",
+      "config": {
+        "namespace": "apim-llm"
+      }
+    },
+    {
+      "name": "Custom namespace",
+      "config": {
+        "namespace": "my-llm-metrics"
+      }
+    }
+  ]
+}

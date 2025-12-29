@@ -1,0 +1,19 @@
+{
+  "id": "flow-start",
+  "name": "Guided flow: start",
+  "description": "Answer a small set of requirements questions to generate a deployment model + SKU recommendation, a policy starter pack, and a deployment checklist.",
+  "type": "flow-step",
+  "step": "start",
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Open the Requirements step and provide your constraints.",
+    "Review the generated recommendation and policy pack outputs."
+  ]
+}
+
+

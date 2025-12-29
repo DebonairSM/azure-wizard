@@ -1,0 +1,39 @@
+{
+  "id": "networking-private-backends",
+  "name": "Networking: private backend access patterns",
+  "description": "How to think about calling private backends from APIM and what to validate.",
+  "decision": "Will APIM reach backends over public internet, private networking, or via self-hosted gateway near the backends?",
+  "whyItMatters": [
+    "Private backend access affects routing/DNS, incident response, and how you prove end-to-end reachability.",
+    "The path APIM uses to reach backends determines where TLS termination happens and how you enforce backend authentication.",
+    "If your client requires private access, this becomes a gating dependency for timeline and SKU choice."
+  ],
+  "portalSteps": [
+    "Inventory each backend and classify it as public, private-in-Azure, on-prem, or other cloud.",
+    "For each backend, decide the network path and the authentication method APIM will use (mTLS, OAuth token acquisition, basic auth, etc.).",
+    "Define DNS requirements (private zones, conditional forwarders) early and validate name resolution from the gateway path.",
+    "Use routing policies (set-backend-service, forward-request) for consistent backend selection and forwarding behavior."
+  ],
+  "validation": [
+    "Validate APIM can resolve backend hostnames and can establish TLS to the backend.",
+    "Run health checks through APIM from representative client networks.",
+    "Validate failure modes: backend down, DNS failure, timeout, and retry behavior."
+  ],
+  "pitfalls": [
+    "Treating network and DNS as implementation details discovered late (causes cutover delays).",
+    "No clear separation of inbound vs outbound connectivity requirements.",
+    "Policy retries that unintentionally multiply backend load during outages."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub (networking and deployment resources)",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "If private backends are required, review 03-deployment → self-hosted gateway.",
+    "Use 08-policies → routing templates for consistent backend routing."
+  ]
+}
+
+

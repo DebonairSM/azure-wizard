@@ -1,0 +1,116 @@
+{
+  "id": "llm-token-limit",
+  "name": "llm-token-limit",
+  "category": "ai-gateway",
+  "description": "Limits the number of tokens that can be sent to an LLM backend per time period. Supports multiple time windows (minute, hour, day, week, month, year) and pre-calculation of prompt tokens.",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "tokens-per-minute": {
+      "type": "number",
+      "required": false,
+      "label": "Tokens Per Minute",
+      "description": "Maximum tokens allowed per minute",
+      "default": 10000
+    },
+    "tokens-per-hour": {
+      "type": "number",
+      "required": false,
+      "label": "Tokens Per Hour",
+      "description": "Maximum tokens allowed per hour"
+    },
+    "tokens-per-day": {
+      "type": "number",
+      "required": false,
+      "label": "Tokens Per Day",
+      "description": "Maximum tokens allowed per day"
+    },
+    "tokens-per-week": {
+      "type": "number",
+      "required": false,
+      "label": "Tokens Per Week",
+      "description": "Maximum tokens allowed per week (Premium v2 only)"
+    },
+    "tokens-per-month": {
+      "type": "number",
+      "required": false,
+      "label": "Tokens Per Month",
+      "description": "Maximum tokens allowed per month (Premium v2 only)"
+    },
+    "counter-key": {
+      "type": "string",
+      "required": false,
+      "label": "Counter Key",
+      "description": "Expression to use as rate limit key (default: subscription key). Examples: @(context.Request.IpAddress), @(context.User.Id)"
+    },
+    "estimate-prompt-tokens": {
+      "type": "boolean",
+      "required": false,
+      "label": "Estimate Prompt Tokens",
+      "description": "Pre-calculate prompt tokens before sending to backend",
+      "default": false
+    },
+    "remaining-tokens-variable-name": {
+      "type": "string",
+      "required": false,
+      "label": "Remaining Tokens Variable",
+      "description": "Variable name to store remaining tokens after limit check"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<llm-token-limit tokens-per-minute=\"{{tokens-per-minute}}\" tokens-per-hour=\"{{tokens-per-hour}}\" tokens-per-day=\"{{tokens-per-day}}\" counter-key=\"{{counter-key}}\" estimate-prompt-tokens=\"{{estimate-prompt-tokens}}\" remaining-tokens-variable-name=\"{{remaining-tokens-variable-name}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/llm-token-limit-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2",
+      "BasicV2"
+    ],
+    "notes": {
+      "PremiumV2": "Full support: all time windows, per-consumer limits, pre-calculation",
+      "StandardV2": "Basic support: minute/hour/day limits, pre-calculation",
+      "BasicV2": "Basic support: minute/hour/day limits"
+    }
+  },
+  "examples": [
+    {
+      "name": "Basic per-minute limit",
+      "config": {
+        "tokens-per-minute": 10000
+      }
+    },
+    {
+      "name": "Multiple time windows",
+      "config": {
+        "tokens-per-minute": 10000,
+        "tokens-per-hour": 500000,
+        "tokens-per-day": 10000000
+      }
+    },
+    {
+      "name": "Per-IP rate limiting",
+      "config": {
+        "tokens-per-minute": 5000,
+        "counter-key": "@(context.Request.IpAddress)"
+      }
+    },
+    {
+      "name": "With token pre-calculation",
+      "config": {
+        "tokens-per-minute": 10000,
+        "estimate-prompt-tokens": true,
+        "remaining-tokens-variable-name": "remainingTokens"
+      }
+    }
+  ],
+  "relatedPolicies": [
+    "llm-emit-token-metric",
+    "azure-openai-token-limit"
+  ]
+}

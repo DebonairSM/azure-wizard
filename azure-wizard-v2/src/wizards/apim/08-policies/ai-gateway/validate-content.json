@@ -1,0 +1,66 @@
+{
+  "id": "validate-content",
+  "name": "validate-content",
+  "category": "ai-gateway",
+  "description": "Validates request/response content structure and format for LLM APIs",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "content-type": {
+      "type": "string",
+      "required": false,
+      "label": "Content Type",
+      "description": "Expected content type",
+      "enum": [
+        "application/json",
+        "text/plain",
+        "application/xml"
+      ],
+      "default": "application/json"
+    },
+    "schema": {
+      "type": "string",
+      "required": false,
+      "label": "JSON Schema",
+      "description": "JSON schema for validation (as string or reference)"
+    },
+    "on-error": {
+      "type": "string",
+      "required": false,
+      "label": "On Error Action",
+      "description": "Action to take on validation error",
+      "enum": [
+        "reject",
+        "log",
+        "transform"
+      ],
+      "default": "reject"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<validate-content content-type=\"{{content-type}}\" schema=\"{{schema}}\" />",
+    "outbound": "<validate-content content-type=\"{{content-type}}\" schema=\"{{schema}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/validate-content-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2",
+      "BasicV2"
+    ]
+  },
+  "examples": [
+    {
+      "name": "Validate JSON",
+      "config": {
+        "content-type": "application/json",
+        "on-error": "reject"
+      }
+    }
+  ]
+}

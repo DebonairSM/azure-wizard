@@ -1,0 +1,11 @@
+{
+  "id": "public-api",
+  "name": "Public API baseline",
+  "description": "Common policies for internet-facing APIs.",
+  "policies": [
+    { "id": "rate-limit", "category": "rate-limiting", "defaults": { "calls": 100, "renewal-period": 60 } },
+    { "id": "quota", "category": "rate-limiting", "defaults": { "calls": 10000, "renewal-period": 86400 } }
+  ]
+}
+
+

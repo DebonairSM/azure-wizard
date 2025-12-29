@@ -1,0 +1,53 @@
+{
+  "id": "rate-limit",
+  "name": "rate-limit",
+  "category": "rate-limiting",
+  "description": "Prevents API usage spikes by limiting the call rate per subscription",
+  "scope": [
+    "global",
+    "product",
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "calls": {
+      "type": "number",
+      "required": true,
+      "label": "Calls",
+      "description": "Maximum number of calls allowed during the time period"
+    },
+    "renewal-period": {
+      "type": "number",
+      "required": true,
+      "label": "Renewal Period (seconds)",
+      "description": "Time window in seconds for rate limit"
+    },
+    "counter-key": {
+      "type": "string",
+      "required": false,
+      "label": "Counter Key",
+      "description": "Expression to use as rate limit key (default: subscription key)"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<rate-limit calls=\"{{calls}}\" renewal-period=\"{{renewal-period}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/rate-limit-policy",
+  "compatibility": {
+    "apimVersions": [
+      "all"
+    ],
+    "skuTiers": [
+      "all"
+    ]
+  },
+  "examples": [
+    {
+      "name": "100 calls per minute",
+      "config": {
+        "calls": 100,
+        "renewal-period": 60
+      }
+    }
+  ]
+}

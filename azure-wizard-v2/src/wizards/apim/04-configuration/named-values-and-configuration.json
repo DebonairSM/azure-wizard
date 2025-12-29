@@ -1,0 +1,39 @@
+{
+  "id": "named-values-and-configuration",
+  "name": "Named values and configuration hygiene",
+  "description": "How to keep APIM configuration maintainable and safe when using policies and environment-specific values.",
+  "decision": "How will you manage environment-specific configuration (URLs, keys, toggles) without copying and editing policy XML per environment?",
+  "whyItMatters": [
+    "Named values reduce duplication and prevent secret leakage in policy XML.",
+    "A clear strategy enables consistent promotion across dev/test/prod.",
+    "Configuration hygiene reduces incident risk during rotations and cutovers."
+  ],
+  "portalSteps": [
+    "Create named values for non-secret configuration (backend URLs, feature toggles, headers).",
+    "For sensitive values, store only references/indirection in APIM and avoid hardcoding secrets in policies.",
+    "Adopt naming conventions for named values (prefix by environment or functional area).",
+    "Review policies to ensure all parameterized values are sourced from named values where feasible."
+  ],
+  "validation": [
+    "Search policy XML for hardcoded secrets and environment-specific endpoints.",
+    "Rotate a non-production secret and validate changes do not require policy rewrites.",
+    "Verify policy behavior remains correct when named values change."
+  ],
+  "pitfalls": [
+    "Storing secrets in policy XML or in plain text named values.",
+    "No naming conventions (teams create duplicates, unclear ownership).",
+    "Manual config differences between environments (non-repeatable deployments)."
+  ],
+  "links": [
+    {
+      "title": "APIM resources hub",
+      "url": "https://azure.github.io/api-management-resources/"
+    }
+  ],
+  "nextSteps": [
+    "Apply policy templates from 08-policies and use named values for parameters.",
+    "Document a promotion checklist and include named value changes in change review."
+  ]
+}
+
+

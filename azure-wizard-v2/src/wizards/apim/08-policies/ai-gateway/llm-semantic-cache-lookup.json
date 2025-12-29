@@ -1,0 +1,88 @@
+{
+  "id": "llm-semantic-cache-lookup",
+  "name": "llm-semantic-cache-lookup",
+  "category": "ai-gateway",
+  "description": "Looks up semantically similar requests in cache using vector embeddings. Requires Azure Cache for Redis with RediSearch module.",
+  "scope": [
+    "api",
+    "operation"
+  ],
+  "parameters": {
+    "cache-provider-id": {
+      "type": "string",
+      "required": true,
+      "label": "Cache Provider ID",
+      "description": "ID of the cache provider. Can be Redis connection string or named value reference"
+    },
+    "similarity-threshold": {
+      "type": "number",
+      "required": true,
+      "label": "Similarity Threshold",
+      "description": "Similarity threshold (0.0 to 1.0). Higher values require more exact matches",
+      "default": 0.8,
+      "min": 0,
+      "max": 1
+    },
+    "embeddings-api": {
+      "type": "string",
+      "required": false,
+      "label": "Embeddings API",
+      "description": "API endpoint for generating embeddings (default: Azure OpenAI embeddings)"
+    },
+    "cache-key-prefix": {
+      "type": "string",
+      "required": false,
+      "label": "Cache Key Prefix",
+      "description": "Prefix for cache keys to namespace different APIs"
+    }
+  },
+  "xmlTemplate": {
+    "inbound": "<llm-semantic-cache-lookup cache-provider-id=\"{{cache-provider-id}}\" similarity-threshold=\"{{similarity-threshold}}\" embeddings-api=\"{{embeddings-api}}\" cache-key-prefix=\"{{cache-key-prefix}}\" />"
+  },
+  "documentation": "https://learn.microsoft.com/azure/api-management/llm-semantic-cache-lookup-policy",
+  "compatibility": {
+    "apimVersions": [
+      "v2"
+    ],
+    "skuTiers": [
+      "PremiumV2",
+      "StandardV2",
+      "BasicV2"
+    ],
+    "requirements": [
+      "Azure Cache for Redis with RediSearch module"
+    ],
+    "notes": {
+      "PremiumV2": "Full support: custom embeddings API, cache invalidation",
+      "StandardV2": "Basic support: Azure OpenAI embeddings only",
+      "BasicV2": "Basic support: Azure OpenAI embeddings only"
+    }
+  },
+  "examples": [
+    {
+      "name": "Basic semantic cache lookup",
+      "config": {
+        "cache-provider-id": "redis-connection-string",
+        "similarity-threshold": 0.8
+      }
+    },
+    {
+      "name": "Strict similarity matching",
+      "config": {
+        "cache-provider-id": "redis-connection-string",
+        "similarity-threshold": 0.95
+      }
+    },
+    {
+      "name": "With custom embeddings API",
+      "config": {
+        "cache-provider-id": "redis-connection-string",
+        "similarity-threshold": 0.85,
+        "embeddings-api": "https://api.example.com/embeddings"
+      }
+    }
+  ],
+  "relatedPolicies": [
+    "llm-semantic-cache-store"
+  ]
+}
